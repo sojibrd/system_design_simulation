@@ -1,0 +1,72 @@
+﻿"use client";
+
+import React, { useMemo } from "react";
+import {
+  ReactFlow,
+  Background,
+  Controls,
+  BackgroundVariant,
+  NodeTypes,
+  EdgeTypes,
+} from "@xyflow/react";
+import { SimulationNode } from "./SimulationNode";
+import { AnimatedFlowEdge } from "./AnimatedEdge";
+import { CustomNodeType, CustomEdgeType } from "@/app/lib/types";
+
+interface FlowDiagramProps {
+  nodes: CustomNodeType[];
+  edges: CustomEdgeType[];
+}
+
+export const FlowDiagram: React.FC<FlowDiagramProps> = ({ nodes, edges }) => {
+  const nodeTypes: NodeTypes = useMemo(
+    () => ({
+      simulationNode: SimulationNode,
+    }),
+    []
+  );
+
+  const edgeTypes: EdgeTypes = useMemo(
+    () => ({
+      animatedFlowEdge: AnimatedFlowEdge,
+    }),
+    []
+  );
+
+  return (
+    <div className="w-full h-full min-h-[360px] md:min-h-[480px] bg-zinc-950 rounded-xl md:rounded-2xl border border-zinc-800/80 overflow-hidden relative shadow-inner">
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
+        fitView
+        fitViewOptions={{ padding: 0.18, minZoom: 0.5, maxZoom: 1.2 }}
+        minZoom={0.3}
+        maxZoom={1.8}
+        nodesDraggable={true}
+        nodesConnectable={false}
+        elementsSelectable={true}
+        proOptions={{ hideAttribution: true }}
+      >
+        <Background
+          variant={BackgroundVariant.Dots}
+          gap={20}
+          size={1.5}
+          color="#27272a"
+        />
+        <Controls
+          showInteractive={false}
+          position="bottom-left"
+          className="!m-3 !border-zinc-800 !bg-zinc-900/90 !backdrop-blur"
+        />
+      </ReactFlow>
+
+      {/* Floating Canvas Hint */}
+      <div className="absolute top-3 right-3 pointer-events-none bg-zinc-900/80 backdrop-blur-md px-2.5 py-1 rounded-md border border-zinc-800 text-[10px] text-zinc-400 flex items-center gap-1.5 shadow-sm">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+        <span>Drag & Zoom enabled</span>
+      </div>
+    </div>
+  );
+};
