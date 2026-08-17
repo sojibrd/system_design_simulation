@@ -187,12 +187,32 @@ export const expertConfig: PhaseConfig = {
   ],
   edges: [
     {
+      id: "edge-client-to-cdn",
+      type: "animatedFlowEdge",
+      source: "node-client",
+      target: "node-cdn",
+      data: {
+        label: "0. GeoDNS Routing",
+        particleColor: "#06b6d4",
+      },
+    },
+    {
+      id: "edge-cdn-to-lb",
+      type: "animatedFlowEdge",
+      source: "node-cdn",
+      target: "node-lb",
+      data: {
+        label: "1. Edge Pass to LB",
+        particleColor: "#06b6d4",
+      },
+    },
+    {
       id: "edge-client-to-lb",
       type: "animatedFlowEdge",
       source: "node-client",
       target: "node-lb",
       data: {
-        label: "1. Global Ingress",
+        label: "1. Direct Ingress",
         particleColor: "#06b6d4",
       },
     },
@@ -212,7 +232,17 @@ export const expertConfig: PhaseConfig = {
       source: "node-gw",
       target: "node-server-1",
       data: {
-        label: "3. Authenticated Route",
+        label: "3a. Pod-1 Route",
+        particleColor: "#06b6d4",
+      },
+    },
+    {
+      id: "edge-gw-to-s2",
+      type: "animatedFlowEdge",
+      source: "node-gw",
+      target: "node-server-2",
+      data: {
+        label: "3b. Pod-2 Route",
         particleColor: "#06b6d4",
       },
     },
@@ -277,6 +307,26 @@ export const expertConfig: PhaseConfig = {
       },
     },
     {
+      id: "edge-s2-to-queue",
+      type: "animatedFlowEdge",
+      source: "node-server-2",
+      target: "node-queue",
+      data: {
+        label: "Async Publish: click_event",
+        particleColor: "#ec4899",
+      },
+    },
+    {
+      id: "edge-s2-to-cache",
+      type: "animatedFlowEdge",
+      source: "node-server-2",
+      target: "node-cache",
+      data: {
+        label: "Redis Lookup",
+        particleColor: "#a855f7",
+      },
+    },
+    {
       id: "edge-queue-to-worker",
       type: "animatedFlowEdge",
       source: "node-queue",
@@ -299,12 +349,14 @@ export const expertConfig: PhaseConfig = {
         whyItMatters:
           "সেন্ট্রালাইজড অথেন্টিকেশন, SSL টার্মিনেশন এবং ট্রাফিক ফিল্টারিং ব্যাকএন্ড মাইক্রোসার্ভিসগুলোকে সুরক্ষিত রাখে।",
         analogy: "🏢 সিকিউরিটি চেকপয়েন্ট পার হয়ে বিশেষ পাস নিয়ে মূল ভবনে প্রবেশ।",
-        activeNodeIds: ["node-client", "node-lb", "node-gw", "node-server-1"],
-        activeEdgeIds: ["edge-client-to-lb", "edge-lb-to-gw", "edge-gw-to-s1"],
+        activeNodeIds: ["node-client", "node-cdn", "node-lb", "node-gw", "node-server-1", "node-server-2"],
+        activeEdgeIds: ["edge-client-to-cdn", "edge-cdn-to-lb", "edge-lb-to-gw", "edge-gw-to-s1", "edge-gw-to-s2"],
         nodeStatusMessages: {
           "node-client": "POST /api/v2/shorten",
+          "node-cdn": "Edge Network / GeoDNS Route",
           "node-gw": "JWT Validated | Rate: OK",
-          "node-server-1": "Request assigned to Pod-1",
+          "node-server-1": "Pod-1 Active",
+          "node-server-2": "Pod-2 Active (Load Balanced)",
         },
         payloadSnippet: `POST /api/v2/shorten HTTP/2\nAuthorization: Bearer eyJhbGciOi...\nX-Request-Id: req_9fa8120c`,
       },
@@ -375,12 +427,14 @@ export const expertConfig: PhaseConfig = {
         whyItMatters:
           "মাল্টি-নোড Redis ক্লাস্টারে ডেটা শার্ডিং থাকায় লাখ লাখ কনকারেন্ট রিড রিকোয়েস্ট ডাটাবেজে না গিয়েই মেমোরি থেকে সমাধান হয়।",
         analogy: "⚡ সুপার কম্পিউটারের মেমোরি থেকে ১ সেকেন্ডের হাজার ভাগের এক ভাগে তথ্য বের করা।",
-        activeNodeIds: ["node-client", "node-gw", "node-server-1", "node-cache"],
-        activeEdgeIds: ["edge-client-to-lb", "edge-gw-to-s1", "edge-s1-to-cache"],
+        activeNodeIds: ["node-client", "node-cdn", "node-lb", "node-gw", "node-server-2", "node-cache"],
+        activeEdgeIds: ["edge-client-to-cdn", "edge-cdn-to-lb", "edge-lb-to-gw", "edge-gw-to-s2", "edge-s2-to-cache"],
         nodeStatusMessages: {
           "node-client": "GET /9wK2pL",
+          "node-cdn": "Edge Cache Miss -> Origin",
+          "node-gw": "Routing to Pod-2",
+          "node-server-2": "Routed to Pod-2",
           "node-cache": "SHARD_02: CACHE HIT (0.4ms)",
-          "node-server-1": "Found target URL!",
         },
         payloadSnippet: `REDIS_CLUSTER.GET("{url}:9wK2pL")\n=> "https://systemdesign.com/expert-deep-dive"\nLatency: 0.4ms`,
       },
@@ -394,10 +448,10 @@ export const expertConfig: PhaseConfig = {
         whyItMatters:
           "ইউজার কোনো ল্যাগ অনুভব করে না (Non-blocking I/O)। অ্যানালিটিক্স ব্যাকগ্রাউন্ডে প্রসেস হওয়ায় রিডাইরেক্ট স্পিড সর্বোচ্চ থাকে।",
         analogy: "📨 চিঠি পোস্টবক্সে ফেলে দিয়ে সাথে সাথে নিজের গন্তব্যে রওনা হওয়া — পোস্টম্যান পরে চিঠি ডেলিভারি করবে।",
-        activeNodeIds: ["node-server-1", "node-client", "node-queue"],
-        activeEdgeIds: ["edge-s1-to-queue", "edge-client-to-lb"],
+        activeNodeIds: ["node-server-2", "node-client", "node-queue"],
+        activeEdgeIds: ["edge-s2-to-queue", "edge-cdn-to-lb"],
         nodeStatusMessages: {
-          "node-server-1": "301 Redirect sent to client!",
+          "node-server-2": "301 Redirect sent to client!",
           "node-client": "Redirecting instantly (3.1ms)...",
           "node-queue": "Kafka Topic: 'url-clicks' received event",
         },

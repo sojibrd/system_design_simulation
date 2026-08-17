@@ -142,7 +142,17 @@ export const intermediateConfig: PhaseConfig = {
       source: "node-lb",
       target: "node-server-1",
       data: {
-        label: "3. Forward to Server 1",
+        label: "3a. Forward to Server 1",
+        particleColor: "#06b6d4",
+      },
+    },
+    {
+      id: "edge-lb-to-s2",
+      type: "animatedFlowEdge",
+      source: "node-lb",
+      target: "node-server-2",
+      data: {
+        label: "3b. Forward to Server 2",
         particleColor: "#06b6d4",
       },
     },
@@ -164,6 +174,16 @@ export const intermediateConfig: PhaseConfig = {
       data: {
         label: "4b. DB Query",
         particleColor: "#3b82f6",
+      },
+    },
+    {
+      id: "edge-s2-to-cache",
+      type: "animatedFlowEdge",
+      source: "node-server-2",
+      target: "node-cache",
+      data: {
+        label: "4c. Cache Check",
+        particleColor: "#a855f7",
       },
     },
   ],
@@ -215,11 +235,12 @@ export const intermediateConfig: PhaseConfig = {
         whyItMatters:
           "Stateless আর্কিটেকচারের কারণে যেকোনো সার্ভার যেকোনো রিকোয়েস্ট হ্যান্ডেল করতে পারে।",
         analogy: "👉 'কাউন্টার ১ ফাঁকা আছে, ওখানে যান!'",
-        activeNodeIds: ["node-lb", "node-server-1"],
-        activeEdgeIds: ["edge-lb-to-s1"],
+        activeNodeIds: ["node-lb", "node-server-1", "node-server-2"],
+        activeEdgeIds: ["edge-lb-to-s1", "edge-lb-to-s2"],
         nodeStatusMessages: {
-          "node-lb": "Routed to Server-1 (Least Connections)",
-          "node-server-1": "Generated short code: 'mR8vX1'",
+          "node-lb": "Round-Robin Balancing (S1 & S2)",
+          "node-server-1": "Processing request... 'mR8vX1'",
+          "node-server-2": "Processing concurrent request...",
         },
         payloadSnippet: `Generated Base62 ID: "mR8vX1" (Length: 6 chars)`,
       },
@@ -272,12 +293,12 @@ export const intermediateConfig: PhaseConfig = {
         whyItMatters:
           "HTTP GET রিকোয়েস্ট খুব দ্রুত প্রসেস করতে হবে কারণ রিডাইরেক্ট লেটেন্সি ব্যবহারকারী সরাসরি অনুভব করে।",
         analogy: "🚪 সদর দরজা দিয়ে দ্রুত ভেতরে ঢোকা।",
-        activeNodeIds: ["node-client", "node-lb", "node-server-1"],
-        activeEdgeIds: ["edge-client-to-lb", "edge-lb-to-s1"],
+        activeNodeIds: ["node-client", "node-lb", "node-server-2"],
+        activeEdgeIds: ["edge-client-to-lb", "edge-lb-to-s2"],
         nodeStatusMessages: {
           "node-client": "GET /mR8vX1",
-          "node-lb": "Forwarding to Server 1",
-          "node-server-1": "Checking Redis Cache first...",
+          "node-lb": "Forwarding to App Server 2",
+          "node-server-2": "Checking Redis Cache first...",
         },
         payloadSnippet: `GET /mR8vX1 HTTP/1.1\nHost: sho.rt`,
       },
@@ -291,11 +312,11 @@ export const intermediateConfig: PhaseConfig = {
         whyItMatters:
           "Cache-Aside প্যাটার্নে ৮০-৯০% রিড রিকোয়েস্ট ক্যাশ থেকে মেটানো হয়, যার ফলে ডাটাবেজ ওভারলোড হওয়া থেকে বাঁচে এবং লেটেন্সি ১-২ms এ নেমে আসে।",
         analogy: "⚡ টেবিলের উপরের খাতা থেকেই উত্তর পেয়ে যাওয়া — আলমারি খোলার প্রয়োজনই হলো না!",
-        activeNodeIds: ["node-server-1", "node-cache"],
-        activeEdgeIds: ["edge-s1-to-cache"],
+        activeNodeIds: ["node-server-2", "node-cache"],
+        activeEdgeIds: ["edge-s2-to-cache"],
         nodeStatusMessages: {
           "node-cache": "CACHE HIT! key='url:mR8vX1' (Time: 0.8ms)",
-          "node-server-1": "Found in RAM! Bypassing Database.",
+          "node-server-2": "Found in RAM! Bypassing Database.",
         },
         payloadSnippet: `REDIS.GET("url:mR8vX1")\n=> "https://example.com/system-design-intermediate"\nLatency: 0.8ms [CACHE HIT]`,
       },
@@ -309,10 +330,10 @@ export const intermediateConfig: PhaseConfig = {
         whyItMatters:
           "ক্যাশ থাকার কারণে সমগ্র রিডাইরেক্ট সাইকেল মাত্র ৫ মিলিসেকেন্ডে শেষ হলো।",
         analogy: "🚀 সুপারফাস্ট রকেটের মতো সঠিক গন্তব্যে পৌঁছে যাওয়া।",
-        activeNodeIds: ["node-server-1", "node-lb", "node-client"],
-        activeEdgeIds: ["edge-lb-to-s1", "edge-client-to-lb"],
+        activeNodeIds: ["node-server-2", "node-lb", "node-client"],
+        activeEdgeIds: ["edge-lb-to-s2", "edge-client-to-lb"],
         nodeStatusMessages: {
-          "node-server-1": "301 Moved Permanently",
+          "node-server-2": "301 Moved Permanently",
           "node-client": "Redirecting...",
         },
         payloadSnippet: `HTTP/1.1 301 Moved Permanently\nLocation: https://example.com/system-design-intermediate\nX-Cache: HIT`,

@@ -27,7 +27,7 @@ export interface UseSimulationReturn {
 
 export function useSimulation(phaseConfig: PhaseConfig): UseSimulationReturn {
   const [flowType, setFlowTypeState] = useState<FlowType>("shorten");
-  const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
+  const [currentStepIndex, setCurrentStepIndex] = useState<number>(-1);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [speed, setSpeed] = useState<SpeedOption>(1);
 
@@ -36,11 +36,11 @@ export function useSimulation(phaseConfig: PhaseConfig): UseSimulationReturn {
   }, [phaseConfig, flowType]);
 
   const totalSteps = steps.length;
-  const currentStep = steps[currentStepIndex] || null;
+  const currentStep = currentStepIndex >= 0 ? steps[currentStepIndex] || null : null;
 
   // Reset step index and flow when phase changes
   useEffect(() => {
-    setCurrentStepIndex(0);
+    setCurrentStepIndex(-1);
     setIsPlaying(false);
     setFlowTypeState("shorten");
   }, [phaseConfig.id]);
@@ -68,7 +68,7 @@ export function useSimulation(phaseConfig: PhaseConfig): UseSimulationReturn {
   }, [isPlaying, currentStepIndex, totalSteps, speed]);
 
   const play = useCallback(() => {
-    if (currentStepIndex >= totalSteps - 1) {
+    if (currentStepIndex < 0 || currentStepIndex >= totalSteps - 1) {
       setCurrentStepIndex(0);
     }
     setIsPlaying(true);
@@ -80,12 +80,12 @@ export function useSimulation(phaseConfig: PhaseConfig): UseSimulationReturn {
 
   const nextStep = useCallback(() => {
     setIsPlaying(false);
-    setCurrentStepIndex((prev) => (prev + 1 < totalSteps ? prev + 1 : prev));
+    setCurrentStepIndex((prev) => (prev < 0 ? 0 : prev + 1 < totalSteps ? prev + 1 : prev));
   }, [totalSteps]);
 
   const prevStep = useCallback(() => {
     setIsPlaying(false);
-    setCurrentStepIndex((prev) => (prev > 0 ? prev - 1 : 0));
+    setCurrentStepIndex((prev) => (prev > 0 ? prev - 1 : -1));
   }, []);
 
   const goToStep = useCallback(
@@ -100,12 +100,12 @@ export function useSimulation(phaseConfig: PhaseConfig): UseSimulationReturn {
 
   const reset = useCallback(() => {
     setIsPlaying(false);
-    setCurrentStepIndex(0);
+    setCurrentStepIndex(-1);
   }, []);
 
   const setFlowType = useCallback((flow: FlowType) => {
     setFlowTypeState(flow);
-    setCurrentStepIndex(0);
+    setCurrentStepIndex(-1);
     setIsPlaying(false);
   }, []);
 
