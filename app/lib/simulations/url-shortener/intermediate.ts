@@ -19,7 +19,7 @@ export const intermediateConfig: PhaseConfig = {
     {
       id: "node-client",
       type: "simulationNode",
-      position: { x: 40, y: 250 },
+      position: { x: 40, y: 290 },
       data: {
         label: "Client",
         subLabel: "Web & Mobile Users",
@@ -33,7 +33,7 @@ export const intermediateConfig: PhaseConfig = {
     {
       id: "node-lb",
       type: "simulationNode",
-      position: { x: 300, y: 250 },
+      position: { x: 380, y: 290 },
       data: {
         label: "Load Balancer",
         subLabel: "NGINX / HAProxy",
@@ -47,7 +47,7 @@ export const intermediateConfig: PhaseConfig = {
     {
       id: "node-limiter",
       type: "simulationNode",
-      position: { x: 600, y: 80 },
+      position: { x: 720, y: 80 },
       data: {
         label: "Rate Limiter",
         subLabel: "Token Bucket (Redis based)",
@@ -61,7 +61,7 @@ export const intermediateConfig: PhaseConfig = {
     {
       id: "node-server-1",
       type: "simulationNode",
-      position: { x: 600, y: 230 },
+      position: { x: 720, y: 265 },
       data: {
         label: "App Server 1",
         subLabel: "Stateless Node.js",
@@ -75,7 +75,7 @@ export const intermediateConfig: PhaseConfig = {
     {
       id: "node-server-2",
       type: "simulationNode",
-      position: { x: 600, y: 380 },
+      position: { x: 720, y: 450 },
       data: {
         label: "App Server 2",
         subLabel: "Stateless Node.js",
@@ -89,7 +89,7 @@ export const intermediateConfig: PhaseConfig = {
     {
       id: "node-cache",
       type: "simulationNode",
-      position: { x: 950, y: 130 },
+      position: { x: 1060, y: 130 },
       data: {
         label: "Cache (Redis)",
         subLabel: "In-Memory Key-Value",
@@ -103,7 +103,7 @@ export const intermediateConfig: PhaseConfig = {
     {
       id: "node-db",
       type: "simulationNode",
-      position: { x: 950, y: 380 },
+      position: { x: 1060, y: 420 },
       data: {
         label: "Database",
         subLabel: "PostgreSQL Primary",
