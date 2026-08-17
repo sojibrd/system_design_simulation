@@ -197,7 +197,7 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
       </div>
 
       {/* Progress Dots at Bottom */}
-      <div className="pt-2 border-t border-zinc-800/80 flex items-center justify-center gap-1.5">
+      <div className="pt-2 border-t border-zinc-800/80 flex flex-wrap items-center justify-center gap-1.5">
         {steps.map((_, idx) => (
           <button
             key={idx}

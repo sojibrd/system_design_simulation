@@ -65,7 +65,7 @@ export const PhaseTabs: React.FC<PhaseTabsProps> = ({
             </div>
 
             <div className="flex items-center gap-1.5 flex-wrap">
-              {phase.keyConcepts.slice(0, 3).map((concept, i) => (
+              {phase.keyConcepts.map((concept, i) => (
                 <span
                   key={i}
                   className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700/50 font-mono"

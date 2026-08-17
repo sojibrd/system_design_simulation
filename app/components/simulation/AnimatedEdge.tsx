@@ -96,7 +96,7 @@ export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
             className={`px-2 py-0.5 rounded-md text-[10px] font-mono border transition-all duration-300 select-none ${
               isActive
                 ? "bg-zinc-950/95 text-cyan-300 border-cyan-500/60 shadow-[0_0_12px_rgba(6,182,212,0.35)] scale-105 font-semibold opacity-100"
-                : "bg-zinc-900/80 text-zinc-600 border-zinc-800/60 opacity-0 group-hover:opacity-100"
+                : "bg-zinc-900/70 text-zinc-600 border-zinc-800/40 opacity-40"
             }`}
           >
             {edgeData.label}

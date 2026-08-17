@@ -59,9 +59,6 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
           ? "bg-zinc-900/90 border border-zinc-500 shadow-md"
           : "bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 shadow"
       }`}
-      onMouseEnter={() => setShowTooltip(true)}
-      onMouseLeave={() => setShowTooltip(false)}
-      onClick={() => setShowTooltip((prev) => !prev)}
     >
       {/* React Flow Handles on all 4 sides for clean multi-directional edge routing */}
       <Handle
@@ -107,7 +104,8 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
           </div>
           <button
             type="button"
-            className="text-zinc-500 hover:text-zinc-300 p-0.5"
+            onClick={(e) => { e.stopPropagation(); setShowTooltip((prev) => !prev); }}
+            className="text-zinc-500 hover:text-cyan-400 p-0.5 transition-colors"
             aria-label="Component info"
           >
             <Info className="w-3.5 h-3.5" />

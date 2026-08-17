@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { FlowType, PhaseConfig, CustomNodeType, CustomEdgeType } from "@/app/lib/types";
@@ -12,6 +12,7 @@ export interface UseSimulationReturn {
   flowType: FlowType;
   totalSteps: number;
   currentStep: PhaseConfig["flows"]["shorten"][number] | null;
+  currentSteps: PhaseConfig["flows"]["shorten"];
   nodes: CustomNodeType[];
   edges: CustomEdgeType[];
   play: () => void;
@@ -37,11 +38,12 @@ export function useSimulation(phaseConfig: PhaseConfig): UseSimulationReturn {
   const totalSteps = steps.length;
   const currentStep = steps[currentStepIndex] || null;
 
-  // Reset step index when phase or flowType changes
+  // Reset step index and flow when phase changes
   useEffect(() => {
     setCurrentStepIndex(0);
     setIsPlaying(false);
-  }, [phaseConfig.id, flowType]);
+    setFlowTypeState("shorten");
+  }, [phaseConfig.id]);
 
   // Auto-play timer
   useEffect(() => {
@@ -149,6 +151,7 @@ export function useSimulation(phaseConfig: PhaseConfig): UseSimulationReturn {
     flowType,
     totalSteps,
     currentStep,
+    currentSteps: steps,
     nodes,
     edges,
     play,

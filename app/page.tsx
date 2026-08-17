@@ -28,6 +28,7 @@ export default function Home() {
     flowType,
     totalSteps,
     currentStep,
+    currentSteps,
     nodes,
     edges,
     play,
@@ -39,8 +40,6 @@ export default function Home() {
     setSpeed,
     setFlowType,
   } = useSimulation(currentPhaseConfig);
-
-  const currentSteps = currentPhaseConfig.flows[flowType] || [];
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col antialiased selection:bg-cyan-500 selection:text-zinc-950">
@@ -62,7 +61,7 @@ export default function Home() {
           <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-3.5 h-full">
             {/* React Flow Diagram Canvas */}
             <div className="flex-1 min-h-[380px] lg:min-h-[500px]">
-              <FlowDiagram nodes={nodes} edges={edges} />
+              <FlowDiagram key={currentPhaseId} nodes={nodes} edges={edges} />
             </div>
 
             {/* Playback & Flow Controls */}
