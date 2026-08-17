@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useMemo } from "react";
 import {
@@ -41,12 +41,15 @@ export const FlowDiagram: React.FC<FlowDiagramProps> = ({ nodes, edges }) => {
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
-        fitViewOptions={{ padding: 0.18, minZoom: 0.5, maxZoom: 1.2 }}
+        fitViewOptions={{ padding: 0.22, minZoom: 0.4, maxZoom: 1.5 }}
         minZoom={0.3}
         maxZoom={1.8}
-        nodesDraggable={true}
+        nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={true}
+        panOnDrag={true}
+        panOnScroll={false}
+        zoomOnScroll={true}
         proOptions={{ hideAttribution: true }}
       >
         <Background
@@ -65,7 +68,7 @@ export const FlowDiagram: React.FC<FlowDiagramProps> = ({ nodes, edges }) => {
       {/* Floating Canvas Hint */}
       <div className="absolute top-3 right-3 pointer-events-none bg-zinc-900/80 backdrop-blur-md px-2.5 py-1 rounded-md border border-zinc-800 text-[10px] text-zinc-400 flex items-center gap-1.5 shadow-sm">
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-        <span>Drag & Zoom enabled</span>
+        <span>Pan & Zoom enabled</span>
       </div>
     </div>
   );

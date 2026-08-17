@@ -1,7 +1,7 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
-import { Link2, HelpCircle, X, Sparkles, Zap, ShieldCheck } from "lucide-react";
+import { Link2, HelpCircle, X, Sparkles, Zap } from "lucide-react";
 
 export const Header: React.FC = () => {
   const [showHelp, setShowHelp] = useState(false);

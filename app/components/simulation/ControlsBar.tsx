@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React from "react";
 import { FlowType } from "@/app/lib/types";
@@ -44,7 +44,8 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
   onFlowChange,
 }) => {
   return (
-    <div className="w-full bg-zinc-900/90 border border-zinc-800 rounded-xl md:rounded-2xl p-3 md:p-4 shadow-lg backdrop-blur-md flex flex-wrap items-center justify-between gap-3">
+    <div className="w-full bg-zinc-900/90 border border-zinc-800 rounded-xl md:rounded-2xl p-3 md:p-4 shadow-lg backdrop-blur-md overflow-x-auto">
+      <div className="flex items-center justify-between gap-3 min-w-[460px]">
       {/* 1. Flow Type Switcher (Shorten vs Redirect) */}
       <div className="flex items-center bg-zinc-950 p-1 rounded-xl border border-zinc-800">
         <button
@@ -56,7 +57,8 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
           }`}
         >
           <Link className="w-3.5 h-3.5" />
-          <span>Shorten (লিংক তৈরি)</span>
+          <span className="hidden sm:inline">Shorten (লিংক তৈরি)</span>
+          <span className="sm:hidden">Shorten</span>
         </button>
 
         <button
@@ -68,7 +70,8 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
           }`}
         >
           <CornerUpRight className="w-3.5 h-3.5" />
-          <span>Redirect (রিডাইরেক্ট)</span>
+          <span className="hidden sm:inline">Redirect (রিডাইরেক্ট)</span>
+          <span className="sm:hidden">Redirect</span>
         </button>
       </div>
 
@@ -108,7 +111,7 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
         ) : (
           <button
             onClick={onPlay}
-            className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-zinc-950 font-bold text-xs md:text-sm shadow-lg shadow-cyan-500/30 transition-all transform active:scale-95 animate-pulse"
+            className="flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-zinc-950 font-bold text-xs md:text-sm shadow-lg shadow-cyan-500/30 transition-all transform active:scale-95"
             aria-label="Simulate flow"
           >
             <Play className="w-4 h-4 fill-current" />
@@ -146,6 +149,7 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
             {val}x
           </button>
         ))}
+      </div>
       </div>
     </div>
   );

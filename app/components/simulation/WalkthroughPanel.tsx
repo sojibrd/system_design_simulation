@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { SimulationStep } from "@/app/lib/types";
 import {
   Sparkles,
@@ -10,6 +10,7 @@ import {
   ChevronUp,
   CheckCircle2,
   HelpCircle,
+  Play,
 } from "lucide-react";
 
 interface WalkthroughPanelProps {
@@ -29,8 +30,37 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
 }) => {
   const [showPayload, setShowPayload] = useState<boolean>(true);
   const [showAllSteps, setShowAllSteps] = useState<boolean>(false);
+  const bodyRef = useRef<HTMLDivElement>(null);
 
-  if (!currentStep) return null;
+  // Auto-scroll body to top on step change
+  useEffect(() => {
+    if (bodyRef.current) {
+      bodyRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [currentStepIndex]);
+
+  // Placeholder when no step is selected yet (before simulation starts)
+  if (!currentStep) {
+    return (
+      <div className="flex flex-col h-full items-center justify-center bg-zinc-900/90 border border-zinc-800 rounded-xl md:rounded-2xl p-6 shadow-xl text-center gap-4">
+        <div className="w-16 h-16 rounded-full bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
+          <Play className="w-7 h-7 text-cyan-400" />
+        </div>
+        <div>
+          <h3 className="text-sm font-bold text-zinc-100 mb-1.5">সিমুলেশন শুরু করুন</h3>
+          <p className="text-xs text-zinc-400 leading-relaxed max-w-[220px] mx-auto">
+            নিচের <span className="text-cyan-300 font-semibold">Simulate</span> বাটনে ক্লিক করুন এবং দেখুন ডাটা কীভাবে প্রবাহিত হয়।
+          </p>
+        </div>
+        <div className="flex items-center gap-2 text-[11px] text-zinc-500">
+          <span className="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono">Shorten</span>
+          <span>বা</span>
+          <span className="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono">Redirect</span>
+          <span>ফ্লো বেছে নিন</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full bg-zinc-900/90 border border-zinc-800 rounded-xl md:rounded-2xl p-4 md:p-5 shadow-xl backdrop-blur-sm overflow-hidden">
@@ -98,7 +128,7 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
       )}
 
       {/* Main Walkthrough Body */}
-      <div className="flex-1 overflow-y-auto py-3 space-y-3.5 pr-1">
+      <div ref={bodyRef} className="flex-1 overflow-y-auto py-3 space-y-3.5 pr-1">
         {/* Step Title */}
         <div>
           <h3 className="text-sm md:text-base font-bold text-zinc-100 leading-snug tracking-tight">

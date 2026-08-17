@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
@@ -52,7 +52,7 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
 
   return (
     <div
-      className={`relative group rounded-xl transition-all duration-300 select-none min-w-[170px] max-w-[210px] ${
+      className={`relative group rounded-xl transition-all duration-300 select-none min-w-[160px] max-w-[200px] ${
         isActive
           ? "bg-zinc-900/95 border-2 border-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.45)] ring-2 ring-cyan-500/30 scale-105"
           : selected
