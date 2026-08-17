@@ -1,4 +1,4 @@
-﻿import { PhaseConfig } from "../../types";
+import { PhaseConfig } from "../../types";
 
 export const expertConfig: PhaseConfig = {
   id: "expert",
@@ -19,7 +19,7 @@ export const expertConfig: PhaseConfig = {
     {
       id: "node-client",
       type: "simulationNode",
-      position: { x: 20, y: 260 },
+      position: { x: 40, y: 290 },
       data: {
         label: "Global Clients",
         subLabel: "Mobile, Web, APIs",
@@ -33,7 +33,7 @@ export const expertConfig: PhaseConfig = {
     {
       id: "node-cdn",
       type: "simulationNode",
-      position: { x: 210, y: 100 },
+      position: { x: 310, y: 100 },
       data: {
         label: "Cloudflare CDN",
         subLabel: "Edge Network (200+ PoPs)",
@@ -47,7 +47,7 @@ export const expertConfig: PhaseConfig = {
     {
       id: "node-lb",
       type: "simulationNode",
-      position: { x: 210, y: 260 },
+      position: { x: 310, y: 290 },
       data: {
         label: "Global Load Balancer",
         subLabel: "AWS ALB / Cloud LB",
@@ -61,7 +61,7 @@ export const expertConfig: PhaseConfig = {
     {
       id: "node-gw",
       type: "simulationNode",
-      position: { x: 400, y: 260 },
+      position: { x: 580, y: 290 },
       data: {
         label: "API Gateway",
         subLabel: "Kong / Envoy Gateway",
@@ -75,7 +75,7 @@ export const expertConfig: PhaseConfig = {
     {
       id: "node-idgen",
       type: "simulationNode",
-      position: { x: 400, y: 90 },
+      position: { x: 580, y: 90 },
       data: {
         label: "Snowflake ID Gen",
         subLabel: "64-bit Distributed Unique ID",
@@ -89,7 +89,7 @@ export const expertConfig: PhaseConfig = {
     {
       id: "node-server-1",
       type: "simulationNode",
-      position: { x: 590, y: 190 },
+      position: { x: 860, y: 190 },
       data: {
         label: "App Cluster (S1)",
         subLabel: "Kubernetes Pod 1",
@@ -103,7 +103,7 @@ export const expertConfig: PhaseConfig = {
     {
       id: "node-server-2",
       type: "simulationNode",
-      position: { x: 590, y: 320 },
+      position: { x: 860, y: 360 },
       data: {
         label: "App Cluster (S2)",
         subLabel: "Kubernetes Pod 2",
@@ -117,7 +117,7 @@ export const expertConfig: PhaseConfig = {
     {
       id: "node-cache",
       type: "simulationNode",
-      position: { x: 800, y: 90 },
+      position: { x: 1140, y: 80 },
       data: {
         label: "Redis Cluster",
         subLabel: "Multi-Node Sharded Cache",
@@ -131,7 +131,7 @@ export const expertConfig: PhaseConfig = {
     {
       id: "node-primary-db",
       type: "simulationNode",
-      position: { x: 800, y: 220 },
+      position: { x: 1140, y: 240 },
       data: {
         label: "Primary DB (Write)",
         subLabel: "PostgreSQL Master (ACID)",
@@ -145,7 +145,7 @@ export const expertConfig: PhaseConfig = {
     {
       id: "node-replica-db",
       type: "simulationNode",
-      position: { x: 800, y: 350 },
+      position: { x: 1140, y: 400 },
       data: {
         label: "Read Replicas",
         subLabel: "PostgreSQL Slaves (Read-Only)",
@@ -159,7 +159,7 @@ export const expertConfig: PhaseConfig = {
     {
       id: "node-queue",
       type: "simulationNode",
-      position: { x: 590, y: 460 },
+      position: { x: 860, y: 520 },
       data: {
         label: "Kafka Queue",
         subLabel: "Distributed Event Stream",
@@ -173,7 +173,7 @@ export const expertConfig: PhaseConfig = {
     {
       id: "node-worker",
       type: "simulationNode",
-      position: { x: 800, y: 460 },
+      position: { x: 1140, y: 520 },
       data: {
         label: "Analytics Engine",
         subLabel: "ClickHouse + Workers",

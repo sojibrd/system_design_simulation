@@ -1,4 +1,4 @@
-﻿import { PhaseConfig } from "../../types";
+import { PhaseConfig } from "../../types";
 
 export const beginnerConfig: PhaseConfig = {
   id: "beginner",
@@ -18,7 +18,7 @@ export const beginnerConfig: PhaseConfig = {
     {
       id: "node-client",
       type: "simulationNode",
-      position: { x: 50, y: 140 },
+      position: { x: 60, y: 160 },
       data: {
         label: "Client",
         subLabel: "Web Browser / Mobile App",
@@ -32,7 +32,7 @@ export const beginnerConfig: PhaseConfig = {
     {
       id: "node-server",
       type: "simulationNode",
-      position: { x: 380, y: 140 },
+      position: { x: 520, y: 160 },
       data: {
         label: "App Server",
         subLabel: "Node.js / Express API",
@@ -46,7 +46,7 @@ export const beginnerConfig: PhaseConfig = {
     {
       id: "node-db",
       type: "simulationNode",
-      position: { x: 710, y: 140 },
+      position: { x: 980, y: 160 },
       data: {
         label: "Database",
         subLabel: "PostgreSQL (Relational DB)",

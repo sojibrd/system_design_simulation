@@ -1,4 +1,4 @@
-﻿import { PhaseConfig } from "../../types";
+import { PhaseConfig } from "../../types";
 
 export const intermediateConfig: PhaseConfig = {
   id: "intermediate",
@@ -19,7 +19,7 @@ export const intermediateConfig: PhaseConfig = {
     {
       id: "node-client",
       type: "simulationNode",
-      position: { x: 30, y: 220 },
+      position: { x: 40, y: 250 },
       data: {
         label: "Client",
         subLabel: "Web & Mobile Users",
@@ -33,7 +33,7 @@ export const intermediateConfig: PhaseConfig = {
     {
       id: "node-lb",
       type: "simulationNode",
-      position: { x: 250, y: 220 },
+      position: { x: 300, y: 250 },
       data: {
         label: "Load Balancer",
         subLabel: "NGINX / HAProxy",
@@ -47,7 +47,7 @@ export const intermediateConfig: PhaseConfig = {
     {
       id: "node-limiter",
       type: "simulationNode",
-      position: { x: 470, y: 70 },
+      position: { x: 600, y: 80 },
       data: {
         label: "Rate Limiter",
         subLabel: "Token Bucket (Redis based)",
@@ -61,7 +61,7 @@ export const intermediateConfig: PhaseConfig = {
     {
       id: "node-server-1",
       type: "simulationNode",
-      position: { x: 470, y: 200 },
+      position: { x: 600, y: 230 },
       data: {
         label: "App Server 1",
         subLabel: "Stateless Node.js",
@@ -75,7 +75,7 @@ export const intermediateConfig: PhaseConfig = {
     {
       id: "node-server-2",
       type: "simulationNode",
-      position: { x: 470, y: 340 },
+      position: { x: 600, y: 380 },
       data: {
         label: "App Server 2",
         subLabel: "Stateless Node.js",
@@ -89,7 +89,7 @@ export const intermediateConfig: PhaseConfig = {
     {
       id: "node-cache",
       type: "simulationNode",
-      position: { x: 740, y: 130 },
+      position: { x: 950, y: 130 },
       data: {
         label: "Cache (Redis)",
         subLabel: "In-Memory Key-Value",
@@ -103,7 +103,7 @@ export const intermediateConfig: PhaseConfig = {
     {
       id: "node-db",
       type: "simulationNode",
-      position: { x: 740, y: 340 },
+      position: { x: 950, y: 380 },
       data: {
         label: "Database",
         subLabel: "PostgreSQL Primary",
