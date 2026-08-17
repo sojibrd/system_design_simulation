@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import { PhaseId } from "@/app/lib/types";
@@ -48,7 +48,7 @@ export default function Home() {
       <Header />
 
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-3 md:p-5 lg:p-6 flex flex-col gap-4">
+      <main className="flex-1 w-full px-3 md:px-5 lg:px-6 py-4 flex flex-col gap-4">
         {/* Phase Selector Tabs */}
         <PhaseTabs
           currentPhaseId={currentPhaseId}
