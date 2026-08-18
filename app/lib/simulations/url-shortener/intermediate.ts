@@ -125,7 +125,7 @@ export const intermediateConfig: PhaseConfig = {
       targetHandle: "l-t",
       data: {
         label: "1. Incoming Request",
-        particleColor: "#06b6d4",
+        particleColor: "request",
       },
     },
     {
@@ -137,7 +137,7 @@ export const intermediateConfig: PhaseConfig = {
       targetHandle: "l-t",
       data: {
         label: "2. Check IP Quota",
-        particleColor: "#f59e0b",
+        particleColor: "cache",
       },
     },
     {
@@ -149,7 +149,7 @@ export const intermediateConfig: PhaseConfig = {
       targetHandle: "l-t",
       data: {
         label: "3a. Forward to Server 1",
-        particleColor: "#06b6d4",
+        particleColor: "request",
       },
     },
     {
@@ -161,7 +161,7 @@ export const intermediateConfig: PhaseConfig = {
       targetHandle: "l-t",
       data: {
         label: "3b. Forward to Server 2",
-        particleColor: "#06b6d4",
+        particleColor: "request",
       },
     },
     {
@@ -173,7 +173,7 @@ export const intermediateConfig: PhaseConfig = {
       targetHandle: "l-t",
       data: {
         label: "4a. Cache Check / Set",
-        particleColor: "#a855f7",
+        particleColor: "write",
       },
     },
     {
@@ -185,7 +185,7 @@ export const intermediateConfig: PhaseConfig = {
       targetHandle: "l-t",
       data: {
         label: "4b. DB Query",
-        particleColor: "#3b82f6",
+        particleColor: "read",
       },
     },
     {
@@ -197,7 +197,7 @@ export const intermediateConfig: PhaseConfig = {
       targetHandle: "l-t",
       data: {
         label: "4c. Cache Check",
-        particleColor: "#a855f7",
+        particleColor: "write",
       },
     },
   ],
@@ -263,7 +263,7 @@ export const intermediateConfig: PhaseConfig = {
           "edge-lb-to-limiter": {
             label: "3. Quota OK (ALLOWED)",
             isReverse: true,
-            particleColor: "#22c55e",
+            particleColor: "success",
           },
         },
         nodeStatusMessages: {
@@ -351,7 +351,7 @@ export const intermediateConfig: PhaseConfig = {
           "edge-lb-to-s1": {
             label: "7. 201 Created Response",
             isReverse: true,
-            particleColor: "#22c55e",
+            particleColor: "success",
           },
         },
         nodeStatusMessages: {
@@ -376,7 +376,7 @@ export const intermediateConfig: PhaseConfig = {
           "edge-client-to-lb": {
             label: "8. Return Short URL",
             isReverse: true,
-            particleColor: "#22c55e",
+            particleColor: "success",
           },
         },
         nodeStatusMessages: {
@@ -466,7 +466,7 @@ export const intermediateConfig: PhaseConfig = {
           "edge-s2-to-cache": {
             label: "4. CACHE HIT (0.8ms)",
             isReverse: true,
-            particleColor: "#a855f7",
+            particleColor: "write",
           },
         },
         nodeStatusMessages: {
@@ -491,7 +491,7 @@ export const intermediateConfig: PhaseConfig = {
           "edge-lb-to-s2": {
             label: "5. 301 Redirect Response",
             isReverse: true,
-            particleColor: "#22c55e",
+            particleColor: "success",
           },
         },
         nodeStatusMessages: {
@@ -516,7 +516,7 @@ export const intermediateConfig: PhaseConfig = {
           "edge-client-to-lb": {
             label: "6. Redirecting to Long URL",
             isReverse: true,
-            particleColor: "#22c55e",
+            particleColor: "success",
           },
         },
         nodeStatusMessages: {

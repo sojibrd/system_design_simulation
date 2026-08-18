@@ -3,15 +3,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import { SimulationStep } from "@/app/lib/types";
 import {
-  Sparkles,
   BookOpen,
   Code2,
   ChevronDown,
   ChevronUp,
   CheckCircle2,
   HelpCircle,
+  Lightbulb,
   Play,
 } from "lucide-react";
+import { Badge, Callout, Panel } from "@/app/components/ui";
 
 interface WalkthroughPanelProps {
   currentStep: SimulationStep | null;
@@ -22,6 +23,8 @@ interface WalkthroughPanelProps {
   /** Flow has run to the end — freeze the live indicators. */
   isFinished?: boolean;
 }
+
+const stepNo = (idx: number) => String(idx + 1).padStart(2, "0");
 
 export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
   currentStep,
@@ -45,56 +48,54 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
   // Placeholder when no step is selected yet (before simulation starts)
   if (!currentStep) {
     return (
-      <div className="flex flex-col h-full items-center justify-center bg-zinc-900/90 border border-zinc-800 rounded-xl md:rounded-2xl p-6 shadow-xl text-center gap-4">
-        <div className="w-16 h-16 rounded-full bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
-          <Play className="w-7 h-7 text-cyan-400" />
+      <Panel className="flex flex-col h-full items-center justify-center p-6 text-center gap-4">
+        <div className="w-14 h-14 rounded-tick border border-ink bg-paper flex items-center justify-center">
+          <Play className="w-6 h-6 text-ink" />
         </div>
         <div>
-          <h3 className="text-sm font-bold text-zinc-100 mb-1.5">সিমুলেশন শুরু করুন</h3>
-          <p className="text-xs text-zinc-400 leading-relaxed max-w-[220px] mx-auto">
-            নিচের <span className="text-cyan-300 font-semibold">Simulate</span> বাটনে ক্লিক করুন এবং দেখুন ডাটা কীভাবে প্রবাহিত হয়।
+          <h3 className="text-sm font-bold text-ink mb-1.5">সিমুলেশন শুরু করুন</h3>
+          <p className="text-xs text-ink-soft leading-relaxed max-w-[220px] mx-auto">
+            নিচের <strong className="text-ink">Simulate</strong> বাটনে ক্লিক করুন এবং দেখুন
+            ডাটা কীভাবে প্রবাহিত হয়।
           </p>
         </div>
-        <div className="flex items-center gap-2 text-[11px] text-zinc-500">
-          <span className="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono">Shorten</span>
+        <div className="flex items-center gap-2 text-[11px] text-ink-muted">
+          <Badge>Shorten</Badge>
           <span>বা</span>
-          <span className="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono">Redirect</span>
-          <span>ফ্লো বেছে নিন</span>
+          <Badge>Redirect</Badge>
+          <span>বেছে নিন</span>
         </div>
-      </div>
+      </Panel>
     );
   }
 
   return (
-    <div className="flex flex-col h-full bg-zinc-900/90 border border-zinc-800 rounded-xl md:rounded-2xl p-4 md:p-5 shadow-xl backdrop-blur-sm overflow-hidden">
-      {/* Top Header: Step Badge & Title */}
-      <div className="flex items-center justify-between gap-2 pb-3 border-b border-zinc-800">
-        <div className="flex items-center gap-2">
-          <span className="px-2.5 py-1 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 font-mono text-xs font-semibold">
-            Step {currentStepIndex + 1} of {totalSteps}
+    <Panel className="flex flex-col h-full p-4 md:p-5 overflow-hidden">
+      {/* Title block of the note sheet */}
+      <div className="flex items-center justify-between gap-2 pb-2 border-b-2 border-ink">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="font-mono text-xs font-bold text-ink">
+            STEP {stepNo(currentStepIndex)} / {String(totalSteps).padStart(2, "0")}
           </span>
-          <span className="text-xs text-zinc-400 font-medium">
-            {currentStep.flowType === "shorten" ? "🔗 Shorten Flow" : "🔄 Redirect Flow"}
-          </span>
+          <Badge tone="accent">
+            {currentStep.flowType === "shorten" ? "SHORTEN" : "REDIRECT"}
+          </Badge>
         </div>
 
         <button
+          type="button"
           onClick={() => setShowAllSteps((prev) => !prev)}
-          className="text-xs text-zinc-400 hover:text-zinc-200 flex items-center gap-1 transition-colors px-2 py-1 rounded-md hover:bg-zinc-800"
+          className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink-muted hover:text-ink flex items-center gap-1 transition-colors px-1.5 py-1 rounded-tick hover:bg-paper-wash"
           title="সব ধাপের তালিকা দেখুন"
         >
-          <span>সব ধাপ ({totalSteps})</span>
-          {showAllSteps ? (
-            <ChevronUp className="w-3.5 h-3.5" />
-          ) : (
-            <ChevronDown className="w-3.5 h-3.5" />
-          )}
+          <span>Index ({totalSteps})</span>
+          {showAllSteps ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
         </button>
       </div>
 
-      {/* Accordion: All steps overview */}
+      {/* Index of every step on the sheet */}
       {showAllSteps && (
-        <div className="my-2 p-2 bg-zinc-950/80 rounded-xl border border-zinc-800 max-h-48 overflow-y-auto space-y-1.5 transition-all">
+        <div className="my-2 p-1.5 bg-paper-sunken rounded-box border border-rule max-h-48 overflow-y-auto">
           {steps.map((step, idx) => {
             const isCurrent = idx === currentStepIndex;
             const isCompleted = idx < currentStepIndex;
@@ -102,30 +103,23 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
             return (
               <button
                 key={step.id}
+                type="button"
                 onClick={() => {
                   onSelectStep(idx);
                   setShowAllSteps(false);
                 }}
-                className={`w-full text-left p-2 rounded-lg text-xs flex items-center gap-2 transition-all ${
+                className={`w-full text-left px-2 py-1.5 rounded-tick text-xs flex items-center gap-2 transition-colors ${
                   isCurrent
-                    ? "bg-cyan-950/40 border border-cyan-500/40 text-cyan-200 font-medium"
+                    ? "bg-ink text-paper font-semibold"
                     : isCompleted
-                    ? "hover:bg-zinc-800/60 text-zinc-300"
-                    : "hover:bg-zinc-800/40 text-zinc-500"
+                    ? "text-ink-soft hover:bg-paper-wash"
+                    : "text-ink-muted hover:bg-paper-wash"
                 }`}
               >
                 {isCompleted ? (
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                ) : isCurrent ? (
-                  <span
-                    className={`w-3.5 h-3.5 rounded-full bg-cyan-400 shrink-0 ${
-                      isFinished ? "" : "animate-pulse"
-                    }`}
-                  />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-confirm shrink-0" />
                 ) : (
-                  <span className="w-3.5 h-3.5 rounded-full border border-zinc-700 shrink-0 flex items-center justify-center text-[9px]">
-                    {idx + 1}
-                  </span>
+                  <span className="font-mono text-[10px] w-3.5 shrink-0">{stepNo(idx)}</span>
                 )}
                 <span className="truncate flex-1">{step.title}</span>
               </button>
@@ -134,68 +128,49 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
         </div>
       )}
 
-      {/* Main Walkthrough Body */}
-      <div ref={bodyRef} className="flex-1 overflow-y-auto py-3 space-y-3.5 pr-1">
-        {/* Step Title */}
-        <div>
-          <h3 className="text-sm md:text-base font-bold text-zinc-100 leading-snug tracking-tight">
-            {currentStep.title}
-          </h3>
-        </div>
+      {/* Body of the note */}
+      <div ref={bodyRef} className="flex-1 overflow-y-auto py-3 space-y-3 pr-1">
+        <h3 className="text-sm md:text-base font-bold text-ink leading-snug tracking-tight">
+          {currentStep.title}
+        </h3>
 
-        {/* Section 1: What Happens (Kid-friendly Bold Summary) */}
-        <div className="bg-zinc-950/70 border border-zinc-800/90 rounded-xl p-3.5 shadow-sm">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-cyan-300 mb-1.5">
-            <BookOpen className="w-3.5 h-3.5" />
-            <span>কী ঘটছে (What happens):</span>
-          </div>
-          <p className="text-xs md:text-sm text-zinc-200 leading-relaxed">
-            {currentStep.whatHappens}
-          </p>
-        </div>
+        <Callout label="কী ঘটছে / What happens" icon={<BookOpen className="w-3.5 h-3.5" />}>
+          {currentStep.whatHappens}
+        </Callout>
 
-        {/* Section 2: Real World Analogy (Kid Friendly) */}
         {currentStep.analogy && (
-          <div className="bg-gradient-to-r from-amber-500/10 to-transparent border-l-2 border-amber-400/80 rounded-r-xl p-3 bg-zinc-950/40">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-300 mb-1">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>সহজ উপমা (Real-life Analogy):</span>
-            </div>
-            <p className="text-xs text-zinc-300 leading-relaxed italic">
-              {currentStep.analogy}
-            </p>
-          </div>
+          <Callout
+            label="সহজ উপমা / Analogy"
+            tone="accent"
+            icon={<Lightbulb className="w-3.5 h-3.5" />}
+          >
+            <span className="italic">{currentStep.analogy}</span>
+          </Callout>
         )}
 
-        {/* Section 3: Technical Reasoning (Why it matters) */}
-        <div className="bg-zinc-950/40 border border-zinc-800/60 rounded-xl p-3">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-400 mb-1">
-            <HelpCircle className="w-3.5 h-3.5 text-zinc-400" />
-            <span>কেন এভাবে কাজ করে (Technical Depth):</span>
-          </div>
-          <p className="text-xs text-zinc-400 leading-relaxed">
-            {currentStep.whyItMatters}
-          </p>
-        </div>
+        <Callout
+          label="কেন এভাবে / Technical depth"
+          icon={<HelpCircle className="w-3.5 h-3.5" />}
+        >
+          <span className="text-ink-muted">{currentStep.whyItMatters}</span>
+        </Callout>
 
-        {/* Section 4: Payload / Code Snippet */}
         {currentStep.payloadSnippet && (
-          <div className="rounded-xl border border-zinc-800 bg-zinc-950 overflow-hidden">
+          <div className="rounded-box border border-rule-strong overflow-hidden">
             <button
+              type="button"
               onClick={() => setShowPayload((prev) => !prev)}
-              className="w-full px-3 py-2 bg-zinc-900/80 border-b border-zinc-800/80 flex items-center justify-between text-xs text-zinc-300 hover:text-cyan-300 transition-colors"
+              className="w-full px-2.5 py-1.5 bg-paper-wash border-b border-rule-strong flex items-center justify-between text-ink-muted hover:text-ink transition-colors"
             >
-              <div className="flex items-center gap-1.5 font-mono text-[11px]">
-                <Code2 className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Request / Query Payload</span>
-              </div>
-              <span className="text-[10px] text-zinc-500">
-                {showPayload ? "লুকান ▲" : "দেখুন ▼"}
+              <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.12em]">
+                <Code2 className="w-3.5 h-3.5" />
+                Request / Query payload
               </span>
+              <span className="font-mono text-[10px]">{showPayload ? "▲" : "▼"}</span>
             </button>
 
             {showPayload && (
-              <pre className="p-3 text-[11px] font-mono text-cyan-300/90 overflow-x-auto leading-relaxed bg-[#0d1117]">
+              <pre className="p-3 text-[11px] font-mono text-ink overflow-x-auto leading-relaxed bg-paper-sunken">
                 <code>{currentStep.payloadSnippet}</code>
               </pre>
             )}
@@ -203,23 +178,24 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
         )}
       </div>
 
-      {/* Progress Dots at Bottom */}
-      <div className="pt-2 border-t border-zinc-800/80 flex flex-wrap items-center justify-center gap-1.5">
+      {/* Progress ruler at the bottom */}
+      <div className="pt-2 border-t border-rule flex flex-wrap items-end justify-center gap-1">
         {steps.map((_, idx) => (
           <button
             key={idx}
+            type="button"
             onClick={() => onSelectStep(idx)}
-            className={`h-1.5 rounded-full transition-all ${
+            className={`w-2 transition-all duration-200 ease-plot ${
               idx === currentStepIndex
-                ? "w-6 bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.6)]"
+                ? `h-4 bg-ink ${isFinished ? "" : "tick-sweep"}`
                 : idx < currentStepIndex
-                ? "w-2 bg-emerald-400/80"
-                : "w-2 bg-zinc-700"
+                ? "h-3 bg-confirm"
+                : "h-1.5 bg-rule-strong"
             }`}
             title={`Go to Step ${idx + 1}`}
           />
         ))}
       </div>
-    </div>
+    </Panel>
   );
 };

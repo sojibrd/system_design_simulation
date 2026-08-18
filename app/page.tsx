@@ -44,7 +44,7 @@ export default function Home() {
   } = useSimulation(currentPhaseConfig);
 
   return (
-    <div className="h-screen overflow-hidden bg-zinc-950 text-zinc-100 flex flex-col antialiased selection:bg-cyan-500 selection:text-zinc-950">
+    <div className="h-screen overflow-hidden bg-paper text-ink-soft flex flex-col antialiased selection:bg-ink selection:text-paper">
       {/* Top Navigation Header */}
       <Header />
 

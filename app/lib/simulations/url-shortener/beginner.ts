@@ -68,7 +68,7 @@ export const beginnerConfig: PhaseConfig = {
       targetHandle: "l-t",
       data: {
         label: "1. POST /api/shorten",
-        particleColor: "#06b6d4",
+        particleColor: "request",
       },
     },
     {
@@ -80,7 +80,7 @@ export const beginnerConfig: PhaseConfig = {
       targetHandle: "l-t",
       data: {
         label: "2. INSERT INTO urls",
-        particleColor: "#3b82f6",
+        particleColor: "read",
       },
     },
   ],
@@ -138,7 +138,7 @@ export const beginnerConfig: PhaseConfig = {
           "edge-server-to-db": {
             label: "3. SQL Result (OK)",
             isReverse: true,
-            particleColor: "#10b981",
+            particleColor: "success",
           },
         },
         nodeStatusMessages: {
@@ -163,7 +163,7 @@ export const beginnerConfig: PhaseConfig = {
           "edge-client-to-server": {
             label: "4. Return Short URL",
             isReverse: true,
-            particleColor: "#22c55e",
+            particleColor: "success",
           },
         },
         nodeStatusMessages: {
@@ -226,7 +226,7 @@ export const beginnerConfig: PhaseConfig = {
           "edge-server-to-db": {
             label: "3. SQL Result (OK)",
             isReverse: true,
-            particleColor: "#10b981",
+            particleColor: "success",
           },
         },
         nodeStatusMessages: {
@@ -251,7 +251,7 @@ export const beginnerConfig: PhaseConfig = {
           "edge-client-to-server": {
             label: "4. Return Short URL",
             isReverse: true,
-            particleColor: "#22c55e",
+            particleColor: "success",
           },
         },
         nodeStatusMessages: {

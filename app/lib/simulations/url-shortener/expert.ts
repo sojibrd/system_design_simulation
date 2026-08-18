@@ -19,7 +19,7 @@ export const expertConfig: PhaseConfig = {
     {
       id: "node-client",
       type: "simulationNode",
-      position: { x: 40, y: 310 },
+      position: { x: 40, y: 400 },
       data: {
         label: "Global Clients",
         subLabel: "Mobile, Web, APIs",
@@ -33,7 +33,7 @@ export const expertConfig: PhaseConfig = {
     {
       id: "node-cdn",
       type: "simulationNode",
-      position: { x: 380, y: 90 },
+      position: { x: 500, y: 100 },
       data: {
         label: "Cloudflare CDN",
         subLabel: "Edge Network (200+ PoPs)",
@@ -47,7 +47,7 @@ export const expertConfig: PhaseConfig = {
     {
       id: "node-lb",
       type: "simulationNode",
-      position: { x: 380, y: 310 },
+      position: { x: 500, y: 400 },
       data: {
         label: "Global Load Balancer",
         subLabel: "AWS ALB / Cloud LB",
@@ -61,7 +61,7 @@ export const expertConfig: PhaseConfig = {
     {
       id: "node-gw",
       type: "simulationNode",
-      position: { x: 720, y: 310 },
+      position: { x: 960, y: 400 },
       data: {
         label: "API Gateway",
         subLabel: "Kong / Envoy Gateway",
@@ -75,7 +75,7 @@ export const expertConfig: PhaseConfig = {
     {
       id: "node-idgen",
       type: "simulationNode",
-      position: { x: 720, y: 90 },
+      position: { x: 960, y: 100 },
       data: {
         label: "Snowflake ID Gen",
         subLabel: "64-bit Distributed Unique ID",
@@ -89,7 +89,7 @@ export const expertConfig: PhaseConfig = {
     {
       id: "node-server-1",
       type: "simulationNode",
-      position: { x: 1060, y: 185 },
+      position: { x: 1420, y: 230 },
       data: {
         label: "App Cluster (S1)",
         subLabel: "Kubernetes Pod 1",
@@ -103,7 +103,7 @@ export const expertConfig: PhaseConfig = {
     {
       id: "node-server-2",
       type: "simulationNode",
-      position: { x: 1060, y: 390 },
+      position: { x: 1420, y: 505 },
       data: {
         label: "App Cluster (S2)",
         subLabel: "Kubernetes Pod 2",
@@ -117,7 +117,7 @@ export const expertConfig: PhaseConfig = {
     {
       id: "node-cache",
       type: "simulationNode",
-      position: { x: 1400, y: 60 },
+      position: { x: 1880, y: 60 },
       data: {
         label: "Redis Cluster",
         subLabel: "Multi-Node Sharded Cache",
@@ -131,7 +131,7 @@ export const expertConfig: PhaseConfig = {
     {
       id: "node-primary-db",
       type: "simulationNode",
-      position: { x: 1400, y: 250 },
+      position: { x: 1880, y: 320 },
       data: {
         label: "Primary DB (Write)",
         subLabel: "PostgreSQL Master (ACID)",
@@ -145,7 +145,7 @@ export const expertConfig: PhaseConfig = {
     {
       id: "node-replica-db",
       type: "simulationNode",
-      position: { x: 1400, y: 430 },
+      position: { x: 1880, y: 560 },
       data: {
         label: "Read Replicas",
         subLabel: "PostgreSQL Slaves (Read-Only)",
@@ -159,7 +159,7 @@ export const expertConfig: PhaseConfig = {
     {
       id: "node-queue",
       type: "simulationNode",
-      position: { x: 1060, y: 580 },
+      position: { x: 1420, y: 765 },
       data: {
         label: "Kafka Queue",
         subLabel: "Distributed Event Stream",
@@ -173,7 +173,7 @@ export const expertConfig: PhaseConfig = {
     {
       id: "node-worker",
       type: "simulationNode",
-      position: { x: 1400, y: 580 },
+      position: { x: 1880, y: 765 },
       data: {
         label: "Analytics Engine",
         subLabel: "ClickHouse + Workers",
@@ -195,7 +195,7 @@ export const expertConfig: PhaseConfig = {
       targetHandle: "l-t",
       data: {
         label: "0. GeoDNS Routing",
-        particleColor: "#06b6d4",
+        particleColor: "request",
       },
     },
     {
@@ -207,7 +207,7 @@ export const expertConfig: PhaseConfig = {
       targetHandle: "t-t",
       data: {
         label: "1. Edge Pass to LB",
-        particleColor: "#06b6d4",
+        particleColor: "request",
       },
     },
     {
@@ -219,7 +219,7 @@ export const expertConfig: PhaseConfig = {
       targetHandle: "l-t",
       data: {
         label: "1. Direct Ingress",
-        particleColor: "#06b6d4",
+        particleColor: "request",
       },
     },
     {
@@ -231,7 +231,7 @@ export const expertConfig: PhaseConfig = {
       targetHandle: "l-t",
       data: {
         label: "2. Gateway Ingress",
-        particleColor: "#06b6d4",
+        particleColor: "request",
       },
     },
     {
@@ -243,7 +243,7 @@ export const expertConfig: PhaseConfig = {
       targetHandle: "l-t",
       data: {
         label: "3a. Pod-1 Route",
-        particleColor: "#06b6d4",
+        particleColor: "request",
       },
     },
     {
@@ -255,7 +255,7 @@ export const expertConfig: PhaseConfig = {
       targetHandle: "l-t",
       data: {
         label: "3b. Pod-2 Route",
-        particleColor: "#06b6d4",
+        particleColor: "request",
       },
     },
     {
@@ -267,7 +267,7 @@ export const expertConfig: PhaseConfig = {
       targetHandle: "b-t",
       data: {
         label: "4a. Fetch Snowflake ID",
-        particleColor: "#eab308",
+        particleColor: "cache",
       },
     },
     {
@@ -279,7 +279,7 @@ export const expertConfig: PhaseConfig = {
       targetHandle: "l-t",
       data: {
         label: "5a. Write to Master",
-        particleColor: "#3b82f6",
+        particleColor: "read",
       },
     },
     {
@@ -291,7 +291,7 @@ export const expertConfig: PhaseConfig = {
       targetHandle: "l-t",
       data: {
         label: "5b. Populate Cache",
-        particleColor: "#a855f7",
+        particleColor: "write",
       },
     },
     {
@@ -303,7 +303,7 @@ export const expertConfig: PhaseConfig = {
       targetHandle: "t-t",
       data: {
         label: "Replicate WAL stream",
-        particleColor: "#64748b",
+        particleColor: "meta",
       },
     },
     {
@@ -315,7 +315,7 @@ export const expertConfig: PhaseConfig = {
       targetHandle: "l-t",
       data: {
         label: "Read Query (Fallback)",
-        particleColor: "#10b981",
+        particleColor: "success",
       },
     },
     {
@@ -327,7 +327,7 @@ export const expertConfig: PhaseConfig = {
       targetHandle: "t-t",
       data: {
         label: "Async Publish: click_event",
-        particleColor: "#ec4899",
+        particleColor: "event",
       },
     },
     {
@@ -339,7 +339,7 @@ export const expertConfig: PhaseConfig = {
       targetHandle: "t-t",
       data: {
         label: "Async Publish: click_event",
-        particleColor: "#ec4899",
+        particleColor: "event",
       },
     },
     {
@@ -351,7 +351,7 @@ export const expertConfig: PhaseConfig = {
       targetHandle: "l-t",
       data: {
         label: "Redis Lookup",
-        particleColor: "#a855f7",
+        particleColor: "write",
       },
     },
     {
@@ -363,7 +363,7 @@ export const expertConfig: PhaseConfig = {
       targetHandle: "l-t",
       data: {
         label: "Batch Consume & Aggregate",
-        particleColor: "#f43f5e",
+        particleColor: "error",
       },
     },
   ],
@@ -492,7 +492,7 @@ export const expertConfig: PhaseConfig = {
           "edge-s1-to-idgen": {
             label: "6. ID Returned",
             isReverse: true,
-            particleColor: "#eab308",
+            particleColor: "cache",
           },
         },
         nodeStatusMessages: {
@@ -580,7 +580,7 @@ export const expertConfig: PhaseConfig = {
           "edge-gw-to-s1": {
             label: "10. 201 Created Response",
             isReverse: true,
-            particleColor: "#22c55e",
+            particleColor: "success",
           },
         },
         nodeStatusMessages: {
@@ -605,7 +605,7 @@ export const expertConfig: PhaseConfig = {
           "edge-lb-to-gw": {
             label: "11. Forward Response",
             isReverse: true,
-            particleColor: "#22c55e",
+            particleColor: "success",
           },
         },
         nodeStatusMessages: {
@@ -630,7 +630,7 @@ export const expertConfig: PhaseConfig = {
           "edge-client-to-lb": {
             label: "12. Return Short URL",
             isReverse: true,
-            particleColor: "#22c55e",
+            particleColor: "success",
           },
         },
         nodeStatusMessages: {
@@ -762,7 +762,7 @@ export const expertConfig: PhaseConfig = {
           "edge-s2-to-cache": {
             label: "6. CACHE HIT (0.4ms)",
             isReverse: true,
-            particleColor: "#a855f7",
+            particleColor: "write",
           },
         },
         nodeStatusMessages: {
@@ -787,7 +787,7 @@ export const expertConfig: PhaseConfig = {
           "edge-gw-to-s2": {
             label: "7. 301 Response",
             isReverse: true,
-            particleColor: "#22c55e",
+            particleColor: "success",
           },
         },
         nodeStatusMessages: {
@@ -812,7 +812,7 @@ export const expertConfig: PhaseConfig = {
           "edge-lb-to-gw": {
             label: "8. Forward Response",
             isReverse: true,
-            particleColor: "#22c55e",
+            particleColor: "success",
           },
         },
         nodeStatusMessages: {
@@ -837,7 +837,7 @@ export const expertConfig: PhaseConfig = {
           "edge-client-to-lb": {
             label: "9. Redirecting to Long URL",
             isReverse: true,
-            particleColor: "#22c55e",
+            particleColor: "success",
           },
         },
         nodeStatusMessages: {

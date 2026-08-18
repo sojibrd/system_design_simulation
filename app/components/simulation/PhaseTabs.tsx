@@ -2,81 +2,66 @@
 
 import React from "react";
 import { PhaseId, PhaseConfig } from "@/app/lib/types";
-import { Sparkles, Layers } from "lucide-react";
+import { Layers } from "lucide-react";
+import { Badge } from "@/app/components/ui";
 
-interface PhaseTabsProps {
+export const PhaseTabs: React.FC<{
   currentPhaseId: PhaseId;
   phases: PhaseConfig[];
   onSelectPhase: (phaseId: PhaseId) => void;
-}
+}> = ({ currentPhaseId, phases, onSelectPhase }) => {
+  const active = phases.find((phase) => phase.id === currentPhaseId);
 
-export const PhaseTabs: React.FC<PhaseTabsProps> = ({
-  currentPhaseId,
-  phases,
-  onSelectPhase,
-}) => {
   return (
     <div className="w-full flex flex-col gap-1.5">
-      {/* Tab Buttons */}
-      <div className="grid grid-cols-3 gap-2 bg-zinc-950/80 p-1 rounded-2xl border border-zinc-800/90 shadow-lg backdrop-blur">
-        {phases.map((phase) => {
+      {/* Revision tabs — the three drafts of the same system, A / B / C. */}
+      <div className="grid grid-cols-3 gap-2">
+        {phases.map((phase, index) => {
           const isSelected = phase.id === currentPhaseId;
 
           return (
             <button
               key={phase.id}
+              type="button"
               onClick={() => onSelectPhase(phase.id)}
-              className={`relative flex flex-col items-center justify-center py-1.5 px-2 md:px-4 rounded-xl transition-all duration-300 text-center ${
+              className={`relative flex items-center justify-center gap-2 py-1.5 px-2 md:px-4 rounded-box border transition-all duration-200 ease-plot ${
                 isSelected
-                  ? "bg-zinc-900 border border-cyan-500/50 shadow-md shadow-cyan-500/10 text-zinc-50 font-bold scale-[1.02]"
-                  : "hover:bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 border border-transparent"
+                  ? "bg-paper-raised border-ink border-b-2 text-ink shadow-drawn"
+                  : "bg-paper border-rule text-ink-muted hover:border-rule-strong hover:text-ink"
               }`}
             >
-              <div className="flex items-center gap-1.5 mb-0.5">
-                <span className="text-xs md:text-sm">{phase.badge.split(" ")[0]}</span>
-                <span className="text-xs md:text-sm tracking-tight">{phase.name}</span>
-              </div>
-
-              <div className="flex items-center gap-1 text-[10px] text-zinc-500 font-mono">
-                <Layers className="w-3 h-3 text-cyan-400/80" />
-                <span>{phase.componentCount} Components</span>
-              </div>
-
-              {isSelected && (
-                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-cyan-400 rounded-full shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
-              )}
+              <span className="font-mono text-[10px] tracking-[0.16em] text-ink-faint">
+                REV {String.fromCharCode(65 + index)}
+              </span>
+              <span className="text-xs md:text-sm font-semibold tracking-tight">
+                {phase.name}
+              </span>
+              <span className="hidden md:flex items-center gap-1 font-mono text-[10px] text-ink-muted">
+                <Layers className="w-3 h-3" />
+                {phase.componentCount}
+              </span>
             </button>
           );
         })}
       </div>
 
-      {/* Active Phase Tagline & Key Highlights */}
-      {phases.map((phase) => {
-        if (phase.id !== currentPhaseId) return null;
-
-        return (
-          <div
-            key={phase.id}
-            className="flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 bg-zinc-900/60 border border-zinc-800/80 rounded-xl text-xs"
-          >
-            <div className="flex items-center gap-2 text-zinc-300 min-w-0">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-              <span className="font-medium truncate">{phase.tagline}</span>
-            </div>
-
-            <div className="flex items-center gap-1.5 flex-wrap">
-              {phase.keyConcepts.map((concept, i) => (
-                <span
-                  key={i}
-                  className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 border border-zinc-700/50 font-mono"
-                >
-                  {concept}
-                </span>
-              ))}
-            </div>
+      {/* Revision note for the selected draft. */}
+      {active && (
+        <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 border-l-2 border-accent bg-accent-soft/50 rounded-r-box text-xs">
+          <div className="flex items-center gap-2 text-ink-soft min-w-0">
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent shrink-0">
+              Note
+            </span>
+            <span className="truncate">{active.tagline}</span>
           </div>
-        );
-      })}
+
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {active.keyConcepts.map((concept) => (
+              <Badge key={concept}>{concept}</Badge>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

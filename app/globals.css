@@ -1,72 +1,145 @@
 @import "tailwindcss";
 @import "@xyflow/react/dist/style.css";
 
-:root {
-  --background: #09090b;
-  --foreground: #f4f4f5;
+/* ============================================================================
+   BLUEPRINT DESIGN SYSTEM — light-only "technical drafting" direction.
+
+   Everything visual in this app resolves to a token below. Components must not
+   reach for raw Tailwind palette colours (`zinc-800`, `cyan-500`, ...) — if a
+   value is missing here, add it here first.
+   ========================================================================= */
+
+@theme {
+  /* --- Type: engineering lettering ------------------------------------- */
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SFMono-Regular", monospace;
+
+  /* --- Surfaces: paper stock ------------------------------------------- */
+  --color-paper: #f7f5ef;        /* the drafting sheet — page background */
+  --color-paper-raised: #fffdf8; /* panels sitting on top of the sheet */
+  --color-paper-sunken: #eae7dd;  /* wells: code blocks, inset groups */
+  --color-paper-wash: #e2ded1;    /* pressed / hover fill on paper */
+
+  /* --- Ink: the only text colours -------------------------------------- */
+  --color-ink: #16213b;          /* headings, primary text */
+  --color-ink-soft: #3b475f;     /* body text */
+  --color-ink-muted: #6d788d;    /* labels, captions, mono annotations */
+  --color-ink-faint: #9aa3b2;    /* disabled, placeholder */
+
+  /* --- Rules: drafted lines -------------------------------------------- */
+  --color-rule: #cdc7b7;         /* hairline borders */
+  --color-rule-strong: #a8a294;  /* emphasised borders */
+  --color-rule-heavy: #16213b;   /* the drawn-in-ink border of an active box */
+
+  /* --- Grid: graph paper ----------------------------------------------- */
+  --color-grid-minor: #ded9ca;
+  --color-grid-major: #cbc4b1;
+
+  /* --- Accent: the draftsman's blue pencil ------------------------------ */
+  --color-accent: #1b4b8f;
+  --color-accent-soft: #dfe7f4;  /* wash fill behind accent content */
+  --color-accent-line: #7f9bc4;  /* accent at hairline weight */
+
+  /* --- Alert: the red correction pencil --------------------------------- */
+  --color-alert: #b23b2c;
+  --color-alert-soft: #f6e2de;
+
+  /* --- Confirm: the green check ---------------------------------------- */
+  --color-confirm: #1f7a5c;
+  --color-confirm-soft: #dcece5;
+
+  /* --- Category inks — one per architecture component category ---------- */
+  --color-cat-client: #1b4b8f;
+  --color-cat-compute: #6b3fa0;
+  --color-cat-storage: #1f7a5c;
+  --color-cat-network: #0f6f80;
+  --color-cat-security: #a2620d;
+  --color-cat-queue: #9c2f66;
+  --color-cat-analytics: #a83b46;
+
+  /* --- Signal inks — semantic packet / flow colours --------------------- */
+  --color-signal-request: #1b4b8f;
+  --color-signal-write: #6b3fa0;
+  --color-signal-read: #0f6f80;
+  --color-signal-success: #1f7a5c;
+  --color-signal-cache: #a2620d;
+  --color-signal-event: #9c2f66;
+  --color-signal-error: #b23b2c;
+  --color-signal-meta: #6d788d;
+
+  /* --- Shape: drafted boxes have corners, not pills --------------------- */
+  --radius-sheet: 3px;
+  --radius-box: 2px;
+  --radius-tick: 1px;
+
+  /* --- Elevation: paper stacked on paper, never a glow ------------------ */
+  --shadow-sheet: 0 1px 0 0 var(--color-rule), 0 2px 6px -4px rgba(22, 33, 59, 0.18);
+  --shadow-lift: 0 2px 0 0 var(--color-rule-strong), 0 8px 20px -12px rgba(22, 33, 59, 0.35);
+  --shadow-drawn: 2px 2px 0 0 var(--color-ink);
+
+  /* --- Motion: a plotter pen, not a bounce ------------------------------ */
+  --ease-plot: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  background-color: var(--color-paper);
+  color: var(--color-ink-soft);
   overflow-x: hidden;
+  /* The graph-paper sheet itself — two grid frequencies, minor over major. */
+  background-image:
+    linear-gradient(var(--color-grid-minor) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid-minor) 1px, transparent 1px);
+  background-size: 24px 24px, 24px 24px;
 }
 
-/* React Flow custom dark styling */
-.react-flow__background {
-  background-color: #09090b !important;
-}
+/* ---------------------------------------------------------------------------
+   React Flow overrides — the library ships a light theme, but not this one.
+   ------------------------------------------------------------------------ */
 
 .react-flow__controls {
-  background-color: #18181b !important;
-  border: 1px solid #27272a !important;
-  border-radius: 8px !important;
+  background-color: var(--color-paper-raised) !important;
+  border: 1px solid var(--color-rule) !important;
+  border-radius: var(--radius-box) !important;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+  box-shadow: var(--shadow-sheet) !important;
 }
 
 .react-flow__controls-button {
-  background-color: #18181b !important;
-  border-bottom: 1px solid #27272a !important;
-  fill: #a1a1aa !important;
-  color: #a1a1aa !important;
+  background-color: var(--color-paper-raised) !important;
+  border-bottom: 1px solid var(--color-rule) !important;
+  fill: var(--color-ink-muted) !important;
+  color: var(--color-ink-muted) !important;
 }
 
 .react-flow__controls-button:hover {
-  background-color: #27272a !important;
-  fill: #22d3ee !important;
-  color: #22d3ee !important;
+  background-color: var(--color-accent-soft) !important;
+  fill: var(--color-accent) !important;
+  color: var(--color-accent) !important;
 }
 
 .react-flow__attribution {
-  background: rgba(9, 9, 11, 0.8) !important;
-  color: #52525b !important;
+  background: rgba(247, 245, 239, 0.85) !important;
+  color: var(--color-ink-faint) !important;
   padding: 2px 6px !important;
-  border-radius: 4px !important;
+  border-radius: var(--radius-tick) !important;
 }
 
 .react-flow__attribution a {
-  color: #71717a !important;
+  color: var(--color-ink-muted) !important;
 }
 
-/* Edge & Particle animation keyframes */
+/* ---------------------------------------------------------------------------
+   Motion — dashed lines advance like a plotted schematic; nothing glows.
+   ------------------------------------------------------------------------ */
+
 @keyframes flowDashForward {
-  from {
-    stroke-dashoffset: 24;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
+  from { stroke-dashoffset: 24; }
+  to { stroke-dashoffset: 0; }
 }
 
 @keyframes flowDashBackward {
-  from {
-    stroke-dashoffset: 0;
-  }
-  to {
-    stroke-dashoffset: 24;
-  }
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: 24; }
 }
 
 .animated-edge-active {
@@ -79,37 +152,42 @@ body {
   animation: flowDashBackward 0.8s linear infinite;
 }
 
-@keyframes pulseBorder {
-  0%, 100% {
-    border-color: rgba(6, 182, 212, 0.4);
-    box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
-  }
-  50% {
-    border-color: rgba(6, 182, 212, 1);
-    box-shadow: 0 0 25px rgba(6, 182, 212, 0.55);
-  }
+/* An active node is "inked in": the border darkens and thickens rather than
+   emitting light. */
+@keyframes inkPulse {
+  0%, 100% { box-shadow: 2px 2px 0 0 var(--color-ink); }
+  50% { box-shadow: 3px 3px 0 0 var(--color-ink); }
 }
 
 .node-pulse-active {
-  animation: pulseBorder 1.5s ease-in-out infinite;
+  animation: inkPulse 1.5s var(--ease-plot) infinite;
 }
 
-/* Custom scrollbars */
+/* Ruled measurement tick that runs under a live status line. */
+@keyframes tickSweep {
+  from { opacity: 0.25; }
+  to { opacity: 1; }
+}
+
+.tick-sweep {
+  animation: tickSweep 0.9s var(--ease-plot) infinite alternate;
+}
+
+/* --- Scrollbars: thin ruled gutters ---------------------------------- */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #09090b;
+  background: var(--color-paper-sunken);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #27272a;
-  border-radius: 3px;
+  background: var(--color-rule-strong);
+  border-radius: var(--radius-tick);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46;
+  background: var(--color-ink-faint);
 }
-

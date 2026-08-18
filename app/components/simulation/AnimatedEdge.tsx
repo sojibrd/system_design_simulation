@@ -6,7 +6,19 @@ import {
   EdgeProps,
   getSmoothStepPath,
 } from "@xyflow/react";
-import { SimulationEdgeData } from "@/app/lib/types";
+import { SimulationEdgeData, SignalKind } from "@/app/lib/types";
+
+// Data files name the MEANING of a hop; the drawing decides its ink.
+const signalInk: Record<SignalKind, string> = {
+  request: "var(--color-signal-request)",
+  write: "var(--color-signal-write)",
+  read: "var(--color-signal-read)",
+  success: "var(--color-signal-success)",
+  cache: "var(--color-signal-cache)",
+  event: "var(--color-signal-event)",
+  error: "var(--color-signal-error)",
+  meta: "var(--color-signal-meta)",
+};
 
 export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
   id,
@@ -23,7 +35,7 @@ export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
   // Highlight stays on after the flow finishes, but the motion stops.
   const isAnimated = isActive && edgeData.isAnimated !== false;
   const isReverse = Boolean(edgeData.isReverse);
-  const particleColor = edgeData.particleColor || "#22d3ee";
+  const ink = signalInk[edgeData.particleColor ?? "request"];
 
   const [edgePath, labelX, labelY] = getSmoothStepPath({
     sourceX,
@@ -32,7 +44,8 @@ export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
     targetX,
     targetY,
     targetPosition,
-    borderRadius: 16,
+    // Schematic corners are drafted, not rounded off.
+    borderRadius: 4,
   });
 
   // Calculate label anchor position: for left-to-right edges, bias towards 38% from source to ensure complete clearance from target node
@@ -45,24 +58,26 @@ export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
 
   return (
     <>
-      {/* Base static/dim edge */}
+      {/* Base drafted line — dashed while dormant, solid once the step lights it */}
       <path
         id={id}
         d={edgePath}
         fill="none"
-        stroke={isActive ? "rgba(6, 182, 212, 0.3)" : "#3f3f46"}
-        strokeWidth={isActive ? 2 : 1.5}
-        strokeDasharray={isActive ? undefined : "4 4"}
+        stroke={isActive ? ink : "var(--color-rule-strong)"}
+        strokeWidth={isActive ? 2 : 1}
+        strokeDasharray={isActive ? undefined : "3 4"}
+        strokeOpacity={isActive ? 0.35 : 1}
         className="transition-colors duration-300"
       />
 
-      {/* Active Glowing Flow Line */}
+      {/* The live hop, plotted over the base line */}
       {isActive && (
         <path
           d={edgePath}
           fill="none"
-          stroke={particleColor}
-          strokeWidth={2.5}
+          stroke={ink}
+          strokeWidth={2}
+          strokeLinecap="butt"
           className={
             isAnimated
               ? isReverse
@@ -70,15 +85,21 @@ export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
                 : "animated-edge-active"
               : undefined
           }
-          filter="drop-shadow(0 0 4px rgba(6, 182, 212, 0.6))"
         />
       )}
 
-      {/* Moving Packet / Dot along the path (SVG animateMotion) */}
+      {/* The packet: a square parcel travelling the line, not a glowing orb */}
       {isAnimated && (
         <g>
-          {/* Outer glow ring */}
-          <circle r="7" fill={particleColor} opacity="0.3">
+          <rect
+            x={-5}
+            y={-5}
+            width={10}
+            height={10}
+            fill="var(--color-paper-raised)"
+            stroke={ink}
+            strokeWidth={2}
+          >
             <animateMotion
               path={edgePath}
               dur="1.2s"
@@ -87,9 +108,8 @@ export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
               keyPoints={isReverse ? "1;0" : "0;1"}
               keyTimes="0;1"
             />
-          </circle>
-          {/* Core particle */}
-          <circle r="3.5" fill="#ffffff">
+          </rect>
+          <rect x={-2} y={-2} width={4} height={4} fill={ink}>
             <animateMotion
               path={edgePath}
               dur="1.2s"
@@ -98,7 +118,7 @@ export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
               keyPoints={isReverse ? "1;0" : "0;1"}
               keyTimes="0;1"
             />
-          </circle>
+          </rect>
         </g>
       )}
 
@@ -111,8 +131,10 @@ export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
               position: "absolute",
               transform: `translate(-50%, -100%) translate(${renderLabelX}px,${labelY - 8}px)`,
               pointerEvents: "all",
+              color: ink,
+              borderColor: ink,
             }}
-            className="px-2 py-0.5 rounded-md text-[10px] font-mono border transition-all duration-300 select-none max-w-[170px] truncate bg-zinc-950/95 text-cyan-300 border-cyan-500/60 shadow-[0_0_12px_rgba(6,182,212,0.35)] scale-105 font-semibold opacity-100"
+            className="px-1.5 py-0.5 rounded-tick text-[10px] font-mono border bg-paper-raised select-none max-w-[170px] truncate font-medium"
           >
             {edgeData.label}
           </div>
