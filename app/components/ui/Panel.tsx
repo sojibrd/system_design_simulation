@@ -2,31 +2,23 @@ import React from "react";
 
 type PanelTone = "raised" | "sunken" | "flat";
 
+// The component names the ROLE of the surface; the theme decides what a
+// surface of that role looks like.
 const toneClasses: Record<PanelTone, string> = {
-  raised: "bg-panel border-bezel shadow-bezel",
-  sunken: "bg-well border-bezel",
-  flat: "bg-chassis border-bezel",
+  raised: "surface-panel",
+  sunken: "surface-well",
+  flat: "surface-app",
 };
 
-/**
- * A panel mounted on the rack. Depth is a machined bezel — an inset top
- * highlight over a bottom shadow — never a blurred card floating in space.
- */
 export const Panel: React.FC<
   React.HTMLAttributes<HTMLDivElement> & { tone?: PanelTone }
 > = ({ tone = "raised", className = "", children, ...rest }) => (
-  <div
-    className={`relative rounded-panel border ${toneClasses[tone]} ${className}`}
-    {...rest}
-  >
+  <div className={`relative ${toneClasses[tone]} ${className}`} {...rest}>
     {children}
   </div>
 );
 
-/**
- * The engraved title strip of a panel: a mono label, an optional right-hand
- * slot, and the machined groove that separates it from the controls below.
- */
+/** A labelled strip at the top of a panel, separated by a seam. */
 export const PanelHeader: React.FC<{
   label: string;
   icon?: React.ReactNode;
@@ -34,13 +26,11 @@ export const PanelHeader: React.FC<{
   className?: string;
 }> = ({ label, icon, right, className = "" }) => (
   <div
-    className={`flex items-center justify-between gap-2 pb-2 mb-2 border-b border-bezel-strong ${className}`}
+    className={`flex items-center justify-between gap-2 pb-2 mb-2 seam-b-heavy ${className}`}
   >
     <div className="flex items-center gap-1.5 min-w-0">
       {icon}
-      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-readout-muted truncate">
-        {label}
-      </span>
+      <span className="t-label truncate">{label}</span>
     </div>
     {right}
   </div>

@@ -13,6 +13,8 @@ import {
 import { SimulationNode } from "./SimulationNode";
 import { AnimatedFlowEdge } from "./AnimatedEdge";
 import { CustomNodeType, CustomEdgeType } from "@/app/lib/types";
+import { Lamp } from "@/app/components/ui";
+import { useThemeNumber } from "@/app/hooks/useThemeNumber";
 
 const FIT_VIEW_OPTIONS = { padding: 0.22, minZoom: 0.4, maxZoom: 1.5 };
 
@@ -50,6 +52,9 @@ export const FlowDiagram: React.FC<FlowDiagramProps> = ({
     []
   );
 
+  const canvasGap = useThemeNumber("--t-canvas-gap", 22);
+  const canvasDotSize = useThemeNumber("--t-canvas-dot-size", 1);
+
   const edgeTypes: EdgeTypes = useMemo(
     () => ({
       animatedFlowEdge: AnimatedFlowEdge,
@@ -58,7 +63,7 @@ export const FlowDiagram: React.FC<FlowDiagramProps> = ({
   );
 
   return (
-    <div className="w-full h-full min-h-0 bg-well rounded-panel border border-bezel-strong overflow-hidden relative shadow-well">
+    <div className="surface-well w-full h-full min-h-0 overflow-hidden relative">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -79,23 +84,19 @@ export const FlowDiagram: React.FC<FlowDiagramProps> = ({
         zoomOnScroll={true}
         proOptions={{ hideAttribution: true }}
       >
-        {/* The perforated rack panel the units are mounted on. */}
+        {/* The backdrop the units sit on — the theme decides its texture. */}
         <Background
           variant={BackgroundVariant.Dots}
-          gap={22}
-          size={1}
-          color="var(--color-bezel)"
+          gap={canvasGap}
+          size={canvasDotSize}
+          color="var(--t-canvas-dot)"
         />
-        <Controls
-          showInteractive={false}
-          position="bottom-left"
-          className="!m-3 !border-bezel-strong !bg-panel-raised"
-        />
+        <Controls showInteractive={false} position="bottom-left" className="!m-3" />
       </ReactFlow>
 
       {/* Floating Canvas Hint */}
-      <div className="absolute top-3 right-3 pointer-events-none bg-panel-raised px-2 py-0.5 rounded-tick border border-bezel-strong font-mono text-[10px] uppercase tracking-[0.12em] text-readout-muted flex items-center gap-1.5">
-        <span className="w-1.5 h-1.5 lamp text-lamp-green"></span>
+      <div className="chip absolute top-3 right-3 pointer-events-none">
+        <Lamp lit color="var(--t-ok)" />
         <span>Pan &amp; Zoom</span>
       </div>
     </div>

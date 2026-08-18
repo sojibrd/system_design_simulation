@@ -7,17 +7,18 @@ import {
   getSmoothStepPath,
 } from "@xyflow/react";
 import { SimulationEdgeData, SignalKind } from "@/app/lib/types";
+import { useThemeNumber } from "@/app/hooks/useThemeNumber";
 
-// Data files name the MEANING of a hop; the panel decides which lamp lights.
-const signalLamp: Record<SignalKind, string> = {
-  request: "var(--color-signal-request)",
-  write: "var(--color-signal-write)",
-  read: "var(--color-signal-read)",
-  success: "var(--color-signal-success)",
-  cache: "var(--color-signal-cache)",
-  event: "var(--color-signal-event)",
-  error: "var(--color-signal-error)",
-  meta: "var(--color-signal-meta)",
+// Data files name the MEANING of a hop; the theme supplies its colour.
+const signalColor: Record<SignalKind, string> = {
+  request: "var(--t-signal-request)",
+  write: "var(--t-signal-write)",
+  read: "var(--t-signal-read)",
+  success: "var(--t-signal-success)",
+  cache: "var(--t-signal-cache)",
+  event: "var(--t-signal-event)",
+  error: "var(--t-signal-error)",
+  meta: "var(--t-signal-meta)",
 };
 
 export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
@@ -35,7 +36,11 @@ export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
   // Highlight stays on after the flow finishes, but the motion stops.
   const isAnimated = isActive && edgeData.isAnimated !== false;
   const isReverse = Boolean(edgeData.isReverse);
-  const lamp = signalLamp[edgeData.particleColor ?? "request"];
+  const color = signalColor[edgeData.particleColor ?? "request"];
+
+  const cornerRadius = useThemeNumber("--t-wire-corner-radius", 4);
+  const packetSize = useThemeNumber("--t-packet-size", 7);
+  const haloSize = useThemeNumber("--t-packet-halo-size", 14);
 
   const [edgePath, labelX, labelY] = getSmoothStepPath({
     sourceX,
@@ -44,8 +49,7 @@ export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
     targetX,
     targetY,
     targetPosition,
-    // Cable runs turn in tight, machined corners.
-    borderRadius: 4,
+    borderRadius: cornerRadius,
   });
 
   // Calculate label anchor position: for left-to-right edges, bias towards 38% from source to ensure complete clearance from target node
@@ -56,18 +60,27 @@ export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
     renderLabelX = targetX + (sourceX - targetX) * 0.38;
   }
 
+  const motion = (
+    <animateMotion
+      path={edgePath}
+      dur="1.2s"
+      repeatCount="indefinite"
+      calcMode="linear"
+      keyPoints={isReverse ? "1;0" : "0;1"}
+      keyTimes="0;1"
+    />
+  );
+
   return (
     <>
-      {/* The wire itself — dark and inert until this step energises it. */}
+      {/* The wire itself — inert until this step energises it. */}
       <path
         id={id}
         d={edgePath}
         fill="none"
-        stroke={isActive ? lamp : "var(--color-bezel-strong)"}
-        strokeWidth={isActive ? 2 : 1}
-        strokeDasharray={isActive ? undefined : "3 4"}
+        stroke={isActive ? color : undefined}
         strokeOpacity={isActive ? 0.35 : 1}
-        className="transition-colors duration-300"
+        className={`wire ${isActive ? "wire--live" : "wire--dormant"}`}
       />
 
       {/* The energised run, drawn over the dormant wire. */}
@@ -75,42 +88,41 @@ export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
         <path
           d={edgePath}
           fill="none"
-          stroke={lamp}
-          strokeWidth={2}
-          strokeLinecap="butt"
-          className={
+          stroke={color}
+          className={`wire wire--live ${
             isAnimated
               ? isReverse
                 ? "animated-edge-active-reverse"
                 : "animated-edge-active"
-              : undefined
-          }
+              : ""
+          }`}
         />
       )}
 
-      {/* The signal travelling the wire — a lit lamp, the one thing allowed to glow. */}
+      {/* The signal travelling the wire. Its shape is a theme value: `rx` is a
+          CSS geometry property, so round vs square needs no DOM change. */}
       {isAnimated && (
         <g>
-          <circle r={7} fill={lamp} opacity={0.28}>
-            <animateMotion
-              path={edgePath}
-              dur="1.2s"
-              repeatCount="indefinite"
-              calcMode="linear"
-              keyPoints={isReverse ? "1;0" : "0;1"}
-              keyTimes="0;1"
-            />
-          </circle>
-          <circle r={3.5} fill={lamp} stroke="var(--color-chassis)" strokeWidth={1}>
-            <animateMotion
-              path={edgePath}
-              dur="1.2s"
-              repeatCount="indefinite"
-              calcMode="linear"
-              keyPoints={isReverse ? "1;0" : "0;1"}
-              keyTimes="0;1"
-            />
-          </circle>
+          <rect
+            className="packet-halo"
+            x={-haloSize / 2}
+            y={-haloSize / 2}
+            width={haloSize}
+            height={haloSize}
+            fill={color}
+          >
+            {motion}
+          </rect>
+          <rect
+            className="packet-core"
+            x={-packetSize / 2}
+            y={-packetSize / 2}
+            width={packetSize}
+            height={packetSize}
+            fill={color}
+          >
+            {motion}
+          </rect>
         </g>
       )}
 
@@ -123,10 +135,9 @@ export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
               position: "absolute",
               transform: `translate(-50%, -100%) translate(${renderLabelX}px,${labelY - 8}px)`,
               pointerEvents: "all",
-              color: lamp,
-              borderColor: lamp,
+              color,
             }}
-            className="px-1.5 py-0.5 rounded-tick text-[10px] font-mono border bg-panel-raised select-none max-w-[170px] truncate font-medium"
+            className="edge-tag select-none max-w-[170px] truncate"
           >
             {edgeData.label}
           </div>

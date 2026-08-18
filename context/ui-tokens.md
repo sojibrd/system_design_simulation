@@ -1,72 +1,99 @@
-# UI Tokens — Control Room Design System
+# Theme Contract — এক-ফাইল থিমিং
 
-`system_design_simulation` প্রজেক্টের ভিজ্যুয়াল ভাষা: **Control Room / ইনস্ট্রুমেন্ট প্যানেল**।
-অ্যাপটা একটা র‍্যাকে বসানো যন্ত্রের প্যানেল — উষ্ণ চারকোল চেসিস, মেশিনড বেজেল, খোদাই করা লেবেল,
-আর সিগন্যাল ল্যাম্প যেগুলো সত্যিই কিছু ঘটলে তবেই জ্বলে।
+`system_design_simulation`-এর সব ভিজ্যুয়াল সিদ্ধান্ত CSS-এ থাকে, কম্পোনেন্টে নয়।
+
+## থিম বদলানো
+
+```css
+/* app/globals.css — লাইন ৯ */
+@import "./themes/control-room.css";
+```
+
+**এই একটা লাইনই** পুরো অ্যাপের চেহারা ঠিক করে। বিদ্যমান থিমগুলো: `control-room.css`, `tactile.css`।
+
+**নতুন থিম লিখতে:** `app/themes/<name>.css`-এ একটা `:root {}` ব্লক, নিচের সব `--t-*` ভেরিয়েবল সেট করে। তারপর উপরের লাইনটা বদলান। **কম্পোনেন্টে কখনো হাত দেবেন না।**
+
+---
 
 ## অলঙ্ঘনীয় নিয়ম
 
-1. **সারফেস উষ্ণ চারকোল** (বাদামি-কালো) — নীলচে slate/zinc নয়। এটাই generic dark-dashboard থেকে আলাদা করে।
-2. **গভীরতা = ফিজিক্যাল বেজেল** — উপরে inset হাইলাইট, নিচে shadow (`shadow-bezel`)। শূন্যে ভাসা blurred card নয়।
-3. **Glow শুধু ল্যাম্পের** (জ্বলন্ত ল্যাম্প সত্যিই আলো ছড়ায়)। প্যানেল, বাটন, বর্ডার, টেক্সট — কখনো নয়। একমাত্র সরঞ্জাম `.lamp` ক্লাস, যা `currentColor`-এ আলো আঁকে।
-4. **Gradient সাজসজ্জা নয়।** কেবল আলোকিত সারফেস মডেল করতে ব্যবহার্য।
-5. **কম্পোনেন্টে কাঁচা Tailwind প্যালেট রঙ নিষিদ্ধ** (`zinc-800`, `cyan-500`…)। ভ্যালু না থাকলে আগে `app/globals.css`-এর `@theme`-এ টোকেন যোগ করুন।
-6. **ডেটা ফাইলে রঙ থাকবে না।** `lib/simulations/*` শুধু *অর্থ* বলে (`particleColor: "success"`), রঙ নয়।
+1. **কম্পোনেন্টে কোনো ভিজ্যুয়াল সিদ্ধান্ত নয়।** রঙ তো নয়ই — `rounded-*`, `shadow-*`, `border-2`, `uppercase`, `tracking-*`, `font-bold` কোনোটাই না। এগুলো role class-এ থাকে।
+2. **Tailwind শুধু লেআউটের জন্য** — `flex`, `grid`, `gap`, `w-`, `min-h-`, `truncate`, `overflow-*`। চেহারার জন্য নয়।
+3. **কম্পোনেন্ট বলে *কী*, থিম বলে *কেমন*।** `data-active`, `aria-selected`, `aria-pressed`, `data-state` — অবস্থা জানায়; সেটা দেখতে কেমন হবে তা CSS ঠিক করে।
+4. **ডেটা ফাইলে রঙ নেই।** `lib/simulations/*` শুধু অর্থ বলে (`particleColor: "success"`)।
+5. **নতুন ভিজ্যুয়াল দরকার হলে আগে কনট্র্যাক্টে টোকেন যোগ করুন**, তারপর সব থিম ফাইলে ভ্যালু দিন।
 
-## টোকেন
+---
 
-### Chassis & panels
-| টোকেন | ভ্যালু | ব্যবহার |
+## Role classes (`app/globals.css`)
+
+| শ্রেণি | ক্লাস |
+|---|---|
+| Surface | `surface-app` `surface-panel` `surface-raised` `surface-well` |
+| Text | `t-title` `t-label` `t-body` `t-caption` `t-mono` `t-strong` `t-accent` `t-muted` |
+| Seam | `seam` `seam-b` `seam-b-heavy` `seam-t` |
+| Control | `control` + `control--primary` `control--alert` `control--quiet`; `segment-group` / `segment` |
+| Chip | `chip` + `chip--accent` `chip--alert` `chip--ok` |
+| Callout | `callout` + `callout--accent` `callout--alert` |
+| Canvas | `unit` `ornament-mark` `lamp` `terminal` `edge-tag` `wire` `packet-core` `packet-halo` |
+| Nav | `tab` `row` `progress-mark` `overlay` |
+
+### State attributes
+
+| অ্যাট্রিবিউট | কোথায় | অর্থ |
 |---|---|---|
-| `chassis` | `#17140f` | পেজ ব্যাকগ্রাউন্ড — যে র‍্যাকে প্যানেল বসানো |
-| `panel` | `#211d18` | প্যানেলের মুখ |
-| `panel-raised` | `#2b251f` | মুখ থেকে উঁচু কন্ট্রোল গ্রুপ, নোড, মোডাল |
-| `panel-hi` | `#363029` | hover / pressed |
-| `well` | `#100e0b` | ভেতরে বসানো readout স্ক্রিন, কোড ব্লক, ক্যানভাস |
+| `data-active` / `data-animated` | `.unit` | এই ধাপে সক্রিয় / চলমান |
+| `data-selected` | `.unit` | ইউজার সিলেক্ট করেছে |
+| `data-lit` / `data-blink` | `.lamp` | জ্বলছে / জ্বলে-নেভে |
+| `data-state` (`done`/`current`/`todo`) + `data-live` | `.progress-mark` | ধাপের অগ্রগতি |
+| `aria-selected` | `.tab` | নির্বাচিত ফেজ |
+| `aria-pressed` | `.segment` | নির্বাচিত সেগমেন্ট |
+| `aria-current` | `.row` | বর্তমান লিস্ট আইটেম |
+| `data-corner` (`tl`/`tr`/`bl`/`br`) | `.ornament-mark` | কোন কোণা |
 
-### Bezels
-`bezel` · `bezel-strong` · `bezel-hi` — প্যানেলের মেশিনড ধার।
+---
 
-### Readout (টেক্সট)
-`readout` (প্রাইমারি) · `readout-soft` (বডি) · `readout-muted` (খোদাই লেবেল, ইউনিট) · `readout-faint` (off/disabled)
+## থিম টোকেন (`--t-*`)
 
-### Lamps — একমাত্র যা আলো ছড়াতে পারে
-`lamp` `#ffb020` (প্রাইমারি, "running") · `lamp-dim` (নিভন্ত) · `lamp-soft` (backlit wash)
-`lamp-green` + `lamp-green-soft` · `lamp-red` + `lamp-red-soft`
+নতুন থিম ফাইলে এগুলো সব সেট করতে হবে। রেফারেন্স হিসেবে `themes/control-room.css` দেখুন।
 
-### Category lamps — আর্কিটেকচার কম্পোনেন্ট
-`cat-client` `cat-compute` `cat-storage` `cat-network` `cat-security` `cat-queue` `cat-analytics`
-নোডে এগুলো কেবল **স্ট্যাটাস ল্যাম্প + mono category লেবেল + emoji well** রঙ করে।
-বর্ডার নয় — active-state-এর অ্যাম্বার রিং সংরক্ষিত।
+- **Type:** `font-sans` `font-mono` `title-family|weight|tracking|transform` `label-family|size|weight|tracking|transform` `control-family|weight|tracking|transform`
+- **App:** `app-bg` `app-bg-image` `app-bg-size` `select-bg|fg` `overlay-bg|filter` `hover-fill` `selected-bg|fg` `accent` `ok` `ok-soft` `disabled-opacity` `ease`
+- **Text:** `text-title|body|label|muted|faint`
+- **Surfaces:** `panel-*` `raised-*` `well-*` (প্রতিটির `bg` `border` `border-width` `radius` `shadow`)
+- **Seams:** `seam` `seam-width` `seam-heavy` `seam-heavy-width`
+- **Controls:** `control-bg|border|fg|shadow|radius|border-width` + hover/press ভ্যারিয়েন্ট; `primary-*` `alert-*`
+- **Chips/Callouts:** `chip-*` `callout-*`
+- **Unit:** `unit-bg|border|border-width|radius|shadow`, `unit-selected-border`, `unit-active-bg|border|border-width|shadow|animation`
+- **Ornament:** `ornament-display|size|inset|radius|fill|color|stroke|shadow`
+- **Lamp:** `lamp-size|radius|off-fill|glow|blink-animation`
+- **Terminal:** `terminal-size|radius|fill|border|fill-hover`
+- **Wire/Packet:** `wire-dormant|dormant-width|dormant-dash`, `wire-live-width|live-dash|live-filter`, `wire-dash-speed`, `wire-corner-radius`, `packet-size|rx`, `packet-halo-size|halo-rx|halo-opacity`, `edge-tag-bg`
+- **Tabs/Progress/Canvas/Scrollbar:** `tab-*` `progress-*` `canvas-dot|gap|dot-size` `scrollbar-*`
+- **Categories:** `cat-client|compute|storage|network|security|queue|analytics`
+- **Signals:** `signal-request|write|read|success|cache|event|error|meta`
 
-### Signal lamps — ফ্লো/প্যাকেট
-`signal-request` `signal-write` `signal-read` `signal-success` `signal-cache` `signal-event` `signal-error` `signal-meta`
-`SignalKind` টাইপ (`app/lib/types.ts`) দিয়ে ডেটা ফাইল থেকে রেফার করা হয়; `AnimatedEdge` ল্যাম্প-রঙে রিজলভ করে।
+### সংখ্যা-টোকেন
 
-### Shape / Depth / Motion
-`rounded-panel` (6px) · `rounded-box` (4px) · `rounded-tick` (2px)
-`shadow-bezel` (মাউন্টেড প্যানেল) · `shadow-raised` (উঁচু) · `shadow-well` (ভেতরে বসানো) · `shadow-key` (চাপার মতো বাটন)
-`ease-instrument` — রিলে সুইচ করার মতো, bounce নয়।
+কয়েকটা ভ্যালু React-কে সংখ্যা হিসেবে পাস করতে হয় (SVG geometry, canvas grid)। সেগুলো থিমেই থাকে, `useThemeNumber()` হুক রানটাইমে পড়ে নেয় — `wire-corner-radius`, `packet-size`, `packet-halo-size`, `canvas-gap`, `canvas-dot-size`।
 
-### Type
-`font-sans` = Barlow (শিল্প-সরঞ্জামের লেবেলের কনডেন্সড grotesk) · `font-mono` = JetBrains Mono
-সব লেবেল, স্পেক, ব্যাজ, স্টেপ নম্বর, স্ট্যাটাস — **mono, uppercase, tracking `[0.12em]`–`[0.18em]`**।
+---
 
-## Primitives — `app/components/ui/`
+## ফন্ট
 
-| Primitive | কাজ |
-|---|---|
-| `Panel` / `PanelHeader` | র‍্যাকে মাউন্ট করা প্যানেল + খোদাই করা টাইটেল স্ট্রিপ (`tone`: raised/sunken/flat) |
-| `Button` / `IconButton` | ফিজিক্যাল কী — চাপলে নিচে নামে (`variant`: primary/alert/outline/ghost) |
-| `Badge` | খোদাই করা প্লেট (`tone`: neutral/accent/alert/confirm) — pill নয় |
-| `Callout` | লেবেলযুক্ত readout ব্লক: রঙিন বাম ধার + mono ক্যাপশন (`tone`: note/accent/alert) |
-| `Rule` / `BezelScrews` | প্যানেলের সিম; ফেসপ্লেট ধরে রাখা চারটি স্ক্রু (যা বক্সকে মাউন্টেড হার্ডওয়্যার বানায়) |
+`app/layout.tsx`-এ চারটে ফ্যামিলি একবার লোড করা: `--font-grotesk` (Archivo), `--font-display` (Archivo Black), `--font-condensed` (Barlow Semi Condensed), `--font-mono-family` (JetBrains Mono)। থিম শুধু বেছে নেয়:
 
-## Motion
+```css
+--t-font-sans: var(--font-condensed), ui-sans-serif, sans-serif;
+--t-title-family: var(--font-display), var(--t-font-sans);
+```
 
-| ক্লাস | কী |
-|---|---|
-| `animated-edge-active(-reverse)` | ড্যাশড ওয়্যার সিগন্যালের দিকে এগোয় |
-| `node-pulse-active` | engaged ইউনিটের অ্যাম্বার রিং শ্বাস নেয় |
-| `tick-sweep` | স্ট্যাটাস ল্যাম্প ব্লিংক |
-| `.lamp` / `.lamp-off` | জ্বলন্ত / নিভন্ত ল্যাম্প (একমাত্র সরকারি glow) |
+**এই তালিকার বাইরের ফন্ট লাগলে — কেবল তখনই — `layout.tsx`-এ হাত পড়বে।** এটাই এক-ফাইল প্রতিশ্রুতির একমাত্র ব্যতিক্রম।
+
+---
+
+## বিদ্যমান থিমের চরিত্র
+
+**`control-room`** — র‍্যাকে বসানো যন্ত্রের প্যানেল। উষ্ণ চারকোল, মেশিনড বেজেল (inset হাইলাইট + নিচে shadow), খোদাই করা mono লেবেল, অ্যাম্বার সিগন্যাল ল্যাম্প। *একমাত্র ল্যাম্পই আলো ছড়ায়।* Ornament = চারটি বেজেল স্ক্রু।
+
+**`tactile`** — উষ্ণ অফ-হোয়াইট শিটে মোটা কালো আউটলাইনের চাঙ্ক ব্লক। হার্ড অফসেট শ্যাডো (blur নেই), সলিড উজ্জ্বল ফিল, চাপলে ব্লক নিচে ধাক্কা খায়। Ornament = বন্ধ (`display: none`) — আউটলাইনই যথেষ্ট চরিত্র। প্যাকেট বর্গাকার পার্সেল।

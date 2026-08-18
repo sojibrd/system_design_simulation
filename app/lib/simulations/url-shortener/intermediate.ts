@@ -15,6 +15,98 @@ export const intermediateConfig: PhaseConfig = {
     "Horizontal Scaling (Stateless App Servers)",
     "Cache Hit vs Cache Miss",
   ],
+  scaleEstimate: {
+    writeQps: "~১০ /sec",
+    readQps: "~১,০০০ /sec",
+    readWriteRatio: "১০০ : ১",
+    storage5y: "~৮০০ GB (১৫৮ কোটি লিংক × ৫০০ B)",
+    codeLength: "৭ অক্ষর → ৬২⁷ ≈ ৩.৫ ট্রিলিয়ন",
+  },
+  tradeOffs: [
+    {
+      question: "কোন caching কৌশল?",
+      options: [
+        {
+          name: "Cache-aside (Lazy loading)",
+          note: "অ্যাপ আগে ক্যাশ দেখে; না পেলে DB থেকে এনে ক্যাশে বসিয়ে দেয়। শুধু যেটা সত্যিই চাওয়া হয় সেটাই ক্যাশে ওঠে, কিন্তু প্রতিটি নতুন কোডের প্রথম ক্লিক ধীর।",
+        },
+        {
+          name: "Write-through",
+          note: "লেখার সময়েই ক্যাশে বসে যায়, তাই প্রথম ক্লিকও দ্রুত। কিন্তু যে লিংকে কেউ কখনো ক্লিক করবে না, সেটাও মেমোরি দখল করে থাকে।",
+        },
+        {
+          name: "Write-behind",
+          note: "আগে ক্যাশে, পরে ধীরে ধীরে DB-তে। সবচেয়ে দ্রুত write, কিন্তু ক্যাশ নোড মরে গেলে ডেটা হারানোর ঝুঁকি।",
+        },
+      ],
+      chosen: "Cache-aside (Lazy loading)",
+      why: "URL shortener-এর ট্রাফিক তীব্রভাবে অসম — মুষ্টিমেয় কিছু লিংকেই বেশিরভাগ ক্লিক পড়ে। Cache-aside স্বয়ংক্রিয়ভাবে শুধু সেই জনপ্রিয় লিংকগুলোকেই মেমোরিতে রাখে। এখানে shorten flow-এ যে write-through-ও করা হচ্ছে, সেটা এই কারণে যে নতুন লিংকে ক্লিক আসে প্রথম কয়েক ঘণ্টাতেই।",
+    },
+    {
+      question: "Cache miss হলে ঠিক কী ঘটে?",
+      options: [
+        {
+          name: "DB থেকে এনে ক্যাশ ভরে দেওয়া",
+          note: "একটি অতিরিক্ত round trip (~২০ms), তারপর সেই কোডের পরের প্রতিটি ক্লিক ক্যাশ থেকেই মিটবে।",
+        },
+        {
+          name: "সরাসরি DB, ক্যাশে না রাখা",
+          note: "ক্যাশ কখনো গরম হয় না — একই কোডে বারবার ক্লিক পড়লেও প্রতিবার DB-তে যেতে হয়।",
+        },
+      ],
+      chosen: "DB থেকে এনে ক্যাশ ভরে দেওয়া",
+      why: "এই ব্যাকফিল ধাপটাই cache-aside-কে কাজ করায়। এটা বাদ দিলে ক্যাশে শুধু সদ্য তৈরি লিংক থাকবে, আর পুরোনো কিন্তু জনপ্রিয় লিংকগুলো চিরকাল DB-তে আঘাত করতেই থাকবে। 'Redirect · Miss' flow-এ ধাপে ধাপে এটাই দেখানো হয়েছে।",
+    },
+    {
+      question: "Rate limiter কোন অ্যালগরিদমে চলবে?",
+      options: [
+        {
+          name: "Fixed window",
+          note: "গোনা সবচেয়ে সহজ, কিন্তু উইন্ডোর সীমানায় দ্বিগুণ ট্রাফিক ঢুকে পড়তে পারে।",
+        },
+        {
+          name: "Sliding window",
+          note: "সীমানার ফাঁকটা বন্ধ হয়, কিন্তু প্রতি ইউজারের টাইমস্ট্যাম্প রাখতে হয় — মেমোরি বেশি লাগে।",
+        },
+        {
+          name: "Token bucket",
+          note: "স্বাভাবিক গড় হার ধরে রেখেও হঠাৎ আসা burst সহ্য করে। বাস্তব ইউজারের আচরণের সবচেয়ে কাছাকাছি।",
+        },
+      ],
+      chosen: "Token bucket",
+      why: "আসল ইউজাররা থেমে থেমে গুচ্ছ গুচ্ছ রিকোয়েস্ট পাঠায় — একটা পেজে দশটা লিংক একসাথে তৈরি করা স্বাভাবিক, আক্রমণ নয়। Fixed window এমন ইউজারকে অকারণে আটকে দিত।",
+    },
+    {
+      question: "Rate limiter-এর হিসাব কোথায় থাকবে?",
+      options: [
+        {
+          name: "প্রতিটি সার্ভারের নিজের মেমোরিতে",
+          note: "দ্রুততম, কিন্তু ২টি সার্ভার থাকলে ইউজার কার্যত দ্বিগুণ কোটা পেয়ে যায় — লোড ব্যালেন্সার তাকে ঘুরিয়ে ফিরিয়ে দু'জায়গাতেই পাঠায়।",
+        },
+        {
+          name: "শেয়ার্ড Redis-এ",
+          note: "সব সার্ভার একই হিসাব দেখে, তাই কোটা সত্যিই কার্যকর হয়। বিনিময়ে প্রতিটি রিকোয়েস্টে একটা নেটওয়ার্ক hop যোগ হয়।",
+        },
+      ],
+      chosen: "শেয়ার্ড Redis-এ",
+      why: "সার্ভার একাধিক হওয়ার মুহূর্তেই in-memory কাউন্টার ভুল উত্তর দিতে শুরু করে। এখানে rate limiter-কে আলাদা কম্পোনেন্ট হিসেবে আঁকা হয়েছে ঠিক এই কারণেই — এটা অ্যাপ সার্ভারের ভেতরের কোনো ফাংশন নয়, একটি শেয়ার্ড state।",
+    },
+    {
+      question: "301 না 302?",
+      options: [
+        {
+          name: "301 Moved Permanently",
+          note: "ব্রাউজার ক্যাশ করে, তাই পরের ক্লিকগুলো সার্ভারে আসে না। ১,০০০ read/sec-এর অনেকটাই এতে বেঁচে যায়।",
+        },
+        {
+          name: "302 Found",
+          note: "প্রতিটি ক্লিক সার্ভারে আসে — গোনা যায়, কিন্তু read QPS-এর পুরো চাপ নিতে হয়।",
+        },
+      ],
+      chosen: "301 Moved Permanently",
+      why: "এই স্তরেও কোনো analytics পাইপলাইন নেই, তাই ক্লিক গোনার প্রয়োজন নেই — ব্রাউজার ক্যাশকে কাজে লাগানোই বুদ্ধিমানের। expert স্তরে Kafka আসার সাথে সাথেই এই সিদ্ধান্ত উল্টে যাবে, কারণ 301 পাঠিয়ে ক্লিক গোনা যায় না।",
+    },
+  ],
   nodes: [
     {
       id: "node-client",
@@ -533,6 +625,218 @@ export const intermediateConfig: PhaseConfig = {
             "node-client": "Redirected in 4.9ms!",
           },
           payloadSnippet: `Location: https://example.com/system-design-intermediate\nTotal latency: 4.9ms`,
+        },
+      ],
+    },
+    {
+      id: "redirect-miss",
+      name: "Redirect · Miss",
+      icon: "miss",
+      steps: [
+        {
+          id: "i-m1",
+          flowType: "redirect-miss",
+          stepNumber: 1,
+          title: "Client → Load Balancer (পুরোনো একটা লিংকে ক্লিক)",
+          whatHappens:
+            "এবার ইউজার এমন একটা লিংকে ক্লিক করলেন যেটা অনেক দিন কেউ খোলেনি। রিকোয়েস্ট লোড ব্যালেন্সারে পৌঁছালো।",
+          whyItMatters:
+            "রিকোয়েস্টটা দেখতে আগের মতোই — ক্যাশে আছে কি নেই, সেটা এখনো কেউ জানে না। পার্থক্য শুরু হবে তিন ধাপ পরে।",
+          analogy: "🚪 একই সদর দরজা, কিন্তু এবার খোঁজা জিনিসটা সহজে পাওয়া যাবে না।",
+          activeNodeIds: ["node-client", "node-lb"],
+          activeEdgeIds: ["edge-client-to-lb"],
+          edgeOverrides: {
+            "edge-client-to-lb": { label: "1. Incoming Request" },
+          },
+          nodeStatusMessages: {
+            "node-client": "GET /oLd7Zq",
+            "node-lb": "SSL Termination & Routing...",
+          },
+          payloadSnippet: `GET /oLd7Zq HTTP/1.1\nHost: sho.rt`,
+        },
+        {
+          id: "i-m2",
+          flowType: "redirect-miss",
+          stepNumber: 2,
+          title: "Load Balancer → App Server 1 (সার্ভার ১-এ ডেলিভারি)",
+          whatHappens:
+            "লোড ব্যালেন্সার এবার সার্ভার ১-কে বেছে নিলো।",
+          whyItMatters:
+            "কোন সার্ভার পেলো তাতে কিছু আসে যায় না — দুটোই stateless, দুটোরই একই ক্যাশ ও একই ডাটাবেজে হাত আছে।",
+          analogy: "👉 'কাউন্টার ১-এ যান।'",
+          activeNodeIds: ["node-lb", "node-server-1"],
+          activeEdgeIds: ["edge-lb-to-s1"],
+          edgeOverrides: {
+            "edge-lb-to-s1": { label: "2. Forward to Server 1" },
+          },
+          nodeStatusMessages: {
+            "node-lb": "Round-Robin -> Server 1",
+            "node-server-1": "Checking Redis Cache first...",
+          },
+          payloadSnippet: `upstream: app-server-1:8080 (active conns: 9)`,
+        },
+        {
+          id: "i-m3",
+          flowType: "redirect-miss",
+          stepNumber: 3,
+          title: "App Server 1 → Redis Cache (ক্যাশে খোঁজা)",
+          whatHappens:
+            "সার্ভার আগের মতোই প্রথমে Redis-এ 'oLd7Zq' কোডটি খুঁজলো।",
+          whyItMatters:
+            "Cache-aside-এর নিয়ম একটাই এবং তা কখনো বদলায় না: DB-তে যাওয়ার আগে সবসময় ক্যাশ দেখো। hit না miss, সেটা আগে থেকে জানার উপায় নেই।",
+          analogy: "🔍 আলমারি খোলার আগে টেবিলের খাতাটা দেখে নেওয়া।",
+          activeNodeIds: ["node-server-1", "node-cache"],
+          activeEdgeIds: ["edge-s1-to-cache"],
+          edgeOverrides: {
+            "edge-s1-to-cache": { label: "3. Cache Lookup", particleColor: "cache" },
+          },
+          nodeStatusMessages: {
+            "node-server-1": "Checking Redis first...",
+            "node-cache": "Searching key 'url:oLd7Zq'",
+          },
+          payloadSnippet: `REDIS.GET("url:oLd7Zq")`,
+        },
+        {
+          id: "i-m4",
+          flowType: "redirect-miss",
+          stepNumber: 4,
+          title: "Redis Cache → App Server 1 (CACHE MISS!)",
+          whatHappens:
+            "Redis উত্তর দিলো: 'nil' — এই কোডটা আমার কাছে নেই! কারণ অনেক দিন কেউ চায়নি বলে TTL শেষ হয়ে এটা মেমোরি থেকে মুছে গেছে।",
+          whyItMatters:
+            "ক্যাশ কোনো ডাটাবেজ নয়, এটা সীমিত মেমোরির একটা তাক। LRU নীতিতে কম ব্যবহৃত জিনিস আপনাআপনি ফেলে দেওয়া হয় — এটা ত্রুটি নয়, নকশারই অংশ। তাই miss পথটা সবসময় লেখা থাকতে হবে।",
+          analogy: "❌ খাতা খুলে দেখা গেলো পাতাটাই ছেঁড়া — এবার আলমারি খুলতেই হবে।",
+          activeNodeIds: ["node-cache", "node-server-1"],
+          activeEdgeIds: ["edge-s1-to-cache"],
+          edgeOverrides: {
+            "edge-s1-to-cache": {
+              label: "4. MISS (nil)",
+              isReverse: true,
+              particleColor: "error",
+            },
+          },
+          nodeStatusMessages: {
+            "node-cache": "CACHE MISS — key evicted (LRU)",
+            "node-server-1": "Not in RAM. Falling back to DB.",
+          },
+          payloadSnippet: `REDIS.GET("url:oLd7Zq")\n=> (nil)   [CACHE MISS]`,
+        },
+        {
+          id: "i-m5",
+          flowType: "redirect-miss",
+          stepNumber: 5,
+          title: "App Server 1 → Database (ডাটাবেজে সন্ধান)",
+          whatHappens:
+            "সার্ভার এবার ডাটাবেজে গেলো এবং short_code কলামের ইনডেক্স ধরে সারিটি খুঁজলো।",
+          whyItMatters:
+            "এই hop-টাই ক্যাশ থাকার আসল কারণ — এটি ক্যাশের চেয়ে প্রায় ২৫ গুণ ধীর। short_code-এ ইনডেক্স না থাকলে এটি হতো আরও হাজার গুণ ধীর।",
+          analogy: "🗄️ অবশেষে আলমারি খুলে ফাইল বের করা।",
+          activeNodeIds: ["node-server-1", "node-db"],
+          activeEdgeIds: ["edge-s1-to-db"],
+          edgeOverrides: {
+            "edge-s1-to-db": { label: "5. DB Query", particleColor: "read" },
+          },
+          nodeStatusMessages: {
+            "node-server-1": "Querying database...",
+            "node-db": "Index scan on short_code",
+          },
+          payloadSnippet: `SELECT url FROM urls WHERE code = 'oLd7Zq';\n-- using idx_urls_code (B-tree)`,
+        },
+        {
+          id: "i-m6",
+          flowType: "redirect-miss",
+          stepNumber: 6,
+          title: "Database → App Server 1 (আসল লিংক পাওয়া গেলো)",
+          whatHappens:
+            "ডাটাবেজ ২১ মিলিসেকেন্ড পর আসল ঠিকানাটি ফেরত দিলো — ক্যাশের ০.৮ মিলিসেকেন্ডের তুলনায় অনেক ধীর, কিন্তু পাওয়া গেছে।",
+          whyItMatters:
+            "সংখ্যা দুটো পাশাপাশি রাখুন: ০.৮ms বনাম ২১ms। এই পার্থক্যটাই ক্যাশ নামের বাড়তি কম্পোনেন্টটির পুরো যুক্তি।",
+          analogy: "📂 ফাইল পাওয়া গেলো, কিন্তু আলমারি হাতড়াতে সময় লেগে গেলো।",
+          activeNodeIds: ["node-db", "node-server-1"],
+          activeEdgeIds: ["edge-s1-to-db"],
+          edgeOverrides: {
+            "edge-s1-to-db": {
+              label: "6. Row Found (21ms)",
+              isReverse: true,
+              particleColor: "success",
+            },
+          },
+          nodeStatusMessages: {
+            "node-db": "1 row returned (21ms)",
+            "node-server-1": "Got it — 26x slower than cache",
+          },
+          payloadSnippet: `{\n  "url": "https://example.com/an-old-but-popular-post"\n}\nLatency: 21ms [DB READ]`,
+        },
+        {
+          id: "i-m7",
+          flowType: "redirect-miss",
+          stepNumber: 7,
+          title: "App Server 1 → Redis Cache (ক্যাশ ব্যাকফিল)",
+          whatHappens:
+            "ইউজারকে উত্তর পাঠানোর আগে সার্ভার লিংকটি আবার Redis-এ বসিয়ে দিলো, নতুন ২৪ ঘণ্টার TTL সহ।",
+          whyItMatters:
+            "এটাই cache-aside চক্রের শেষ কড়া। এই ধাপটা না থাকলে ক্যাশ কখনোই গরম হতো না — একই লিংকে দশ হাজার ক্লিক পড়লে দশ হাজার বারই DB-তে যেতে হতো। এখন পরের ক্লিক থেকেই এটি hit।",
+          analogy: "📌 ফাইলটা আলমারিতে ফেরত রাখার আগে টেবিলের খাতায় টুকে রাখা।",
+          activeNodeIds: ["node-server-1", "node-cache"],
+          activeEdgeIds: ["edge-s1-to-cache"],
+          edgeOverrides: {
+            "edge-s1-to-cache": { label: "7. Backfill Cache", particleColor: "cache" },
+          },
+          nodeStatusMessages: {
+            "node-server-1": "Repopulating cache...",
+            "node-cache": "SET 'url:oLd7Zq' -> TTL 24h",
+          },
+          payloadSnippet: `REDIS.SETEX("url:oLd7Zq", 86400, "https://...");\n// পরের ক্লিক থেকে এটি CACHE HIT`,
+        },
+        {
+          id: "i-m8",
+          flowType: "redirect-miss",
+          stepNumber: 8,
+          title: "App Server 1 → Load Balancer (301 রেসপন্স ফেরত)",
+          whatHappens:
+            "সার্ভার HTTP 301 রেসপন্স তৈরি করে লোড ব্যালেন্সারে পাঠিয়ে দিলো।",
+          whyItMatters:
+            "ইউজারের দিক থেকে উত্তরটা hit-এর ক্ষেত্রে যা হতো ঠিক তা-ই — শুধু পৌঁছাতে সময় লাগলো বেশি। ধীর পথ মানে ভিন্ন উত্তর নয়।",
+          analogy: "📤 একই চিঠি, শুধু লিখতে সময় বেশি লাগলো।",
+          activeNodeIds: ["node-server-1", "node-lb"],
+          activeEdgeIds: ["edge-lb-to-s1"],
+          edgeOverrides: {
+            "edge-lb-to-s1": {
+              label: "8. 301 Redirect Response",
+              isReverse: true,
+              particleColor: "success",
+            },
+          },
+          nodeStatusMessages: {
+            "node-server-1": "301 Moved Permanently",
+            "node-lb": "Receiving response from Server 1...",
+          },
+          payloadSnippet: `HTTP/1.1 301 Moved Permanently\nLocation: https://example.com/an-old-but-popular-post`,
+        },
+        {
+          id: "i-m9",
+          flowType: "redirect-miss",
+          stepNumber: 9,
+          title: "Load Balancer → Client (রিডাইরেক্ট, তবে ধীরে)",
+          whatHappens:
+            "ইউজার আসল সাইটে পৌঁছে গেলেন — কিন্তু ২৬ মিলিসেকেন্ডে, hit-এর ৫ মিলিসেকেন্ডের বদলে।",
+          whyItMatters:
+            "৯০% ক্লিক hit হলে গড় লেটেন্সি ৭ms-এর কাছাকাছি থাকে। কিন্তু hit-রেট নেমে ৫০% হলে গড় দাঁড়ায় ১৩ms — তাই cache hit ratio কেবল একটা মেট্রিক নয়, এটাই সিস্টেমের স্বাস্থ্যের প্রধান সূচক।",
+          analogy: "🐢 গন্তব্য একই, শুধু রাস্তাটা লম্বা ছিল।",
+          activeNodeIds: ["node-lb", "node-client"],
+          activeEdgeIds: ["edge-client-to-lb"],
+          edgeOverrides: {
+            "edge-client-to-lb": {
+              label: "9. Redirecting (26ms)",
+              isReverse: true,
+              particleColor: "success",
+            },
+          },
+          nodeStatusMessages: {
+            "node-lb": "Delivering 301 to Client",
+            "node-client": "Redirected in 26ms (cache miss)",
+          },
+          payloadSnippet: `Location: https://example.com/an-old-but-popular-post\nTotal latency: 26ms  (vs 4.9ms on a cache hit)`,
         },
       ],
     },

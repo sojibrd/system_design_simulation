@@ -57,17 +57,17 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
   if (!currentStep) {
     return (
       <Panel className="flex flex-col h-full items-center justify-center p-6 text-center gap-4">
-        <div className="w-14 h-14 rounded-box border border-bezel-strong bg-well shadow-well flex items-center justify-center text-lamp">
+        <div className="surface-well t-accent w-14 h-14 flex items-center justify-center">
           <Play className="w-6 h-6" />
         </div>
         <div>
-          <h3 className="text-sm font-bold text-readout mb-1.5">সিমুলেশন শুরু করুন</h3>
-          <p className="text-xs text-readout-soft leading-relaxed max-w-[220px] mx-auto">
-            নিচের <strong className="text-readout">Simulate</strong> বাটনে ক্লিক করুন এবং দেখুন
+          <h3 className="t-title text-sm mb-1.5">সিমুলেশন শুরু করুন</h3>
+          <p className="t-body text-xs max-w-[220px] mx-auto">
+            নিচের <strong className="t-strong">Simulate</strong> বাটনে ক্লিক করুন এবং দেখুন
             ডাটা কীভাবে প্রবাহিত হয়।
           </p>
         </div>
-        <div className="flex items-center gap-2 text-[11px] text-readout-muted">
+        <div className="t-caption flex items-center gap-2">
           <Badge>Shorten</Badge>
           <span>বা</span>
           <Badge>Redirect</Badge>
@@ -80,9 +80,9 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
   return (
     <Panel className="flex flex-col h-full p-4 md:p-5 overflow-hidden">
       {/* Title block of the note sheet */}
-      <div className="flex items-center justify-between gap-2 pb-2 border-b border-bezel-strong">
+      <div className="flex items-center justify-between gap-2 pb-2 seam-b-heavy">
         <div className="flex items-center gap-2 min-w-0">
-          <span className="font-mono text-xs font-bold text-readout">
+          <span className="t-mono t-strong text-xs">
             STEP {stepNo(currentStepIndex)} / {String(totalSteps).padStart(2, "0")}
           </span>
           <Badge tone="accent">
@@ -93,7 +93,7 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
         <button
           type="button"
           onClick={() => setShowAllSteps((prev) => !prev)}
-          className="font-mono text-[10px] uppercase tracking-[0.12em] text-readout-muted hover:text-readout flex items-center gap-1 transition-colors px-1.5 py-1 rounded-tick hover:bg-panel-hi"
+          className="row t-label flex items-center gap-1 px-1.5 py-1"
           title="সব ধাপের তালিকা দেখুন"
         >
           <span>Log ({totalSteps})</span>
@@ -103,7 +103,7 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
 
       {/* Index of every step on the sheet */}
       {showAllSteps && (
-        <div className="my-2 p-1.5 bg-well rounded-box border border-bezel max-h-48 overflow-y-auto">
+        <div className="surface-well my-2 p-1.5 max-h-48 overflow-y-auto">
           {steps.map((step, idx) => {
             const isCurrent = idx === currentStepIndex;
             const isCompleted = idx < currentStepIndex;
@@ -116,18 +116,13 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
                   onSelectStep(idx);
                   setShowAllSteps(false);
                 }}
-                className={`w-full text-left px-2 py-1.5 rounded-tick text-xs flex items-center gap-2 transition-colors ${
-                  isCurrent
-                    ? "bg-lamp text-chassis font-semibold"
-                    : isCompleted
-                    ? "text-readout-soft hover:bg-panel-hi"
-                    : "text-readout-muted hover:bg-panel-hi"
-                }`}
+                aria-current={isCurrent}
+                className="row w-full text-left px-2 py-1.5 text-xs flex items-center gap-2"
               >
                 {isCompleted ? (
-                  <CheckCircle2 className="w-3.5 h-3.5 text-lamp-green shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--t-ok)" }} />
                 ) : (
-                  <span className="font-mono text-[10px] w-3.5 shrink-0">{stepNo(idx)}</span>
+                  <span className="t-mono text-[10px] w-3.5 shrink-0">{stepNo(idx)}</span>
                 )}
                 <span className="truncate flex-1">{step.title}</span>
               </button>
@@ -138,7 +133,7 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
 
       {/* Body of the note */}
       <div ref={bodyRef} className="flex-1 overflow-y-auto py-3 space-y-3 pr-1">
-        <h3 className="text-sm md:text-base font-bold text-readout leading-snug tracking-tight">
+        <h3 className="t-title text-sm md:text-base leading-snug">
           {currentStep.title}
         </h3>
 
@@ -160,25 +155,25 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
           label="কেন এভাবে / Technical depth"
           icon={<HelpCircle className="w-3.5 h-3.5" />}
         >
-          <span className="text-readout-muted">{currentStep.whyItMatters}</span>
+          <span className="t-muted">{currentStep.whyItMatters}</span>
         </Callout>
 
         {currentStep.payloadSnippet && (
-          <div className="rounded-box border border-bezel-strong overflow-hidden">
+          <div className="surface-well overflow-hidden">
             <button
               type="button"
               onClick={() => setShowPayload((prev) => !prev)}
-              className="w-full px-2.5 py-1.5 bg-panel-hi border-b border-bezel-strong flex items-center justify-between text-readout-muted hover:text-readout transition-colors"
+              className="row w-full px-2.5 py-1.5 seam-b flex items-center justify-between"
             >
-              <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.12em]">
+              <span className="t-label flex items-center gap-1.5">
                 <Code2 className="w-3.5 h-3.5" />
                 Request / Query payload
               </span>
-              <span className="font-mono text-[10px]">{showPayload ? "▲" : "▼"}</span>
+              <span className="t-mono text-[10px]">{showPayload ? "▲" : "▼"}</span>
             </button>
 
             {showPayload && (
-              <pre className="p-3 text-[11px] font-mono text-lamp-green overflow-x-auto leading-relaxed bg-well shadow-well">
+              <pre className="t-mono p-3 text-[11px] overflow-x-auto leading-relaxed" style={{ color: "var(--t-ok)" }}>
                 <code>{currentStep.payloadSnippet}</code>
               </pre>
             )}
@@ -187,19 +182,17 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
       </div>
 
       {/* Progress ruler at the bottom */}
-      <div className="pt-2 border-t border-bezel flex flex-wrap items-end justify-center gap-1">
+      <div className="pt-2 seam-t flex flex-wrap items-end justify-center gap-1">
         {steps.map((_, idx) => (
           <button
             key={idx}
             type="button"
             onClick={() => onSelectStep(idx)}
-            className={`w-2 transition-all duration-200 ease-instrument ${
-              idx === currentStepIndex
-                ? `h-4 bg-lamp ${isFinished ? "" : "tick-sweep"}`
-                : idx < currentStepIndex
-                ? "h-3 bg-lamp-green"
-                : "h-1.5 bg-bezel-strong"
-            }`}
+            data-state={
+              idx === currentStepIndex ? "current" : idx < currentStepIndex ? "done" : "todo"
+            }
+            data-live={!isFinished}
+            className="progress-mark"
             title={`Go to Step ${idx + 1}`}
           />
         ))}

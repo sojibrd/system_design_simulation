@@ -46,14 +46,6 @@ interface ControlsBarProps {
   onTogglePanel: () => void;
 }
 
-/** A segmented switch drawn as two ruled cells, not a pill. */
-const segment = (selected: boolean) =>
-  `flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-colors duration-150 ${
-    selected
-      ? "bg-lamp text-chassis"
-      : "text-readout-muted hover:text-readout hover:bg-panel-hi"
-  }`;
-
 export const ControlsBar: React.FC<ControlsBarProps> = ({
   isPlaying,
   speed,
@@ -77,7 +69,7 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
         {/* 1. Flow selector — built from what the phase declares, so a tier can
                offer a cache-miss or failover scenario without touching this file */}
         <div className="flex-1 flex items-center justify-start">
-          <div className="flex items-center rounded-box border border-bezel-strong overflow-hidden divide-x divide-bezel-strong">
+          <div className="segment-group">
             {availableFlows.map((flow) => {
               const Icon = flowIcons[flow.icon];
               return (
@@ -85,7 +77,8 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
                   key={flow.id}
                   type="button"
                   onClick={() => onFlowChange(flow.id)}
-                  className={segment(flowType === flow.id)}
+                  aria-pressed={flowType === flow.id}
+                  className="segment text-xs"
                 >
                   <Icon className="w-3.5 h-3.5" />
                   <span>{flow.name}</span>
@@ -134,9 +127,9 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
 
         {/* 3. Speed & panel toggle — mirrors the left side's flex weight */}
         <div className="flex-1 flex items-center justify-end gap-2">
-          <div className="flex items-center gap-1 rounded-box border border-bezel-strong px-2 py-1">
-            <Gauge className="w-3.5 h-3.5 text-readout-faint shrink-0" />
-            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-readout-faint hidden sm:inline mr-1">
+          <div className="segment-group px-2 py-1 gap-1">
+            <Gauge className="t-muted w-3.5 h-3.5 shrink-0" />
+            <span className="t-label hidden sm:inline mr-1">
               Speed
             </span>
 
@@ -145,11 +138,8 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
                 key={val}
                 type="button"
                 onClick={() => onSpeedChange(val)}
-                className={`px-1.5 py-0.5 rounded-tick font-mono text-[11px] transition-colors ${
-                  speed === val
-                    ? "bg-lamp text-chassis font-bold"
-                    : "text-readout-muted hover:text-readout hover:bg-panel-hi"
-                }`}
+                aria-pressed={speed === val}
+                className="segment t-mono px-1.5 py-0.5 text-[11px]"
               >
                 {val}x
               </button>

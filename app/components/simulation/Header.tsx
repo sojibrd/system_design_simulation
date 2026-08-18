@@ -9,9 +9,9 @@ const HELP_STEPS: { title: string; body: React.ReactNode }[] = [
     title: "Phase নির্বাচন করুন",
     body: (
       <>
-        উপরে তিনটি ফেজ আছে — <strong className="text-readout">Beginner</strong> (৩টি
-        কম্পোনেন্ট), <strong className="text-readout">Intermediate</strong> (৭টি কম্পোনেন্ট),
-        এবং <strong className="text-readout">Expert</strong> (১২টি কম্পোনেন্ট)।
+        উপরে তিনটি ফেজ আছে — <strong className="t-strong">Beginner</strong> (৩টি
+        কম্পোনেন্ট), <strong className="t-strong">Intermediate</strong> (৭টি কম্পোনেন্ট),
+        এবং <strong className="t-strong">Expert</strong> (১২টি কম্পোনেন্ট)।
       </>
     ),
   },
@@ -19,7 +19,7 @@ const HELP_STEPS: { title: string; body: React.ReactNode }[] = [
     title: "Simulate বাটনে চাপ দিন",
     body: (
       <>
-        নিচের <strong className="text-readout">▶ Simulate</strong> বাটনে ক্লিক করলে ডাটা
+        নিচের <strong className="t-strong">▶ Simulate</strong> বাটনে ক্লিক করলে ডাটা
         কীভাবে একটি সার্ভার থেকে অন্যটিতে যায় তা অ্যানিমেশন আকারে দেখতে পাবেন।
       </>
     ),
@@ -50,28 +50,28 @@ export const Header: React.FC = () => {
   return (
     <>
       {/* The rack header plate: ident on the left, the unit under test on the right. */}
-      <header className="w-full bg-panel border-b border-bezel-strong px-4 py-2 shrink-0 z-40">
+      <header className="surface-panel w-full seam-b-heavy px-4 py-2 shrink-0 z-40">
         <div className="w-full flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-box border border-bezel-strong bg-well shadow-well flex items-center justify-center text-lamp">
+            <div className="surface-well t-accent w-8 h-8 flex items-center justify-center">
               <Cpu className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-sm md:text-base font-bold text-readout tracking-tight">
+                <h1 className="t-title text-sm md:text-base">
                   System Design Simulator
                 </h1>
                 <Badge tone="accent">INTERACTIVE</Badge>
               </div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-readout-muted">
+              <p className="t-label">
                 Rack 01 / architecture walkthrough
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-box border border-bezel-strong bg-chassis text-xs text-readout font-medium">
-              <Link2 className="w-3.5 h-3.5 text-lamp" />
+            <div className="chip hidden sm:flex px-2.5 py-1 text-xs">
+              <Link2 className="w-3.5 h-3.5 t-accent" />
               <span>URL Shortener (লিংক শর্টনার)</span>
             </div>
 
@@ -87,14 +87,14 @@ export const Header: React.FC = () => {
       </header>
 
       {showHelp && (
-        <div className="fixed inset-0 z-50 bg-chassis/80 flex items-center justify-center p-4">
-          <Panel className="max-w-lg w-full p-5 md:p-6 shadow-raised">
-            <div className="flex items-center justify-between pb-2 mb-4 border-b border-bezel-strong">
+        <div className="overlay fixed inset-0 z-50 flex items-center justify-center p-4">
+          <Panel className="max-w-lg w-full p-5 md:p-6">
+            <div className="flex items-center justify-between pb-2 mb-4 seam-b-heavy">
               <div className="min-w-0">
-                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-readout-muted">
+                <span className="t-label">
                   Operating the console
                 </span>
-                <h3 className="text-base font-bold text-readout">
+                <h3 className="t-title text-base">
                   কীভাবে এই সিমুলেটর ব্যবহার করবেন?
                 </h3>
               </div>
@@ -106,18 +106,18 @@ export const Header: React.FC = () => {
             <ol className="space-y-3">
               {HELP_STEPS.map((step, i) => (
                 <li key={step.title} className="flex items-start gap-3">
-                  <span className="shrink-0 w-6 h-6 rounded-tick border border-bezel-strong bg-well flex items-center justify-center font-mono text-[11px] font-bold text-readout">
+                  <span className="surface-well t-mono t-strong shrink-0 w-6 h-6 flex items-center justify-center text-[11px]">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-readout mb-0.5">{step.title}</p>
-                    <p className="text-xs text-readout-soft leading-relaxed">{step.body}</p>
+                    <p className="t-title text-xs mb-0.5">{step.title}</p>
+                    <p className="t-body text-xs">{step.body}</p>
                   </div>
                 </li>
               ))}
             </ol>
 
-            <div className="pt-4 mt-4 border-t border-bezel flex justify-end">
+            <div className="pt-4 mt-4 seam-t flex justify-end">
               <Button variant="primary" onClick={() => setShowHelp(false)}>
                 বুঝেছি, শুরু করি
               </Button>

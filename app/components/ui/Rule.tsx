@@ -1,36 +1,30 @@
 import React from "react";
 
-/**
- * A seam between panels. `heavy` is the machined groove that separates a
- * faceplate title strip from its controls.
- */
+/** A divider between two regions of a panel. */
 export const Rule: React.FC<{
   weight?: "hair" | "heavy";
   className?: string;
 }> = ({ weight = "hair", className = "" }) => (
-  <div
-    className={`w-full h-px ${
-      weight === "heavy" ? "bg-bezel-strong" : "bg-bezel"
-    } ${className}`}
-  />
+  <div className={`${weight === "heavy" ? "seam-b-heavy" : "seam"} ${className}`} />
 );
 
+const CORNERS = ["tl", "tr", "bl", "br"] as const;
+
 /**
- * The four screws holding a unit faceplate to the rack. Purely decorative —
- * it is what makes a plain rectangle read as mounted hardware.
+ * The decoration in a unit corners. Deliberately meaningless in itself — this
+ * is the slot a theme uses to give a unit its character: registration ticks on
+ * a drawing, screws on a rack panel, or nothing at all. The DOM never changes;
+ * only `--t-ornament-*` does.
  */
-export const BezelScrews: React.FC = () => (
+export const Ornament: React.FC<{ color?: string }> = ({ color }) => (
   <>
-    {[
-      "left-1.5 top-1.5",
-      "right-1.5 top-1.5",
-      "left-1.5 bottom-1.5",
-      "right-1.5 bottom-1.5",
-    ].map((pos) => (
+    {CORNERS.map((corner) => (
       <span
-        key={pos}
+        key={corner}
         aria-hidden
-        className={`pointer-events-none absolute w-1 h-1 rounded-full bg-chassis ring-1 ring-bezel-hi/70 ${pos}`}
+        data-corner={corner}
+        className="ornament-mark"
+        style={color ? ({ "--t-ornament-color": color } as React.CSSProperties) : undefined}
       />
     ))}
   </>

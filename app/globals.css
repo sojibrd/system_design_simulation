@@ -2,158 +2,565 @@
 @import "@xyflow/react/dist/style.css";
 
 /* ============================================================================
-   CONTROL ROOM DESIGN SYSTEM
+   ACTIVE THEME — this is the one line to change to re-skin the whole app.
+   Every visual value lives in the imported file; nothing below it is
+   theme-specific.
+   ========================================================================= */
+@import "./themes/control-room.css";
 
-   The app reads as an instrument panel in a control room: a warm charcoal
-   chassis, moulded panels behind chunky bezels, engraved labels, and signal
-   lamps that light when something is actually happening.
+/* ============================================================================
+   THEME CONTRACT
 
-   Rules that keep it from drifting back into generic dark-dashboard:
-   - Surfaces are WARM charcoal (brown-black), never blue-grey slate/zinc.
-   - Depth is a physical bezel — an inset top highlight and a bottom shadow.
-     Never a blurred drop shadow floating in space.
-   - Glow belongs to LAMPS ONLY (a lit lamp really does glow). Panels,
-     buttons, borders and text never glow.
-   - No gradients as decoration. A gradient may only model a lit surface.
+   Components describe WHAT a thing is (a unit, a label, an active step) and
+   never how it looks. Everything below reads `--t-*` variables that the theme
+   file supplies. A theme may change any value here; it may never require a
+   component to change.
+
+   Division of labour:
+   - Tailwind utilities  -> layout only (flex, grid, gap, sizing, truncate)
+   - role classes below  -> every visual decision
    ========================================================================= */
 
 @theme {
-  /* --- Type: engraved panel lettering ---------------------------------- */
-  --font-sans: var(--font-barlow), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains), ui-monospace, "SFMono-Regular", monospace;
-
-  /* --- Chassis & panels: warm charcoal, never blue-grey ----------------- */
-  --color-chassis: #17140f;      /* the rack the panels are mounted in */
-  --color-panel: #211d18;        /* a panel face */
-  --color-panel-raised: #2b251f; /* a control group sitting proud of the face */
-  --color-panel-hi: #363029;     /* hover / pressed */
-  --color-well: #100e0b;         /* recessed readout screens, code wells */
-
-  /* --- Bezels: the machined edge around every panel --------------------- */
-  --color-bezel: #3a322a;
-  --color-bezel-strong: #4d4238;
-  --color-bezel-hi: #5f5245;
-
-  /* --- Readout: engraved / backlit text --------------------------------- */
-  --color-readout: #f3ece0;      /* primary readout, headings */
-  --color-readout-soft: #c9bda9; /* body text */
-  --color-readout-muted: #8f8272; /* engraved labels, units */
-  --color-readout-faint: #625849; /* off / disabled */
-
-  /* --- Lamps: the only things allowed to glow --------------------------- */
-  --color-lamp: #ffb020;         /* primary — "running" */
-  --color-lamp-dim: #7d5a17;     /* the same lamp, unlit */
-  --color-lamp-soft: #2e2311;    /* backlit wash behind lamp content */
-
-  --color-lamp-green: #52c07a;
-  --color-lamp-green-soft: #14261a;
-  --color-lamp-red: #e05646;
-  --color-lamp-red-soft: #2c1613;
-
-  /* --- Category lamps — one per architecture component category --------- */
-  --color-cat-client: #62a0dd;
-  --color-cat-compute: #a97ad6;
-  --color-cat-storage: #52c07a;
-  --color-cat-network: #45b0ad;
-  --color-cat-security: #ffb020;
-  --color-cat-queue: #d76aa0;
-  --color-cat-analytics: #e8873a;
-
-  /* --- Signal lamps — semantic flow / packet colours -------------------- */
-  --color-signal-request: #62a0dd;
-  --color-signal-write: #a97ad6;
-  --color-signal-read: #45b0ad;
-  --color-signal-success: #52c07a;
-  --color-signal-cache: #ffb020;
-  --color-signal-event: #d76aa0;
-  --color-signal-error: #e05646;
-  --color-signal-meta: #8f8272;
-
-  /* --- Shape: moulded plastic, softly machined -------------------------- */
-  --radius-panel: 6px;
-  --radius-box: 4px;
-  --radius-tick: 2px;
-
-  /* --- Depth: a real bezel, not a floating card ------------------------- */
-  --shadow-bezel:
-    inset 0 1px 0 0 rgba(255, 236, 205, 0.07),
-    inset 0 -1px 0 0 rgba(0, 0, 0, 0.55),
-    0 1px 2px 0 rgba(0, 0, 0, 0.5);
-  --shadow-raised:
-    inset 0 1px 0 0 rgba(255, 236, 205, 0.1),
-    0 6px 18px -8px rgba(0, 0, 0, 0.85);
-  --shadow-well: inset 0 2px 7px 0 rgba(0, 0, 0, 0.75);
-  /* A physical key: it stands off the panel until you press it. */
-  --shadow-key:
-    inset 0 1px 0 0 rgba(255, 236, 205, 0.18),
-    0 2px 0 0 rgba(0, 0, 0, 0.7);
-
-  /* --- Motion: a relay switching, not a bounce -------------------------- */
-  --ease-instrument: cubic-bezier(0.3, 0.7, 0.2, 1);
+  /* Font families are loaded once in layout.tsx and never change per theme;
+     a theme only chooses which role gets which family. */
+  --font-sans: var(--t-font-sans);
+  --font-mono: var(--t-font-mono);
 }
 
+/* --- Root -------------------------------------------------------------- */
+
 body {
-  background-color: var(--color-chassis);
-  color: var(--color-readout-soft);
+  background-color: var(--t-app-bg);
+  background-image: var(--t-app-bg-image, none);
+  background-size: var(--t-app-bg-size, auto);
+  color: var(--t-text-body);
+  font-family: var(--t-font-sans);
   overflow-x: hidden;
 }
 
+::selection {
+  background-color: var(--t-select-bg);
+  color: var(--t-select-fg);
+}
+
+@layer components {
+  /* --- Surfaces -------------------------------------------------------- */
+
+  .surface-app {
+    background-color: var(--t-app-bg);
+    color: var(--t-text-body);
+  }
+
+  .surface-panel {
+    background-color: var(--t-panel-bg);
+    border: var(--t-panel-border-width) solid var(--t-panel-border);
+    border-radius: var(--t-panel-radius);
+    box-shadow: var(--t-panel-shadow);
+  }
+
+  .surface-raised {
+    background-color: var(--t-raised-bg);
+    border: var(--t-raised-border-width) solid var(--t-raised-border);
+    border-radius: var(--t-raised-radius);
+    box-shadow: var(--t-raised-shadow);
+  }
+
+  .surface-well {
+    background-color: var(--t-well-bg);
+    border: var(--t-well-border-width) solid var(--t-well-border);
+    border-radius: var(--t-well-radius);
+    box-shadow: var(--t-well-shadow);
+  }
+
+  /* --- Text roles ------------------------------------------------------ */
+
+  .t-title {
+    color: var(--t-text-title);
+    font-family: var(--t-title-family);
+    font-weight: var(--t-title-weight);
+    letter-spacing: var(--t-title-tracking);
+    text-transform: var(--t-title-transform);
+  }
+
+  /* The engraved / annotated micro-label used all over the app. */
+  .t-label {
+    color: var(--t-text-label);
+    font-family: var(--t-label-family);
+    font-size: var(--t-label-size);
+    font-weight: var(--t-label-weight);
+    letter-spacing: var(--t-label-tracking);
+    text-transform: var(--t-label-transform);
+  }
+
+  .t-body {
+    color: var(--t-text-body);
+    line-height: 1.65;
+  }
+
+  .t-caption {
+    color: var(--t-text-muted);
+    font-size: 0.6875rem;
+    line-height: 1.5;
+  }
+
+  .t-mono {
+    color: var(--t-text-body);
+    font-family: var(--t-font-mono);
+  }
+
+  .t-strong {
+    color: var(--t-text-title);
+    font-weight: 700;
+  }
+
+  .t-accent {
+    color: var(--t-accent);
+  }
+
+  .t-muted {
+    color: var(--t-text-muted);
+  }
+
+  /* --- Seams ----------------------------------------------------------- */
+
+  .seam {
+    background-color: var(--t-seam);
+    height: var(--t-seam-width);
+    width: 100%;
+  }
+
+  .seam-b {
+    border-bottom: var(--t-seam-width) solid var(--t-seam);
+  }
+
+  .seam-b-heavy {
+    border-bottom: var(--t-seam-heavy-width) solid var(--t-seam-heavy);
+  }
+
+  .seam-t {
+    border-top: var(--t-seam-width) solid var(--t-seam);
+  }
+
+  /* --- Controls -------------------------------------------------------- */
+
+  .control {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    border-style: solid;
+    border-width: var(--t-control-border-width);
+    border-radius: var(--t-control-radius);
+    font-family: var(--t-control-family);
+    font-weight: var(--t-control-weight);
+    letter-spacing: var(--t-control-tracking);
+    text-transform: var(--t-control-transform);
+    transition: all 120ms var(--t-ease);
+    user-select: none;
+    background-color: var(--t-control-bg);
+    border-color: var(--t-control-border);
+    color: var(--t-control-fg);
+    box-shadow: var(--t-control-shadow);
+  }
+
+  .control:hover:not(:disabled) {
+    background-color: var(--t-control-bg-hover);
+    border-color: var(--t-control-border-hover);
+    color: var(--t-control-fg-hover);
+  }
+
+  .control:active:not(:disabled) {
+    transform: var(--t-control-press-transform);
+    box-shadow: var(--t-control-press-shadow);
+  }
+
+  .control:disabled {
+    opacity: var(--t-disabled-opacity);
+    pointer-events: none;
+    box-shadow: none;
+  }
+
+  .control:focus-visible {
+    outline: 2px solid var(--t-accent);
+    outline-offset: 2px;
+  }
+
+  .control--primary {
+    background-color: var(--t-primary-bg);
+    border-color: var(--t-primary-border);
+    color: var(--t-primary-fg);
+    box-shadow: var(--t-primary-shadow);
+  }
+
+  .control--primary:hover:not(:disabled) {
+    background-color: var(--t-primary-bg-hover);
+    border-color: var(--t-primary-border);
+    color: var(--t-primary-fg);
+  }
+
+  .control--alert {
+    background-color: var(--t-alert-bg);
+    border-color: var(--t-alert-border);
+    color: var(--t-alert-fg);
+    box-shadow: var(--t-primary-shadow);
+  }
+
+  .control--alert:hover:not(:disabled) {
+    background-color: var(--t-alert-bg-hover);
+    color: var(--t-alert-fg);
+  }
+
+  .control--quiet {
+    background-color: transparent;
+    border-color: transparent;
+    color: var(--t-text-muted);
+    box-shadow: none;
+  }
+
+  .control--quiet:hover:not(:disabled) {
+    background-color: var(--t-hover-fill);
+    border-color: transparent;
+    color: var(--t-text-title);
+  }
+
+  .control--quiet:active:not(:disabled) {
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* A two-cell switch (Shorten / Redirect) and the speed steps. */
+  .segment-group {
+    display: flex;
+    align-items: center;
+    border: var(--t-control-border-width) solid var(--t-control-border);
+    border-radius: var(--t-control-radius);
+    overflow: hidden;
+  }
+
+  .segment {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    font-family: var(--t-control-family);
+    font-weight: var(--t-control-weight);
+    letter-spacing: var(--t-control-tracking);
+    text-transform: var(--t-control-transform);
+    color: var(--t-text-muted);
+    transition: all 120ms var(--t-ease);
+  }
+
+  .segment + .segment {
+    border-left: var(--t-control-border-width) solid var(--t-control-border);
+  }
+
+  .segment:hover {
+    background-color: var(--t-hover-fill);
+    color: var(--t-text-title);
+  }
+
+  .segment[aria-pressed="true"] {
+    background-color: var(--t-selected-bg);
+    color: var(--t-selected-fg);
+  }
+
+  /* --- Chips ----------------------------------------------------------- */
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.375rem;
+    border: var(--t-chip-border-width) solid var(--t-chip-border);
+    border-radius: var(--t-chip-radius);
+    background-color: var(--t-chip-bg);
+    color: var(--t-chip-fg);
+    font-family: var(--t-label-family);
+    font-size: var(--t-label-size);
+    letter-spacing: var(--t-label-tracking);
+    text-transform: var(--t-label-transform);
+  }
+
+  .chip--accent {
+    border-color: var(--t-chip-accent-border);
+    background-color: var(--t-chip-accent-bg);
+    color: var(--t-chip-accent-fg);
+  }
+
+  .chip--alert {
+    border-color: var(--t-alert-bg);
+    background-color: var(--t-alert-soft);
+    color: var(--t-alert-bg);
+  }
+
+  .chip--ok {
+    border-color: var(--t-ok);
+    background-color: var(--t-ok-soft);
+    color: var(--t-ok);
+  }
+
+  /* --- Callout: a labelled block of explanation ------------------------ */
+
+  .callout {
+    border: var(--t-callout-border-width) solid var(--t-callout-border);
+    border-left-width: var(--t-callout-edge-width);
+    border-left-color: var(--t-callout-edge);
+    border-radius: var(--t-callout-radius);
+    background-color: var(--t-callout-bg);
+    box-shadow: var(--t-callout-shadow);
+    padding: 0.75rem;
+  }
+
+  .callout--accent {
+    border-color: var(--t-chip-accent-border);
+    border-left-color: var(--t-accent);
+    background-color: var(--t-chip-accent-bg);
+  }
+
+  .callout--accent .t-label {
+    color: var(--t-accent);
+  }
+
+  .callout--alert {
+    border-color: var(--t-alert-bg);
+    border-left-color: var(--t-alert-bg);
+    background-color: var(--t-alert-soft);
+  }
+
+  .callout--alert .t-label {
+    color: var(--t-alert-bg);
+  }
+
+  /* --- Unit: one architecture component on the canvas ------------------ */
+
+  .unit {
+    background-color: var(--t-unit-bg);
+    border: var(--t-unit-border-width) solid var(--t-unit-border);
+    border-radius: var(--t-unit-radius);
+    box-shadow: var(--t-unit-shadow);
+    transition: border-color 240ms var(--t-ease), box-shadow 240ms var(--t-ease);
+  }
+
+  .unit[data-selected="true"] {
+    border-color: var(--t-unit-selected-border);
+  }
+
+  .unit[data-active="true"] {
+    background-color: var(--t-unit-active-bg);
+    border-color: var(--t-unit-active-border);
+    border-width: var(--t-unit-active-border-width);
+    box-shadow: var(--t-unit-active-shadow);
+  }
+
+  .unit[data-active="true"][data-animated="true"] {
+    animation: var(--t-unit-active-animation);
+  }
+
+  /* --- Ornament: the decoration that gives a unit its character -------- */
+
+  .ornament-mark {
+    position: absolute;
+    pointer-events: none;
+    display: var(--t-ornament-display);
+    width: var(--t-ornament-size);
+    height: var(--t-ornament-size);
+    border-radius: var(--t-ornament-radius);
+    background-color: var(--t-ornament-fill);
+    box-shadow: var(--t-ornament-shadow);
+    border-style: solid;
+    border-color: var(--t-ornament-color);
+    border-width: 0;
+  }
+
+  .ornament-mark[data-corner="tl"] {
+    left: var(--t-ornament-inset);
+    top: var(--t-ornament-inset);
+    border-left-width: var(--t-ornament-stroke);
+    border-top-width: var(--t-ornament-stroke);
+  }
+
+  .ornament-mark[data-corner="tr"] {
+    right: var(--t-ornament-inset);
+    top: var(--t-ornament-inset);
+    border-right-width: var(--t-ornament-stroke);
+    border-top-width: var(--t-ornament-stroke);
+  }
+
+  .ornament-mark[data-corner="bl"] {
+    left: var(--t-ornament-inset);
+    bottom: var(--t-ornament-inset);
+    border-left-width: var(--t-ornament-stroke);
+    border-bottom-width: var(--t-ornament-stroke);
+  }
+
+  .ornament-mark[data-corner="br"] {
+    right: var(--t-ornament-inset);
+    bottom: var(--t-ornament-inset);
+    border-right-width: var(--t-ornament-stroke);
+    border-bottom-width: var(--t-ornament-stroke);
+  }
+
+  /* --- Lamp: a status indicator; `data-lit` says whether it is on ------- */
+
+  .lamp {
+    display: inline-block;
+    flex: none;
+    width: var(--t-lamp-size);
+    height: var(--t-lamp-size);
+    border-radius: var(--t-lamp-radius);
+    background-color: var(--t-lamp-off-fill);
+    transition: all 200ms var(--t-ease);
+  }
+
+  .lamp[data-lit="true"] {
+    background-color: currentColor;
+    box-shadow: var(--t-lamp-glow);
+  }
+
+  .lamp[data-blink="true"] {
+    animation: var(--t-lamp-blink-animation);
+  }
+
+  /* --- Terminals: the connection points on a unit ---------------------- */
+
+  .terminal {
+    width: var(--t-terminal-size) !important;
+    height: var(--t-terminal-size) !important;
+    border-radius: var(--t-terminal-radius) !important;
+    background-color: var(--t-terminal-fill) !important;
+    border: var(--t-terminal-border) !important;
+    opacity: 0 !important;
+    transition: opacity 150ms var(--t-ease);
+  }
+
+  .group:hover .terminal {
+    opacity: 1 !important;
+    background-color: var(--t-terminal-fill-hover) !important;
+  }
+
+  /* --- Edge label ------------------------------------------------------ */
+
+  .edge-tag {
+    padding: 0.125rem 0.375rem;
+    border: var(--t-chip-border-width) solid currentColor;
+    border-radius: var(--t-chip-radius);
+    background-color: var(--t-edge-tag-bg);
+    font-family: var(--t-font-mono);
+    font-size: var(--t-label-size);
+    font-weight: 500;
+  }
+
+  /* --- Tabs ------------------------------------------------------------ */
+
+  .tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: var(--t-control-border-width) solid var(--t-tab-border);
+    border-radius: var(--t-control-radius);
+    background-color: var(--t-tab-bg);
+    color: var(--t-text-muted);
+    box-shadow: var(--t-tab-shadow);
+    transition: all 180ms var(--t-ease);
+  }
+
+  .tab:hover {
+    border-color: var(--t-tab-border-hover);
+    color: var(--t-text-title);
+  }
+
+  .tab[aria-selected="true"] {
+    background-color: var(--t-tab-selected-bg);
+    border-color: var(--t-tab-selected-border);
+    color: var(--t-text-title);
+    box-shadow: var(--t-tab-selected-shadow);
+  }
+
+  /* --- Progress marks -------------------------------------------------- */
+
+  .progress-mark {
+    width: var(--t-progress-width);
+    border-radius: var(--t-progress-radius);
+    background-color: var(--t-progress-todo);
+    height: var(--t-progress-todo-height);
+    transition: all 200ms var(--t-ease);
+  }
+
+  .progress-mark[data-state="done"] {
+    background-color: var(--t-progress-done);
+    height: var(--t-progress-done-height);
+  }
+
+  .progress-mark[data-state="current"] {
+    background-color: var(--t-progress-current);
+    height: var(--t-progress-current-height);
+  }
+
+  .progress-mark[data-state="current"][data-live="true"] {
+    animation: var(--t-lamp-blink-animation);
+  }
+
+  /* --- List rows (the step index) -------------------------------------- */
+
+  .row {
+    border-radius: var(--t-chip-radius);
+    color: var(--t-text-muted);
+    transition: all 150ms var(--t-ease);
+  }
+
+  .row:hover {
+    background-color: var(--t-hover-fill);
+    color: var(--t-text-title);
+  }
+
+  .row[aria-current="true"] {
+    background-color: var(--t-selected-bg);
+    color: var(--t-selected-fg);
+    font-weight: 600;
+  }
+
+  /* --- Modal overlay --------------------------------------------------- */
+
+  .overlay {
+    background-color: var(--t-overlay-bg);
+    backdrop-filter: var(--t-overlay-filter, none);
+  }
+}
+
 /* ---------------------------------------------------------------------------
-   Lamp helpers — the ONLY sanctioned glow in the system. `.lamp` paints a
-   small light source in `currentColor`; nothing else may emit light.
+   SVG parts of the diagram. `rx` is a CSS-settable geometry property, so the
+   packet shape (round vs square) is a theme value, not a different element.
    ------------------------------------------------------------------------ */
 
-.lamp {
-  border-radius: 9999px;
-  background-color: currentColor;
-  box-shadow: 0 0 8px 0 currentColor;
+.wire {
+  transition: stroke 240ms var(--t-ease);
 }
 
-.lamp-off {
-  background-color: var(--color-readout-faint);
-  box-shadow: none;
+.wire--live {
+  stroke-width: var(--t-wire-live-width);
+  filter: var(--t-wire-live-filter, none);
 }
 
-/* ---------------------------------------------------------------------------
-   React Flow overrides — the library's light chrome does not belong on a rack.
-   ------------------------------------------------------------------------ */
-
-.react-flow__controls {
-  background-color: var(--color-panel-raised) !important;
-  border: 1px solid var(--color-bezel-strong) !important;
-  border-radius: var(--radius-box) !important;
-  overflow: hidden;
-  box-shadow: var(--shadow-bezel) !important;
+.wire--dormant {
+  stroke: var(--t-wire-dormant);
+  stroke-width: var(--t-wire-dormant-width);
+  stroke-dasharray: var(--t-wire-dormant-dash);
 }
 
-.react-flow__controls-button {
-  background-color: var(--color-panel-raised) !important;
-  border-bottom: 1px solid var(--color-bezel) !important;
-  fill: var(--color-readout-muted) !important;
-  color: var(--color-readout-muted) !important;
+.packet-core {
+  rx: var(--t-packet-rx);
+  ry: var(--t-packet-rx);
 }
 
-.react-flow__controls-button:hover {
-  background-color: var(--color-panel-hi) !important;
-  fill: var(--color-lamp) !important;
-  color: var(--color-lamp) !important;
+.packet-halo {
+  rx: var(--t-packet-halo-rx);
+  ry: var(--t-packet-halo-rx);
+  opacity: var(--t-packet-halo-opacity);
 }
 
-.react-flow__attribution {
-  background: rgba(23, 20, 15, 0.85) !important;
-  color: var(--color-readout-faint) !important;
-  padding: 2px 6px !important;
-  border-radius: var(--radius-tick) !important;
-}
-
-.react-flow__attribution a {
-  color: var(--color-readout-muted) !important;
-}
-
-/* ---------------------------------------------------------------------------
-   Motion
-   ------------------------------------------------------------------------ */
-
+/* Flow direction along a wire. */
 @keyframes flowDashForward {
   from { stroke-dashoffset: 24; }
   to { stroke-dashoffset: 0; }
@@ -165,60 +572,67 @@ body {
 }
 
 .animated-edge-active {
-  stroke-dasharray: 6, 6;
-  animation: flowDashForward 0.8s linear infinite;
+  stroke-dasharray: var(--t-wire-live-dash);
+  animation: flowDashForward var(--t-wire-dash-speed) linear infinite;
 }
 
 .animated-edge-active-reverse {
-  stroke-dasharray: 6, 6;
-  animation: flowDashBackward 0.8s linear infinite;
+  stroke-dasharray: var(--t-wire-live-dash);
+  animation: flowDashBackward var(--t-wire-dash-speed) linear infinite;
 }
 
-/* An engaged unit: its status lamp breathes and the bezel picks up the light. */
-@keyframes unitLive {
-  0%, 100% {
-    box-shadow:
-      inset 0 1px 0 0 rgba(255, 236, 205, 0.12),
-      0 0 0 1px rgba(255, 176, 32, 0.35),
-      0 0 14px -4px rgba(255, 176, 32, 0.5);
-  }
-  50% {
-    box-shadow:
-      inset 0 1px 0 0 rgba(255, 236, 205, 0.12),
-      0 0 0 1px rgba(255, 176, 32, 0.75),
-      0 0 22px -4px rgba(255, 176, 32, 0.9);
-  }
+/* ---------------------------------------------------------------------------
+   React Flow chrome — driven entirely by theme variables.
+   ------------------------------------------------------------------------ */
+
+.react-flow__controls {
+  background-color: var(--t-raised-bg) !important;
+  border: var(--t-raised-border-width) solid var(--t-raised-border) !important;
+  border-radius: var(--t-raised-radius) !important;
+  overflow: hidden;
+  box-shadow: var(--t-raised-shadow) !important;
 }
 
-.node-pulse-active {
-  animation: unitLive 1.6s var(--ease-instrument) infinite;
+.react-flow__controls-button {
+  background-color: var(--t-raised-bg) !important;
+  border-bottom: var(--t-seam-width) solid var(--t-seam) !important;
+  fill: var(--t-text-muted) !important;
+  color: var(--t-text-muted) !important;
 }
 
-/* A blinking status lamp. */
-@keyframes lampBlink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
+.react-flow__controls-button:hover {
+  background-color: var(--t-hover-fill) !important;
+  fill: var(--t-accent) !important;
+  color: var(--t-accent) !important;
 }
 
-.tick-sweep {
-  animation: lampBlink 1s var(--ease-instrument) infinite;
+.react-flow__attribution {
+  background: var(--t-panel-bg) !important;
+  color: var(--t-text-faint) !important;
+  padding: 2px 6px !important;
+  border-radius: var(--t-chip-radius) !important;
 }
 
-/* --- Scrollbars: recessed slot rails ---------------------------------- */
+.react-flow__attribution a {
+  color: var(--t-text-muted) !important;
+}
+
+/* --- Scrollbars --------------------------------------------------------- */
+
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: var(--t-scrollbar-size);
+  height: var(--t-scrollbar-size);
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-well);
+  background: var(--t-scrollbar-track);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-bezel-strong);
-  border-radius: var(--radius-tick);
+  background: var(--t-scrollbar-thumb);
+  border-radius: var(--t-chip-radius);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-bezel-hi);
+  background: var(--t-scrollbar-thumb-hover);
 }

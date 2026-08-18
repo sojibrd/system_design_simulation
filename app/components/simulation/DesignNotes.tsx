@@ -35,16 +35,16 @@ export const DesignNotes: React.FC<{ phase: PhaseConfig }> = ({ phase }) => {
         type="button"
         onClick={() => setIsOpen((open) => !open)}
         aria-expanded={isOpen}
-        className="w-full flex items-center gap-2 px-3 py-1.5 rounded-box border border-bezel bg-chassis hover:border-bezel-strong transition-colors"
+        className="control w-full justify-start gap-2 px-3 py-1.5"
       >
-        <Calculator className="w-3.5 h-3.5 text-readout-faint shrink-0" />
-        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-readout-muted">
+        <Calculator className="t-muted w-3.5 h-3.5 shrink-0" />
+        <span className="t-label">
           Scale &amp; Trade-offs
         </span>
-        <span className="text-xs text-readout-soft truncate hidden sm:inline">
+        <span className="t-body text-xs truncate hidden sm:inline normal-case">
           — এই কনফিগারেশন কোন সংখ্যার জন্য, আর কেন এই সিদ্ধান্তগুলো
         </span>
-        <span className="ml-auto shrink-0 text-readout-faint">
+        <span className="t-muted ml-auto shrink-0">
           {isOpen ? (
             <ChevronUp className="w-3.5 h-3.5" />
           ) : (
@@ -54,22 +54,22 @@ export const DesignNotes: React.FC<{ phase: PhaseConfig }> = ({ phase }) => {
       </button>
 
       {isOpen && (
-        <div className="mt-2 max-h-[38vh] overflow-y-auto rounded-box border border-bezel bg-panel p-3 flex flex-col gap-4">
+        <div className="surface-panel mt-2 max-h-[38vh] overflow-y-auto p-3 flex flex-col gap-4">
           {scaleEstimate && (
             <section>
-              <h4 className="font-mono text-[10px] uppercase tracking-[0.16em] text-lamp mb-2">
+              <h4 className="t-label t-accent mb-2">
                 Capacity Estimate
               </h4>
               <dl className="grid grid-cols-2 md:grid-cols-5 gap-2">
                 {rows.map((row) => (
                   <div
                     key={row.label}
-                    className="rounded-tick border border-bezel bg-well px-2 py-1.5"
+                    className="surface-well px-2 py-1.5"
                   >
-                    <dt className="font-mono text-[9px] uppercase tracking-[0.12em] text-readout-faint truncate">
+                    <dt className="t-label truncate">
                       {row.label}
                     </dt>
-                    <dd className="text-xs text-readout font-semibold mt-0.5">
+                    <dd className="t-title text-xs mt-0.5">
                       {row.value}
                     </dd>
                   </div>
@@ -80,7 +80,7 @@ export const DesignNotes: React.FC<{ phase: PhaseConfig }> = ({ phase }) => {
 
           {tradeOffs && tradeOffs.length > 0 && (
             <section>
-              <h4 className="font-mono text-[10px] uppercase tracking-[0.16em] text-lamp mb-2 flex items-center gap-1.5">
+              <h4 className="t-label t-accent mb-2 flex items-center gap-1.5">
                 <GitCompare className="w-3 h-3" />
                 Design Trade-offs
               </h4>
@@ -88,9 +88,9 @@ export const DesignNotes: React.FC<{ phase: PhaseConfig }> = ({ phase }) => {
                 {tradeOffs.map((tradeOff) => (
                   <article
                     key={tradeOff.question}
-                    className="rounded-tick border border-bezel bg-well px-2.5 py-2"
+                    className="surface-well px-2.5 py-2"
                   >
-                    <h5 className="text-xs font-bold text-readout mb-1.5">
+                    <h5 className="t-title text-xs mb-1.5">
                       {tradeOff.question}
                     </h5>
 
@@ -100,13 +100,16 @@ export const DesignNotes: React.FC<{ phase: PhaseConfig }> = ({ phase }) => {
                         return (
                           <li
                             key={option.name}
-                            className={`text-[11px] leading-relaxed pl-2 border-l-2 ${
-                              isChosen
-                                ? "border-lamp text-readout-soft"
-                                : "border-bezel-strong text-readout-muted"
+                            className={`t-body text-[11px] pl-2 border-l-2 ${
+                              isChosen ? "t-body" : "t-muted"
                             }`}
+                            style={{
+                              borderColor: isChosen
+                                ? "var(--t-accent)"
+                                : "var(--t-seam)",
+                            }}
                           >
-                            <span className="font-mono font-semibold">
+                            <span className="t-mono t-strong">
                               {option.name}
                             </span>
                             {isChosen && (
@@ -120,8 +123,8 @@ export const DesignNotes: React.FC<{ phase: PhaseConfig }> = ({ phase }) => {
                       })}
                     </ul>
 
-                    <p className="text-[11px] text-readout-soft leading-relaxed">
-                      <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-lamp">
+                    <p className="t-body text-[11px]">
+                      <span className="t-label t-accent">
                         কেন:{" "}
                       </span>
                       {tradeOff.why}
