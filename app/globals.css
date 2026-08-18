@@ -2,134 +2,156 @@
 @import "@xyflow/react/dist/style.css";
 
 /* ============================================================================
-   BLUEPRINT DESIGN SYSTEM — light-only "technical drafting" direction.
+   CONTROL ROOM DESIGN SYSTEM
 
-   Everything visual in this app resolves to a token below. Components must not
-   reach for raw Tailwind palette colours (`zinc-800`, `cyan-500`, ...) — if a
-   value is missing here, add it here first.
+   The app reads as an instrument panel in a control room: a warm charcoal
+   chassis, moulded panels behind chunky bezels, engraved labels, and signal
+   lamps that light when something is actually happening.
+
+   Rules that keep it from drifting back into generic dark-dashboard:
+   - Surfaces are WARM charcoal (brown-black), never blue-grey slate/zinc.
+   - Depth is a physical bezel — an inset top highlight and a bottom shadow.
+     Never a blurred drop shadow floating in space.
+   - Glow belongs to LAMPS ONLY (a lit lamp really does glow). Panels,
+     buttons, borders and text never glow.
+   - No gradients as decoration. A gradient may only model a lit surface.
    ========================================================================= */
 
 @theme {
-  /* --- Type: engineering lettering ------------------------------------- */
-  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  /* --- Type: engraved panel lettering ---------------------------------- */
+  --font-sans: var(--font-barlow), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains), ui-monospace, "SFMono-Regular", monospace;
 
-  /* --- Surfaces: paper stock ------------------------------------------- */
-  --color-paper: #f7f5ef;        /* the drafting sheet — page background */
-  --color-paper-raised: #fffdf8; /* panels sitting on top of the sheet */
-  --color-paper-sunken: #eae7dd;  /* wells: code blocks, inset groups */
-  --color-paper-wash: #e2ded1;    /* pressed / hover fill on paper */
+  /* --- Chassis & panels: warm charcoal, never blue-grey ----------------- */
+  --color-chassis: #17140f;      /* the rack the panels are mounted in */
+  --color-panel: #211d18;        /* a panel face */
+  --color-panel-raised: #2b251f; /* a control group sitting proud of the face */
+  --color-panel-hi: #363029;     /* hover / pressed */
+  --color-well: #100e0b;         /* recessed readout screens, code wells */
 
-  /* --- Ink: the only text colours -------------------------------------- */
-  --color-ink: #16213b;          /* headings, primary text */
-  --color-ink-soft: #3b475f;     /* body text */
-  --color-ink-muted: #6d788d;    /* labels, captions, mono annotations */
-  --color-ink-faint: #9aa3b2;    /* disabled, placeholder */
+  /* --- Bezels: the machined edge around every panel --------------------- */
+  --color-bezel: #3a322a;
+  --color-bezel-strong: #4d4238;
+  --color-bezel-hi: #5f5245;
 
-  /* --- Rules: drafted lines -------------------------------------------- */
-  --color-rule: #cdc7b7;         /* hairline borders */
-  --color-rule-strong: #a8a294;  /* emphasised borders */
-  --color-rule-heavy: #16213b;   /* the drawn-in-ink border of an active box */
+  /* --- Readout: engraved / backlit text --------------------------------- */
+  --color-readout: #f3ece0;      /* primary readout, headings */
+  --color-readout-soft: #c9bda9; /* body text */
+  --color-readout-muted: #8f8272; /* engraved labels, units */
+  --color-readout-faint: #625849; /* off / disabled */
 
-  /* --- Grid: graph paper ----------------------------------------------- */
-  --color-grid-minor: #ded9ca;
-  --color-grid-major: #cbc4b1;
+  /* --- Lamps: the only things allowed to glow --------------------------- */
+  --color-lamp: #ffb020;         /* primary — "running" */
+  --color-lamp-dim: #7d5a17;     /* the same lamp, unlit */
+  --color-lamp-soft: #2e2311;    /* backlit wash behind lamp content */
 
-  /* --- Accent: the draftsman's blue pencil ------------------------------ */
-  --color-accent: #1b4b8f;
-  --color-accent-soft: #dfe7f4;  /* wash fill behind accent content */
-  --color-accent-line: #7f9bc4;  /* accent at hairline weight */
+  --color-lamp-green: #52c07a;
+  --color-lamp-green-soft: #14261a;
+  --color-lamp-red: #e05646;
+  --color-lamp-red-soft: #2c1613;
 
-  /* --- Alert: the red correction pencil --------------------------------- */
-  --color-alert: #b23b2c;
-  --color-alert-soft: #f6e2de;
+  /* --- Category lamps — one per architecture component category --------- */
+  --color-cat-client: #62a0dd;
+  --color-cat-compute: #a97ad6;
+  --color-cat-storage: #52c07a;
+  --color-cat-network: #45b0ad;
+  --color-cat-security: #ffb020;
+  --color-cat-queue: #d76aa0;
+  --color-cat-analytics: #e8873a;
 
-  /* --- Confirm: the green check ---------------------------------------- */
-  --color-confirm: #1f7a5c;
-  --color-confirm-soft: #dcece5;
+  /* --- Signal lamps — semantic flow / packet colours -------------------- */
+  --color-signal-request: #62a0dd;
+  --color-signal-write: #a97ad6;
+  --color-signal-read: #45b0ad;
+  --color-signal-success: #52c07a;
+  --color-signal-cache: #ffb020;
+  --color-signal-event: #d76aa0;
+  --color-signal-error: #e05646;
+  --color-signal-meta: #8f8272;
 
-  /* --- Category inks — one per architecture component category ---------- */
-  --color-cat-client: #1b4b8f;
-  --color-cat-compute: #6b3fa0;
-  --color-cat-storage: #1f7a5c;
-  --color-cat-network: #0f6f80;
-  --color-cat-security: #a2620d;
-  --color-cat-queue: #9c2f66;
-  --color-cat-analytics: #a83b46;
+  /* --- Shape: moulded plastic, softly machined -------------------------- */
+  --radius-panel: 6px;
+  --radius-box: 4px;
+  --radius-tick: 2px;
 
-  /* --- Signal inks — semantic packet / flow colours --------------------- */
-  --color-signal-request: #1b4b8f;
-  --color-signal-write: #6b3fa0;
-  --color-signal-read: #0f6f80;
-  --color-signal-success: #1f7a5c;
-  --color-signal-cache: #a2620d;
-  --color-signal-event: #9c2f66;
-  --color-signal-error: #b23b2c;
-  --color-signal-meta: #6d788d;
+  /* --- Depth: a real bezel, not a floating card ------------------------- */
+  --shadow-bezel:
+    inset 0 1px 0 0 rgba(255, 236, 205, 0.07),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.55),
+    0 1px 2px 0 rgba(0, 0, 0, 0.5);
+  --shadow-raised:
+    inset 0 1px 0 0 rgba(255, 236, 205, 0.1),
+    0 6px 18px -8px rgba(0, 0, 0, 0.85);
+  --shadow-well: inset 0 2px 7px 0 rgba(0, 0, 0, 0.75);
+  /* A physical key: it stands off the panel until you press it. */
+  --shadow-key:
+    inset 0 1px 0 0 rgba(255, 236, 205, 0.18),
+    0 2px 0 0 rgba(0, 0, 0, 0.7);
 
-  /* --- Shape: drafted boxes have corners, not pills --------------------- */
-  --radius-sheet: 3px;
-  --radius-box: 2px;
-  --radius-tick: 1px;
-
-  /* --- Elevation: paper stacked on paper, never a glow ------------------ */
-  --shadow-sheet: 0 1px 0 0 var(--color-rule), 0 2px 6px -4px rgba(22, 33, 59, 0.18);
-  --shadow-lift: 0 2px 0 0 var(--color-rule-strong), 0 8px 20px -12px rgba(22, 33, 59, 0.35);
-  --shadow-drawn: 2px 2px 0 0 var(--color-ink);
-
-  /* --- Motion: a plotter pen, not a bounce ------------------------------ */
-  --ease-plot: cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* --- Motion: a relay switching, not a bounce -------------------------- */
+  --ease-instrument: cubic-bezier(0.3, 0.7, 0.2, 1);
 }
 
 body {
-  background-color: var(--color-paper);
-  color: var(--color-ink-soft);
+  background-color: var(--color-chassis);
+  color: var(--color-readout-soft);
   overflow-x: hidden;
-  /* The graph-paper sheet itself — two grid frequencies, minor over major. */
-  background-image:
-    linear-gradient(var(--color-grid-minor) 1px, transparent 1px),
-    linear-gradient(90deg, var(--color-grid-minor) 1px, transparent 1px);
-  background-size: 24px 24px, 24px 24px;
 }
 
 /* ---------------------------------------------------------------------------
-   React Flow overrides — the library ships a light theme, but not this one.
+   Lamp helpers — the ONLY sanctioned glow in the system. `.lamp` paints a
+   small light source in `currentColor`; nothing else may emit light.
+   ------------------------------------------------------------------------ */
+
+.lamp {
+  border-radius: 9999px;
+  background-color: currentColor;
+  box-shadow: 0 0 8px 0 currentColor;
+}
+
+.lamp-off {
+  background-color: var(--color-readout-faint);
+  box-shadow: none;
+}
+
+/* ---------------------------------------------------------------------------
+   React Flow overrides — the library's light chrome does not belong on a rack.
    ------------------------------------------------------------------------ */
 
 .react-flow__controls {
-  background-color: var(--color-paper-raised) !important;
-  border: 1px solid var(--color-rule) !important;
+  background-color: var(--color-panel-raised) !important;
+  border: 1px solid var(--color-bezel-strong) !important;
   border-radius: var(--radius-box) !important;
   overflow: hidden;
-  box-shadow: var(--shadow-sheet) !important;
+  box-shadow: var(--shadow-bezel) !important;
 }
 
 .react-flow__controls-button {
-  background-color: var(--color-paper-raised) !important;
-  border-bottom: 1px solid var(--color-rule) !important;
-  fill: var(--color-ink-muted) !important;
-  color: var(--color-ink-muted) !important;
+  background-color: var(--color-panel-raised) !important;
+  border-bottom: 1px solid var(--color-bezel) !important;
+  fill: var(--color-readout-muted) !important;
+  color: var(--color-readout-muted) !important;
 }
 
 .react-flow__controls-button:hover {
-  background-color: var(--color-accent-soft) !important;
-  fill: var(--color-accent) !important;
-  color: var(--color-accent) !important;
+  background-color: var(--color-panel-hi) !important;
+  fill: var(--color-lamp) !important;
+  color: var(--color-lamp) !important;
 }
 
 .react-flow__attribution {
-  background: rgba(247, 245, 239, 0.85) !important;
-  color: var(--color-ink-faint) !important;
+  background: rgba(23, 20, 15, 0.85) !important;
+  color: var(--color-readout-faint) !important;
   padding: 2px 6px !important;
   border-radius: var(--radius-tick) !important;
 }
 
 .react-flow__attribution a {
-  color: var(--color-ink-muted) !important;
+  color: var(--color-readout-muted) !important;
 }
 
 /* ---------------------------------------------------------------------------
-   Motion — dashed lines advance like a plotted schematic; nothing glows.
+   Motion
    ------------------------------------------------------------------------ */
 
 @keyframes flowDashForward {
@@ -152,42 +174,51 @@ body {
   animation: flowDashBackward 0.8s linear infinite;
 }
 
-/* An active node is "inked in": the border darkens and thickens rather than
-   emitting light. */
-@keyframes inkPulse {
-  0%, 100% { box-shadow: 2px 2px 0 0 var(--color-ink); }
-  50% { box-shadow: 3px 3px 0 0 var(--color-ink); }
+/* An engaged unit: its status lamp breathes and the bezel picks up the light. */
+@keyframes unitLive {
+  0%, 100% {
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 236, 205, 0.12),
+      0 0 0 1px rgba(255, 176, 32, 0.35),
+      0 0 14px -4px rgba(255, 176, 32, 0.5);
+  }
+  50% {
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 236, 205, 0.12),
+      0 0 0 1px rgba(255, 176, 32, 0.75),
+      0 0 22px -4px rgba(255, 176, 32, 0.9);
+  }
 }
 
 .node-pulse-active {
-  animation: inkPulse 1.5s var(--ease-plot) infinite;
+  animation: unitLive 1.6s var(--ease-instrument) infinite;
 }
 
-/* Ruled measurement tick that runs under a live status line. */
-@keyframes tickSweep {
-  from { opacity: 0.25; }
-  to { opacity: 1; }
+/* A blinking status lamp. */
+@keyframes lampBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
 }
 
 .tick-sweep {
-  animation: tickSweep 0.9s var(--ease-plot) infinite alternate;
+  animation: lampBlink 1s var(--ease-instrument) infinite;
 }
 
-/* --- Scrollbars: thin ruled gutters ---------------------------------- */
+/* --- Scrollbars: recessed slot rails ---------------------------------- */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-paper-sunken);
+  background: var(--color-well);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-rule-strong);
+  background: var(--color-bezel-strong);
   border-radius: var(--radius-tick);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-ink-faint);
+  background: var(--color-bezel-hi);
 }

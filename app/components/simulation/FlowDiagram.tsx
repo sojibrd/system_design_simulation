@@ -58,7 +58,7 @@ export const FlowDiagram: React.FC<FlowDiagramProps> = ({
   );
 
   return (
-    <div className="w-full h-full min-h-0 bg-paper-raised rounded-sheet border border-rule-strong overflow-hidden relative shadow-sheet">
+    <div className="w-full h-full min-h-0 bg-well rounded-panel border border-bezel-strong overflow-hidden relative shadow-well">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -79,31 +79,23 @@ export const FlowDiagram: React.FC<FlowDiagramProps> = ({
         zoomOnScroll={true}
         proOptions={{ hideAttribution: true }}
       >
-        {/* Graph paper: a fine grid with a heavier one every fifth line. */}
+        {/* The perforated rack panel the units are mounted on. */}
         <Background
-          id="minor"
-          variant={BackgroundVariant.Lines}
-          gap={16}
-          lineWidth={1}
-          color="var(--color-grid-minor)"
-        />
-        <Background
-          id="major"
-          variant={BackgroundVariant.Lines}
-          gap={80}
-          lineWidth={1}
-          color="var(--color-grid-major)"
+          variant={BackgroundVariant.Dots}
+          gap={22}
+          size={1}
+          color="var(--color-bezel)"
         />
         <Controls
           showInteractive={false}
           position="bottom-left"
-          className="!m-3 !border-rule !bg-paper-raised"
+          className="!m-3 !border-bezel-strong !bg-panel-raised"
         />
       </ReactFlow>
 
       {/* Floating Canvas Hint */}
-      <div className="absolute top-3 right-3 pointer-events-none bg-paper-raised px-2 py-0.5 rounded-tick border border-rule font-mono text-[10px] uppercase tracking-[0.12em] text-ink-muted flex items-center gap-1.5">
-        <span className="w-1.5 h-1.5 bg-confirm"></span>
+      <div className="absolute top-3 right-3 pointer-events-none bg-panel-raised px-2 py-0.5 rounded-tick border border-bezel-strong font-mono text-[10px] uppercase tracking-[0.12em] text-readout-muted flex items-center gap-1.5">
+        <span className="w-1.5 h-1.5 lamp text-lamp-green"></span>
         <span>Pan &amp; Zoom</span>
       </div>
     </div>

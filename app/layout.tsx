@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Archivo, JetBrains_Mono } from "next/font/google";
+import { Barlow, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-// Archivo: a grotesk with the squared-off terminals of engineering lettering.
-// JetBrains Mono: every label, spec and payload on a drafting sheet is mono.
-const sans = Archivo({
-  variable: "--font-archivo",
+// Barlow: the slightly condensed, industrial grotesk of equipment labelling.
+// JetBrains Mono: every engraved label, spec and readout on the panel is mono.
+const sans = Barlow({
+  variable: "--font-barlow",
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
   display: "swap",
 });
@@ -29,7 +30,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable} h-full`}>
-      <body className="h-full bg-paper text-ink-soft font-sans">{children}</body>
+      <body className="h-full bg-chassis text-readout-soft font-sans">{children}</body>
     </html>
   );
 }

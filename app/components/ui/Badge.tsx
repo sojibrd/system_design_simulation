@@ -3,15 +3,15 @@ import React from "react";
 type Tone = "neutral" | "accent" | "alert" | "confirm";
 
 const toneClasses: Record<Tone, string> = {
-  neutral: "border-rule-strong text-ink-muted bg-paper",
-  accent: "border-accent-line text-accent bg-accent-soft",
-  alert: "border-alert/50 text-alert bg-alert-soft",
-  confirm: "border-confirm/50 text-confirm bg-confirm-soft",
+  neutral: "border-bezel-strong text-readout-muted bg-chassis",
+  accent: "border-lamp-dim text-lamp bg-lamp-soft",
+  alert: "border-lamp-red/50 text-lamp-red bg-lamp-red-soft",
+  confirm: "border-lamp-green/50 text-lamp-green bg-lamp-green-soft",
 };
 
 /**
- * A stamped annotation — mono, uppercase, square. Used for specs, counts and
- * category names, never as a decorative pill.
+ * An engraved plate on the panel — mono, uppercase, square. Used for specs,
+ * counts and category names, never as a decorative pill.
  */
 export const Badge: React.FC<{
   tone?: Tone;

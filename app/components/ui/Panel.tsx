@@ -3,20 +3,20 @@ import React from "react";
 type PanelTone = "raised" | "sunken" | "flat";
 
 const toneClasses: Record<PanelTone, string> = {
-  raised: "bg-paper-raised border-rule shadow-sheet",
-  sunken: "bg-paper-sunken border-rule",
-  flat: "bg-paper border-rule",
+  raised: "bg-panel border-bezel shadow-bezel",
+  sunken: "bg-well border-bezel",
+  flat: "bg-chassis border-bezel",
 };
 
 /**
- * A sheet of paper laid on the drafting board. Square corners, a hairline
- * rule for a border, and elevation expressed as a stacked edge — never a glow.
+ * A panel mounted on the rack. Depth is a machined bezel — an inset top
+ * highlight over a bottom shadow — never a blurred card floating in space.
  */
 export const Panel: React.FC<
   React.HTMLAttributes<HTMLDivElement> & { tone?: PanelTone }
 > = ({ tone = "raised", className = "", children, ...rest }) => (
   <div
-    className={`relative rounded-sheet border ${toneClasses[tone]} ${className}`}
+    className={`relative rounded-panel border ${toneClasses[tone]} ${className}`}
     {...rest}
   >
     {children}
@@ -24,8 +24,8 @@ export const Panel: React.FC<
 );
 
 /**
- * The title block of a drawing: a mono label, optional right-hand slot, and the
- * heavy rule underneath that a real drafting sheet always carries.
+ * The engraved title strip of a panel: a mono label, an optional right-hand
+ * slot, and the machined groove that separates it from the controls below.
  */
 export const PanelHeader: React.FC<{
   label: string;
@@ -34,11 +34,11 @@ export const PanelHeader: React.FC<{
   className?: string;
 }> = ({ label, icon, right, className = "" }) => (
   <div
-    className={`flex items-center justify-between gap-2 pb-2 mb-2 border-b border-ink/60 ${className}`}
+    className={`flex items-center justify-between gap-2 pb-2 mb-2 border-b border-bezel-strong ${className}`}
   >
     <div className="flex items-center gap-1.5 min-w-0">
       {icon}
-      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-muted truncate">
+      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-readout-muted truncate">
         {label}
       </span>
     </div>

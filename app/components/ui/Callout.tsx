@@ -3,14 +3,14 @@ import React from "react";
 type Tone = "note" | "accent" | "alert";
 
 const toneClasses: Record<Tone, { box: string; label: string }> = {
-  note: { box: "border-rule bg-paper", label: "text-ink-muted" },
-  accent: { box: "border-accent-line bg-accent-soft", label: "text-accent" },
-  alert: { box: "border-alert/40 bg-alert-soft", label: "text-alert" },
+  note: { box: "border-bezel bg-panel-raised", label: "text-readout-muted" },
+  accent: { box: "border-lamp-dim bg-lamp-soft", label: "text-lamp" },
+  alert: { box: "border-lamp-red/40 bg-lamp-red-soft", label: "text-lamp-red" },
 };
 
 /**
- * A margin note on the drawing: a heavy left rule, a mono caption, and the
- * body text. This is how the walkthrough carries its explanations.
+ * A labelled readout block on the panel: an engraved caption strip above the
+ * value, with a coloured edge marking which subsystem it belongs to.
  */
 export const Callout: React.FC<{
   label: string;
@@ -22,14 +22,14 @@ export const Callout: React.FC<{
   const t = toneClasses[tone];
 
   return (
-    <div className={`rounded-box border border-l-2 ${t.box} p-3 ${className}`}>
+    <div className={`rounded-box border border-l-[3px] ${t.box} p-3 shadow-bezel ${className}`}>
       <div
-        className={`flex items-center gap-1.5 mb-1 font-mono text-[10px] uppercase tracking-[0.12em] ${t.label}`}
+        className={`flex items-center gap-1.5 mb-1 font-mono text-[10px] uppercase tracking-[0.14em] ${t.label}`}
       >
         {icon}
         <span>{label}</span>
       </div>
-      <div className="text-xs md:text-sm text-ink-soft leading-relaxed">
+      <div className="text-xs md:text-sm text-readout-soft leading-relaxed">
         {children}
       </div>
     </div>

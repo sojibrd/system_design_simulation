@@ -38,8 +38,8 @@ interface ControlsBarProps {
 const segment = (selected: boolean) =>
   `flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-colors duration-150 ${
     selected
-      ? "bg-ink text-paper"
-      : "text-ink-muted hover:text-ink hover:bg-paper-wash"
+      ? "bg-lamp text-chassis"
+      : "text-readout-muted hover:text-readout hover:bg-panel-hi"
   }`;
 
 export const ControlsBar: React.FC<ControlsBarProps> = ({
@@ -63,7 +63,7 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
       <div className="flex items-center gap-3 min-w-[560px]">
         {/* 1. Flow selector — equal-weight side keeps playback centred */}
         <div className="flex-1 flex items-center justify-start">
-          <div className="flex items-center rounded-box border border-rule-strong overflow-hidden divide-x divide-rule-strong">
+          <div className="flex items-center rounded-box border border-bezel-strong overflow-hidden divide-x divide-bezel-strong">
             <button type="button" onClick={() => onFlowChange("shorten")} className={segment(flowType === "shorten")}>
               <Link className="w-3.5 h-3.5" />
               <span>Shorten</span>
@@ -114,9 +114,9 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
 
         {/* 3. Speed & panel toggle — mirrors the left side's flex weight */}
         <div className="flex-1 flex items-center justify-end gap-2">
-          <div className="flex items-center gap-1 rounded-box border border-rule-strong px-2 py-1">
-            <Gauge className="w-3.5 h-3.5 text-ink-faint shrink-0" />
-            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-faint hidden sm:inline mr-1">
+          <div className="flex items-center gap-1 rounded-box border border-bezel-strong px-2 py-1">
+            <Gauge className="w-3.5 h-3.5 text-readout-faint shrink-0" />
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-readout-faint hidden sm:inline mr-1">
               Speed
             </span>
 
@@ -127,8 +127,8 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
                 onClick={() => onSpeedChange(val)}
                 className={`px-1.5 py-0.5 rounded-tick font-mono text-[11px] transition-colors ${
                   speed === val
-                    ? "bg-ink text-paper font-bold"
-                    : "text-ink-muted hover:text-ink hover:bg-paper-wash"
+                    ? "bg-lamp text-chassis font-bold"
+                    : "text-readout-muted hover:text-readout hover:bg-panel-hi"
                 }`}
               >
                 {val}x
