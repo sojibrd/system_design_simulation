@@ -453,18 +453,6 @@ export const expertConfig: PhaseConfig = {
       },
     },
     {
-      id: "edge-s1-to-queue",
-      type: "animatedFlowEdge",
-      source: "node-server-1",
-      sourceHandle: "b-s",
-      target: "node-queue",
-      targetHandle: "t-t",
-      data: {
-        label: "Async Publish: click_event",
-        particleColor: "event",
-      },
-    },
-    {
       id: "edge-s2-to-queue",
       type: "animatedFlowEdge",
       source: "node-server-2",
@@ -1030,6 +1018,382 @@ export const expertConfig: PhaseConfig = {
             "node-worker": "ClickHouse INSERT +1 click (Total: 4,192,051)",
           },
           payloadSnippet: `INSERT INTO click_analytics (short_code, clicked_at, country, browser)\nVALUES ('9wK2pL', NOW(), 'BD', 'Chrome 128');`,
+        },
+      ],
+    },
+    {
+      id: "redirect-miss",
+      name: "Redirect · Miss",
+      icon: "miss",
+      steps: [
+        {
+          id: "e-m1",
+          flowType: "redirect-miss",
+          stepNumber: 1,
+          title: "Client → CDN Edge (পুরোনো একটা লিংকে ক্লিক)",
+          whatHappens:
+            "এবার এমন একটা কোডে ক্লিক পড়লো যেটা অনেক দিন কেউ খোলেনি। রিকোয়েস্ট নিকটতম এজ নোডে পৌঁছালো।",
+          whyItMatters:
+            "রিকোয়েস্টটা hit-এর ক্ষেত্রে যা হতো ঠিক তা-ই। ক্যাশে আছে কি নেই সেটা পাঁচ ধাপ পরে জানা যাবে — তার আগে পর্যন্ত দুটো পথ অভিন্ন।",
+          analogy: "📍 কাছের ব্রাঞ্চেই আগে খোঁজ নেওয়া।",
+          activeNodeIds: ["node-client", "node-cdn"],
+          activeEdgeIds: ["edge-client-to-cdn"],
+          edgeOverrides: {
+            "edge-client-to-cdn": { label: "1. GeoDNS Routing" },
+          },
+          nodeStatusMessages: {
+            "node-client": "GET /oLd7Zq",
+            "node-cdn": "Edge Cache Miss -> Origin",
+          },
+          payloadSnippet: `GET /oLd7Zq HTTP/2\nHost: link.co`,
+        },
+        {
+          id: "e-m2",
+          flowType: "redirect-miss",
+          stepNumber: 2,
+          title: "CDN → Global Load Balancer (এজ থেকে অরিজিনে)",
+          whatHappens:
+            "এজ ক্যাশেও কোডটা নেই, তাই CDN রিকোয়েস্টটি গ্লোবাল লোড ব্যালেন্সারে পাঠালো।",
+          whyItMatters:
+            "লক্ষ করুন এখানে দুটো আলাদা ক্যাশ স্তর আছে — CDN edge, তারপর Redis। দুটোই miss হলে তবেই ডাটাবেজের পালা।",
+          analogy: "🚪 রিসেপশনে না পেয়ে ভেতরের অফিসে খোঁজ নিতে যাওয়া।",
+          activeNodeIds: ["node-cdn", "node-lb"],
+          activeEdgeIds: ["edge-cdn-to-lb"],
+          edgeOverrides: {
+            "edge-cdn-to-lb": { label: "2. Origin Fetch" },
+          },
+          nodeStatusMessages: {
+            "node-cdn": "MISS -> forwarding",
+            "node-lb": "Healthy upstreams: 2/2",
+          },
+          payloadSnippet: `CF-Cache-Status: MISS\nConnection: keep-alive (reused)`,
+        },
+        {
+          id: "e-m3",
+          flowType: "redirect-miss",
+          stepNumber: 3,
+          title: "Load Balancer → API Gateway (গেটওয়েতে প্রবেশ)",
+          whatHappens:
+            "লোড ব্যালেন্সার রিকোয়েস্টটি API Gateway-তে পাঠালো, যেখানে রেট লিমিট ও রাউটিং নিয়ম প্রয়োগ হলো।",
+          whyItMatters:
+            "Miss পথটি ব্যয়বহুল, তাই এখানেই রেট লিমিট সবচেয়ে বেশি জরুরি — বট যদি এলোমেলো কোড ছুড়তে থাকে, প্রতিটিই miss হয়ে ডাটাবেজে গিয়ে আঘাত করবে।",
+          analogy: "🏢 ভেতরে ঢোকার আগে গার্ডের চেকপয়েন্ট।",
+          activeNodeIds: ["node-lb", "node-gw"],
+          activeEdgeIds: ["edge-lb-to-gw"],
+          edgeOverrides: {
+            "edge-lb-to-gw": { label: "3. Gateway Ingress" },
+          },
+          nodeStatusMessages: {
+            "node-lb": "Routing to gateway pool",
+            "node-gw": "Rate: OK | Route: /:code",
+          },
+          payloadSnippet: `X-RateLimit-Remaining: 9987\nmatched route: GET /:shortCode`,
+        },
+        {
+          id: "e-m4",
+          flowType: "redirect-miss",
+          stepNumber: 4,
+          title: "API Gateway → App Pod 1 (অ্যাপ সার্ভারে ডেলিভারি)",
+          whatHappens:
+            "গেটওয়ে রিকোয়েস্টটি Pod-1-এ পাঠালো।",
+          whyItMatters:
+            "Pod-1 আর Pod-2-এর মধ্যে কোনো পার্থক্য নেই — দুটোই stateless, দুটোরই একই Redis ক্লাস্টার ও একই ডাটাবেজে হাত আছে।",
+          analogy: "👉 'কাউন্টার ১-এ যান।'",
+          activeNodeIds: ["node-gw", "node-server-1"],
+          activeEdgeIds: ["edge-gw-to-s1"],
+          edgeOverrides: {
+            "edge-gw-to-s1": { label: "4. Route to Pod-1" },
+          },
+          nodeStatusMessages: {
+            "node-gw": "Least-conn -> Pod-1",
+            "node-server-1": "Pod-1 handling request",
+          },
+          payloadSnippet: `selected pod: url-api-7d9c4-x2ml (least connections)`,
+        },
+        {
+          id: "e-m5",
+          flowType: "redirect-miss",
+          stepNumber: 5,
+          title: "App Pod 1 → Redis Cluster (ক্যাশে খোঁজা)",
+          whatHappens:
+            "সার্ভার Redis ক্লাস্টারে 'oLd7Zq' কোডটি খুঁজলো — কোন shard-এ থাকার কথা, সেটা কোডের hash থেকেই বেরিয়ে এলো।",
+          whyItMatters:
+            "ক্লাস্টার মোডে কী-গুলো shard-এ ভাগ করা থাকে, তাই কোনো একটি নোড পুরো ডেটাসেট ধরে রাখে না। খোঁজার আগে জানতেই হয় কোন নোডে যেতে হবে।",
+          analogy: "🔍 কোন আলমারিতে খুঁজতে হবে সেটা আগে বের করা।",
+          activeNodeIds: ["node-server-1", "node-cache"],
+          activeEdgeIds: ["edge-s1-to-cache"],
+          edgeOverrides: {
+            "edge-s1-to-cache": { label: "5. Redis Lookup", particleColor: "cache" },
+          },
+          nodeStatusMessages: {
+            "node-server-1": "Checking Redis first...",
+            "node-cache": "SHARD_07: searching key",
+          },
+          payloadSnippet: `REDIS_CLUSTER.GET("{url}:oLd7Zq")\n// slot 9284 -> shard 07`,
+        },
+        {
+          id: "e-m6",
+          flowType: "redirect-miss",
+          stepNumber: 6,
+          title: "Redis Cluster → App Pod 1 (CACHE MISS!)",
+          whatHappens:
+            "Redis উত্তর দিলো 'nil' — কী-টি নেই। অনেক দিন কেউ চায়নি বলে LRU নীতিতে এটি মেমোরি থেকে সরে গেছে।",
+          whyItMatters:
+            "৮০ TB ডেটার বিপরীতে Redis ক্লাস্টারে হয়তো কয়েকশ GB মেমোরি — অর্থাৎ ১%-এরও কম ডেটা ক্যাশে থাকতে পারে। তাই miss অনিবার্য, ব্যতিক্রম নয়। প্রশ্নটা 'miss হবে কি না' নয়, 'miss হলে কত দ্রুত সামলাতে পারি'।",
+          analogy: "❌ আলমারি খুলে দেখা গেলো তাকটাই খালি।",
+          activeNodeIds: ["node-cache", "node-server-1"],
+          activeEdgeIds: ["edge-s1-to-cache"],
+          edgeOverrides: {
+            "edge-s1-to-cache": {
+              label: "6. MISS (nil)",
+              isReverse: true,
+              particleColor: "error",
+            },
+          },
+          nodeStatusMessages: {
+            "node-cache": "CACHE MISS — evicted (LRU)",
+            "node-server-1": "Falling back to read replica",
+          },
+          payloadSnippet: `REDIS_CLUSTER.GET("{url}:oLd7Zq")\n=> (nil)   [CACHE MISS]`,
+        },
+        {
+          id: "e-m7",
+          flowType: "redirect-miss",
+          stepNumber: 7,
+          title: "App Pod 1 → Read Replica (রেপ্লিকায় সন্ধান, primary-তে নয়)",
+          whatHappens:
+            "সার্ভার এবার রিড-রেপ্লিকায় গেলো — লক্ষ করুন, primary ডাটাবেজে নয়।",
+          whyItMatters:
+            "এটাই CQRS-এর মূল কথা এবং এই আর্কিটেকচারের সবচেয়ে গুরুত্বপূর্ণ নিয়ম: read কখনোই primary-তে যায় না। ১,০০,০০০ read/sec primary-তে পাঠালে সেটি সাথে সাথে ভেঙে পড়ত এবং সব write-ও বন্ধ হয়ে যেত।",
+          analogy: "📚 মূল খাতা না ছুঁয়ে ফটোকপি থেকে পড়ে নেওয়া।",
+          activeNodeIds: ["node-server-1", "node-replica-db"],
+          activeEdgeIds: ["edge-s1-to-replica"],
+          edgeOverrides: {
+            "edge-s1-to-replica": { label: "7. Read Query (Replica)", particleColor: "read" },
+          },
+          nodeStatusMessages: {
+            "node-server-1": "Querying read replica...",
+            "node-replica-db": "Index scan on short_code",
+          },
+          payloadSnippet: `-- read pool, never the primary\nSELECT original_url FROM urls_sharded_07 WHERE short_code = 'oLd7Zq';`,
+        },
+        {
+          id: "e-m8",
+          flowType: "redirect-miss",
+          stepNumber: 8,
+          title: "Read Replica → App Pod 1 (আসল লিংক পাওয়া গেলো)",
+          whatHappens:
+            "রেপ্লিকা ১৮ মিলিসেকেন্ড পর আসল ঠিকানা ফেরত দিলো — ক্যাশের ০.৪ মিলিসেকেন্ডের তুলনায় প্রায় ৪৫ গুণ ধীর।",
+          whyItMatters:
+            "০.৪ms বনাম ১৮ms। যদি ৯৯% ক্লিক ক্যাশ থেকে মেটে, গড় দাঁড়ায় ~০.৬ms। কিন্তু hit-রেট ৯০%-এ নামলে গড় হয় ~২.২ms — প্রায় চারগুণ। এই কারণেই cache hit ratio এখানে সবচেয়ে নিবিড়ভাবে পর্যবেক্ষণ করা মেট্রিক।",
+          analogy: "📂 কপি থেকেই তথ্য মিললো, তবে সময় লেগে গেলো।",
+          activeNodeIds: ["node-replica-db", "node-server-1"],
+          activeEdgeIds: ["edge-s1-to-replica"],
+          edgeOverrides: {
+            "edge-s1-to-replica": {
+              label: "8. Row Found (18ms)",
+              isReverse: true,
+              particleColor: "success",
+            },
+          },
+          nodeStatusMessages: {
+            "node-replica-db": "1 row returned (18ms)",
+            "node-server-1": "Got it — 45x slower than cache",
+          },
+          payloadSnippet: `{\n  "original_url": "https://systemdesign.com/an-old-but-popular-post"\n}\nLatency: 18ms [REPLICA READ]`,
+        },
+        {
+          id: "e-m9",
+          flowType: "redirect-miss",
+          stepNumber: 9,
+          title: "App Pod 1 → Redis Cluster (ক্যাশ ব্যাকফিল)",
+          whatHappens:
+            "উত্তর পাঠানোর আগে সার্ভার লিংকটি Redis-এ বসিয়ে দিলো, নতুন TTL সহ।",
+          whyItMatters:
+            "এই ধাপটাই cache-aside চক্র সম্পূর্ণ করে। কোনো লিংক আবার জনপ্রিয় হয়ে উঠলে (ধরুন কেউ পুরোনো পোস্ট শেয়ার করলো) প্রথম ক্লিকটাই তাকে ক্যাশে তুলে আনে — বাকি লক্ষ ক্লিক আর ডাটাবেজ পর্যন্ত পৌঁছায় না।",
+          analogy: "📌 কপি ফেরত রাখার আগে টেবিলের খাতায় টুকে রাখা।",
+          activeNodeIds: ["node-server-1", "node-cache"],
+          activeEdgeIds: ["edge-s1-to-cache"],
+          edgeOverrides: {
+            "edge-s1-to-cache": { label: "9. Backfill Cache", particleColor: "cache" },
+          },
+          nodeStatusMessages: {
+            "node-server-1": "Repopulating cache...",
+            "node-cache": "SETEX with TTL 24h",
+          },
+          payloadSnippet: `REDIS_CLUSTER.SETEX("{url}:oLd7Zq", 86400, "https://...");\n// পরের ক্লিক থেকে এটি CACHE HIT`,
+        },
+        {
+          id: "e-m10",
+          flowType: "redirect-miss",
+          stepNumber: 10,
+          title: "App Pod 1 → API Gateway (302 রেসপন্স ফেরত)",
+          whatHappens:
+            "সার্ভার HTTP 302 রেসপন্স তৈরি করে গেটওয়েতে পাঠালো।",
+          whyItMatters:
+            "Hit হোক বা miss, উত্তরটা অভিন্ন — শুধু পৌঁছাতে সময় লাগলো বেশি। ধীর পথ কখনোই ভিন্ন উত্তর দেয় না।",
+          analogy: "📤 একই চিঠি, শুধু লিখতে সময় বেশি লাগলো।",
+          activeNodeIds: ["node-server-1", "node-gw"],
+          activeEdgeIds: ["edge-gw-to-s1"],
+          edgeOverrides: {
+            "edge-gw-to-s1": {
+              label: "10. 302 Response",
+              isReverse: true,
+              particleColor: "success",
+            },
+          },
+          nodeStatusMessages: {
+            "node-server-1": "302 Found (countable)",
+            "node-gw": "Receiving response from Pod-1",
+          },
+          payloadSnippet: `HTTP/2 302 Found\nLocation: https://systemdesign.com/an-old-but-popular-post`,
+        },
+        {
+          id: "e-m11",
+          flowType: "redirect-miss",
+          stepNumber: 11,
+          title: "API Gateway → Load Balancer (রেসপন্স ফরওয়ার্ড)",
+          whatHappens:
+            "গেটওয়ে রেসপন্সটি ফরওয়ার্ড করলো এবং latency মেট্রিকে এটিকে 'cache miss' হিসেবে চিহ্নিত করলো।",
+          whyItMatters:
+            "Hit ও miss আলাদা করে ট্যাগ না করলে ড্যাশবোর্ডে শুধু একটা গড় সংখ্যা দেখা যাবে — আর গড় সংখ্যা এখানে মিথ্যা বলে, কারণ দুটো পথের গতি ৪৫ গুণ আলাদা।",
+          analogy: "🧾 বেরোনোর সময় গার্ড লিখে রাখলো: 'এই কাজে দেরি হয়েছে'।",
+          activeNodeIds: ["node-gw", "node-lb"],
+          activeEdgeIds: ["edge-lb-to-gw"],
+          edgeOverrides: {
+            "edge-lb-to-gw": {
+              label: "11. Forward Response",
+              isReverse: true,
+              particleColor: "success",
+            },
+          },
+          nodeStatusMessages: {
+            "node-gw": "Telemetry: cache=miss, 21.3ms",
+            "node-lb": "Response received",
+          },
+          payloadSnippet: `X-Response-Time: 21.3ms\nX-Cache-Layer: redis-miss -> replica`,
+        },
+        {
+          id: "e-m12",
+          flowType: "redirect-miss",
+          stepNumber: 12,
+          title: "Load Balancer → Client (রিডাইরেক্ট, তবে ধীরে)",
+          whatHappens:
+            "ইউজার আসল সাইটে পৌঁছে গেলেন — ২১ মিলিসেকেন্ডে, hit-এর ৩ মিলিসেকেন্ডের বদলে।",
+          whyItMatters:
+            "ইউজার এই পার্থক্যটা টেরই পান না — দুটোই চোখের পলকের চেয়ে দ্রুত। কিন্তু সার্ভারের জন্য পার্থক্যটা বিশাল: miss মানে একটা ডাটাবেজ কানেকশন দখল হওয়া। hit-রেট ৯৯% থেকে ৯০%-এ নামলে ডাটাবেজের উপর চাপ দশগুণ বেড়ে যায়।",
+          analogy: "🐢 গন্তব্য একই, শুধু রাস্তাটা লম্বা ছিল।",
+          activeNodeIds: ["node-lb", "node-client"],
+          activeEdgeIds: ["edge-client-to-lb"],
+          edgeOverrides: {
+            "edge-client-to-lb": {
+              label: "12. Redirecting (21ms)",
+              isReverse: true,
+              particleColor: "success",
+            },
+          },
+          nodeStatusMessages: {
+            "node-lb": "Delivering 302 to client",
+            "node-client": "Redirected in 21ms (cache miss)",
+          },
+          payloadSnippet: `Location: https://systemdesign.com/an-old-but-popular-post\nTotal latency: 21ms  (vs 3.1ms on a cache hit)`,
+        },
+      ],
+    },
+    {
+      id: "failover",
+      name: "Failover",
+      icon: "failover",
+      steps: [
+        {
+          id: "e-f1",
+          flowType: "failover",
+          stepNumber: 1,
+          title: "App Pod 1 → Primary DB (write চেষ্টা, কিন্তু primary মৃত)",
+          whatHappens:
+            "একজন ইউজার নতুন লিংক বানাতে চাইলেন। সার্ভার primary ডাটাবেজে লিখতে গেলো — কিন্তু কানেকশনই তৈরি হলো না। primary মেশিনটি বসে গেছে।",
+          whyItMatters:
+            "'High Availability' মানে কিছু কখনো ভাঙবে না, এমন নয় — মানে হলো ভাঙলে সিস্টেম কী করে, সেটা আগে থেকেই ঠিক করা আছে। এই flow-টা সেই পরিকল্পনাটাই দেখায়।",
+          analogy: "💥 হেড অফিসের মূল খাতাটা হঠাৎ আগুনে পুড়ে গেলো।",
+          activeNodeIds: ["node-server-1", "node-primary-db"],
+          activeEdgeIds: ["edge-s1-to-primary"],
+          edgeOverrides: {
+            "edge-s1-to-primary": { label: "1. Write FAILED", particleColor: "error" },
+          },
+          nodeStatusMessages: {
+            "node-server-1": "ECONNREFUSED — retrying...",
+            "node-primary-db": "❌ NODE DOWN (no heartbeat 10s)",
+          },
+          payloadSnippet: `Error: connect ECONNREFUSED 10.0.4.11:5432\n// circuit breaker: OPEN after 5 consecutive failures`,
+        },
+        {
+          id: "e-f2",
+          flowType: "failover",
+          stepNumber: 2,
+          title: "Primary DB → Read Replica (Raft ভোটে নতুন primary নির্বাচন)",
+          whatHappens:
+            "Patroni ক্লাস্টার লক্ষ করলো primary-র heartbeat বন্ধ। বাকি নোডগুলো ভোট দিয়ে সবচেয়ে কম lag থাকা রেপ্লিকাটিকে নতুন primary হিসেবে promote করলো।",
+          whyItMatters:
+            "সবচেয়ে কম lag-এর রেপ্লিকা বাছা হয় কারণ তার কাছেই সবচেয়ে বেশি সাম্প্রতিক ডেটা আছে — অর্থাৎ সবচেয়ে কম লেখা হারাবে। আর ভোটাভুটির জন্য সংখ্যাগরিষ্ঠতা (quorum) লাগে; এতেই split-brain ঠেকে: নেটওয়ার্ক দু'ভাগ হলে যে অংশে সংখ্যাগরিষ্ঠতা নেই, সে নিজেকে primary ঘোষণা করতে পারে না।",
+          analogy: "🗳️ সহকর্মীরা মিলে ভোট দিয়ে ঠিক করলো কে এখন থেকে মূল খাতা রাখবে।",
+          activeNodeIds: ["node-primary-db", "node-replica-db"],
+          activeEdgeIds: ["edge-primary-to-replica"],
+          edgeOverrides: {
+            "edge-primary-to-replica": {
+              label: "2. Raft election → promote",
+              particleColor: "meta",
+            },
+          },
+          nodeStatusMessages: {
+            "node-primary-db": "❌ DEMOTED (fenced)",
+            "node-replica-db": "⬆️ PROMOTED to PRIMARY (lag was 0.2ms)",
+          },
+          payloadSnippet: `patroni: leader lease expired\npatroni: replica-02 has lowest lag (0.2ms) -> promoting\npatroni: new leader = replica-02   (elapsed: 24s)`,
+        },
+        {
+          id: "e-f3",
+          flowType: "failover",
+          stepNumber: 3,
+          title: "App Pod 2 → Redis Cluster (এদিকে redirect চলছেই)",
+          whatHappens:
+            "ঠিক এই ২৪ সেকেন্ড জুড়ে redirect ট্রাফিক এক মুহূর্তের জন্যও থামেনি — প্রতিটি ক্লিক Redis থেকেই মিটে যাচ্ছে।",
+          whyItMatters:
+            "এটাই ব্যর্থতা সামলানোর আসল কৌশল: read পথ আর write পথ আলাদা রাখা। write ৩০ সেকেন্ড বন্ধ থাকলে কয়েকজন ইউজার নতুন লিংক বানাতে পারেন না। কিন্তু read বন্ধ হলে ১,০০,০০০ ক্লিক/sec হারে ভাঙা লিংক তৈরি হতো। তাই ব্যর্থতার সময় আমরা write কোরবানি দিই, read নয়।",
+          analogy: "📖 মূল খাতা পুড়লেও পড়ার কপিগুলো অক্ষত — তাই পাঠকরা টেরই পেলো না।",
+          activeNodeIds: ["node-server-2", "node-cache"],
+          activeEdgeIds: ["edge-s2-to-cache"],
+          edgeOverrides: {
+            "edge-s2-to-cache": { label: "3. Reads unaffected", particleColor: "cache" },
+          },
+          nodeStatusMessages: {
+            "node-server-2": "Redirects: 100% healthy",
+            "node-cache": "CACHE HIT (0.4ms) — serving as normal",
+          },
+          payloadSnippet: `# during the 24s failover window\nredirect_success_rate: 100%\nshorten_success_rate:    0%   ← degraded, by design`,
+        },
+        {
+          id: "e-f4",
+          flowType: "failover",
+          stepNumber: 4,
+          title: "App Pod 1 → নতুন Primary (write আবার চালু)",
+          whatHappens:
+            "নতুন primary তৈরি হয়ে গেছে। Circuit breaker আবার খুলে গেলো এবং যে write গুলো queue-তে অপেক্ষা করছিল, সেগুলো একে একে সফল হলো।",
+          whyItMatters:
+            "কিন্তু একটা মূল্য দিতে হয়েছে: replication async ছিল, তাই primary মরার ঠিক আগের ~০.২ms-এ যে লেখাগুলো হয়েছিল, সেগুলো কোনো রেপ্লিকায় পৌঁছায়নি — চিরতরে হারিয়ে গেছে। Sync replication এই ক্ষতি ঠেকাতে পারত, কিন্তু তাতে প্রতিটি write ধীর হয়ে যেত। এই বিনিময়টাই সচেতনভাবে বেছে নেওয়া।",
+          analogy: "✍️ নতুন খাতা খোলা হলো — শুধু শেষ মুহূর্তের দু-এক লাইন আর ফিরে পাওয়া গেলো না।",
+          activeNodeIds: ["node-server-1", "node-replica-db"],
+          activeEdgeIds: ["edge-s1-to-replica"],
+          edgeOverrides: {
+            "edge-s1-to-replica": {
+              label: "4. Writes resume (new primary)",
+              particleColor: "write",
+            },
+          },
+          nodeStatusMessages: {
+            "node-server-1": "Circuit CLOSED — writes flowing",
+            "node-replica-db": "PRIMARY — accepting writes",
+          },
+          payloadSnippet: `# post-mortem\ntotal write downtime:  24s\nwrites lost (async replication gap):  ~3 rows\nredirect impact:  none`,
         },
       ],
     },
