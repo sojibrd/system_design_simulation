@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
 import { SimulationNodeData } from "@/app/lib/types";
-import { Info, Sparkles } from "lucide-react";
+import { Info } from "lucide-react";
 
 const categoryColors: Record<string, { border: string; badge: string; text: string }> = {
   client: {
@@ -54,7 +54,7 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
 
   return (
     <div
-      className={`relative group rounded-xl transition-all duration-300 select-none min-w-[160px] max-w-[200px] ${
+      className={`relative group rounded-xl transition-all duration-300 select-none min-w-[160px] max-w-[200px] min-h-[88px] flex flex-col justify-center ${
         isActive
           ? "bg-zinc-900/95 border-2 border-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.45)] ring-2 ring-cyan-500/30 scale-105"
           : selected
@@ -88,9 +88,9 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
         className="!w-2 !h-2 !bg-zinc-600 !border-zinc-900 group-hover:!bg-cyan-400"
       />
 
-      <div className="p-3">
+      <div className="p-3 flex flex-col justify-center min-h-[88px]">
         {/* Header: Emoji + Title */}
-        <div className="flex items-start justify-between gap-2 mb-1.5">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
             <span className="text-xl shrink-0 filter drop-shadow-sm">{nodeData.emoji}</span>
             <div className="min-w-0">
@@ -107,20 +107,12 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); setShowTooltip((prev) => !prev); }}
-            className="text-zinc-500 hover:text-cyan-400 p-0.5 transition-colors"
+            className="text-zinc-500 hover:text-cyan-400 p-0.5 transition-colors shrink-0"
             aria-label="Component info"
           >
             <Info className="w-3.5 h-3.5" />
           </button>
         </div>
-
-        {/* Analogy Pill (Kid-friendly) */}
-        {nodeData.analogy && (
-          <div className="mt-1.5 pt-1.5 border-t border-zinc-800/80 flex items-center gap-1 text-[10px] text-zinc-400 line-clamp-1">
-            <Sparkles className="w-2.5 h-2.5 text-cyan-400 shrink-0" />
-            <span className="truncate italic">{nodeData.analogy}</span>
-          </div>
-        )}
 
         {/* Live Active Status Badge */}
         {isActive && nodeData.statusMessage && (
@@ -150,10 +142,12 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
           <p className="text-[11px] text-zinc-300 leading-relaxed mb-2">
             {nodeData.description}
           </p>
-          <div className="bg-zinc-900/90 rounded-lg p-1.5 border border-zinc-800 text-[10px] text-zinc-400 mb-1.5">
-            <span className="font-semibold text-cyan-300">💡 বাস্তব জীবনের মতো: </span>
-            {nodeData.analogy}
-          </div>
+          {nodeData.analogy && (
+            <div className="bg-zinc-900/90 rounded-lg p-1.5 border border-zinc-800 text-[10px] text-zinc-400 mb-1.5">
+              <span className="font-semibold text-cyan-300">💡 Analogy: </span>
+              {nodeData.analogy}
+            </div>
+          )}
           {nodeData.techSpecs && (
             <div className="text-[9px] font-mono text-zinc-500">
               Tech: <span className="text-zinc-400">{nodeData.techSpecs}</span>

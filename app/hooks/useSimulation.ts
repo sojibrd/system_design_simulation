@@ -63,9 +63,9 @@ export function useSimulation(phaseConfig: PhaseConfig): UseSimulationReturn {
         if (prev + 1 < totalSteps) {
           return prev + 1;
         } else {
-          // Finished flow
+          // Finished flow — reset to initial state (-1) so diagram matches before-starting situation
           setIsPlaying(false);
-          return prev;
+          return -1;
         }
       });
     }, delay);
@@ -86,7 +86,7 @@ export function useSimulation(phaseConfig: PhaseConfig): UseSimulationReturn {
 
   const nextStep = useCallback(() => {
     setIsPlaying(false);
-    setCurrentStepIndex((prev) => (prev < 0 ? 0 : prev + 1 < totalSteps ? prev + 1 : prev));
+    setCurrentStepIndex((prev) => (prev < 0 ? 0 : prev + 1 < totalSteps ? prev + 1 : -1));
   }, [totalSteps]);
 
   const prevStep = useCallback(() => {

@@ -128,7 +128,7 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
         {/* Next Step */}
         <button
           onClick={onNext}
-          disabled={currentStepIndex >= totalSteps - 1}
+          disabled={totalSteps === 0}
           className="p-2 rounded-xl text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800/80 border border-zinc-800 disabled:opacity-40 disabled:pointer-events-none transition-colors"
           title="Next step"
           aria-label="Next step"
