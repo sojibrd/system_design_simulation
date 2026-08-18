@@ -141,15 +141,18 @@ export function useSimulation(phaseConfig: PhaseConfig): UseSimulationReturn {
 
   const edges = useMemo(() => {
     const activeEdges = currentStep?.activeEdgeIds || [];
+    const edgeOverrides = currentStep?.edgeOverrides || {};
 
     return phaseConfig.edges.map((edge) => {
       const isActive = activeEdges.includes(edge.id);
+      const override = edgeOverrides[edge.id] || {};
       return {
         ...edge,
         data: {
           ...edge.data,
           isActive,
           isAnimated: isActive && !isFinished,
+          ...override,
         },
       };
     });

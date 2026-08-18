@@ -407,8 +407,25 @@ export const expertConfig: PhaseConfig = {
         whyItMatters:
           "ডিস্ট্রিবিউটেড ইনফ্রাস্ট্রাকচারের অপ্টিমাইজেশনের ফলে ৯৯.৯৯% রিকোয়েস্ট লেটেন্সি সাব-১০ মিলিসেকেন্ডের নিচে থাকে।",
         analogy: "✨ পলকের মধ্যে কাজ শেষ হওয়া।",
-        activeNodeIds: ["node-server-1", "node-gw", "node-client"],
+        activeNodeIds: ["node-server-1", "node-gw", "node-lb", "node-client"],
         activeEdgeIds: ["edge-gw-to-s1", "edge-lb-to-gw", "edge-client-to-lb"],
+        edgeOverrides: {
+          "edge-gw-to-s1": {
+            label: "4a. 201 Created Response",
+            isReverse: true,
+            particleColor: "#22c55e",
+          },
+          "edge-lb-to-gw": {
+            label: "4b. Forward Response",
+            isReverse: true,
+            particleColor: "#22c55e",
+          },
+          "edge-client-to-lb": {
+            label: "4c. Return Short URL",
+            isReverse: true,
+            particleColor: "#22c55e",
+          },
+        },
         nodeStatusMessages: {
           "node-server-1": "HTTP 201 Created",
           "node-client": "Created: https://link.co/9wK2pL",

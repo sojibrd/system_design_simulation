@@ -267,16 +267,48 @@ export const intermediateConfig: PhaseConfig = {
         id: "i-s5",
         flowType: "shorten",
         stepNumber: 5,
-        title: "Success response to Client (ইউজারকে ছোট লিংক প্রদান)",
+        title: "App Server 1 responds to Load Balancer (সার্ভার ১ লোড ব্যালেন্সারে রেসপন্স প্রদান)",
+        whatHappens:
+          "অ্যাপ সার্ভার ১ শর্ট ইউআরএল তৈরি সম্পন্ন করে লোড ব্যালেন্সারে রেসপন্স ফেরত পাঠালো।",
+        whyItMatters:
+          "সার্ভার প্রসেসিং শেষ করে লোড ব্যালেন্সারের মাধ্যমে রেসপন্স রুটিং করে।",
+        analogy: "📤 ক্যাশিয়ার টোকেন স্লিপ রেজিস্টারে ফেরত জমা দিলো।",
+        activeNodeIds: ["node-server-1", "node-lb"],
+        activeEdgeIds: ["edge-lb-to-s1"],
+        edgeOverrides: {
+          "edge-lb-to-s1": {
+            label: "5. 201 Created Response",
+            isReverse: true,
+            particleColor: "#22c55e",
+          },
+        },
+        nodeStatusMessages: {
+          "node-server-1": "201 Created -> Returning to LB",
+          "node-lb": "Receiving response from Server 1...",
+        },
+        payloadSnippet: `HTTP/1.1 201 Created\nContent-Type: application/json\n\n{\n  "code": "mR8vX1",\n  "shortUrl": "https://sho.rt/mR8vX1"\n}`,
+      },
+      {
+        id: "i-s6",
+        flowType: "shorten",
+        stepNumber: 6,
+        title: "Load Balancer returns Short URL to Client (ইউজারকে ছোট লিংক প্রদান)",
         whatHappens:
           "ইউজারের স্ক্রিনে সাথে সাথে 'https://sho.rt/mR8vX1' ভেসে উঠলো। পুরো প্রক্রিয়াটি মাত্র 15 মিলিসেকেন্ডে শেষ হলো!",
         whyItMatters:
           "হাই পারফরম্যান্স সিস্টেমের p95 latency < 50ms রাখা নিশ্চিত করা হয়েছে।",
         analogy: "🎉 সেকেন্ডের মধ্যে কাজ শেষ করে মুখে হাসি নিয়ে বিদায় জানানো।",
-        activeNodeIds: ["node-server-1", "node-lb", "node-client"],
-        activeEdgeIds: ["edge-lb-to-s1", "edge-client-to-lb"],
+        activeNodeIds: ["node-lb", "node-client"],
+        activeEdgeIds: ["edge-client-to-lb"],
+        edgeOverrides: {
+          "edge-client-to-lb": {
+            label: "6. Return Short URL",
+            isReverse: true,
+            particleColor: "#22c55e",
+          },
+        },
         nodeStatusMessages: {
-          "node-server-1": "201 Created",
+          "node-lb": "Delivering response to Client",
           "node-client": "Created! https://sho.rt/mR8vX1",
         },
         payloadSnippet: `{\n  "status": "success",\n  "shortUrl": "https://sho.rt/mR8vX1",\n  "latencyMs": 14.2\n}`,
@@ -332,6 +364,18 @@ export const intermediateConfig: PhaseConfig = {
         analogy: "🚀 সুপারফাস্ট রকেটের মতো সঠিক গন্তব্যে পৌঁছে যাওয়া।",
         activeNodeIds: ["node-server-2", "node-lb", "node-client"],
         activeEdgeIds: ["edge-lb-to-s2", "edge-client-to-lb"],
+        edgeOverrides: {
+          "edge-lb-to-s2": {
+            label: "3a. 301 Redirect Response",
+            isReverse: true,
+            particleColor: "#22c55e",
+          },
+          "edge-client-to-lb": {
+            label: "3b. Redirecting to Long URL",
+            isReverse: true,
+            particleColor: "#22c55e",
+          },
+        },
         nodeStatusMessages: {
           "node-server-2": "301 Moved Permanently",
           "node-client": "Redirecting...",

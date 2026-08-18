@@ -49,6 +49,7 @@ export interface SimulationStep {
   analogy: string; // Real-world analogy with emoji
   activeNodeIds: string[];
   activeEdgeIds: string[];
+  edgeOverrides?: Record<string, { label?: string; isReverse?: boolean; particleColor?: string }>;
   nodeStatusMessages?: Record<string, string>;
   payloadSnippet?: string;
 }
