@@ -155,20 +155,21 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
               variant="alert"
               onClick={onPause}
               aria-label="Pause simulation"
-              className="flex-1 sm:flex-none min-h-11 sm:min-h-0"
+              className="min-w-11 min-h-11 px-3! sm:px-4! sm:min-w-0 sm:min-h-0"
             >
               <Pause className="w-4 h-4 fill-current" />
-              <span>Pause</span>
+              {/* The glyph carries it on a phone; the word costs a third of the row. */}
+              <span className="hidden sm:inline">Pause</span>
             </Button>
           ) : (
             <Button
               variant="primary"
               onClick={onPlay}
               aria-label="Simulate flow"
-              className="flex-1 sm:flex-none min-h-11 sm:min-h-0"
+              className="min-w-11 min-h-11 px-3! sm:px-4! sm:min-w-0 sm:min-h-0"
             >
               <Play className="w-4 h-4 fill-current" />
-              <span>Simulate</span>
+              <span className="hidden sm:inline">Simulate</span>
             </Button>
           )}
 
