@@ -50,8 +50,8 @@ export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
         id={id}
         d={edgePath}
         fill="none"
-        stroke={isActive ? "rgba(6, 182, 212, 0.3)" : "#27272a"}
-        strokeWidth={isActive ? 2 : 1.5}
+        stroke={isActive ? "rgba(6, 182, 212, 0.3)" : "#1f1f23"}
+        strokeWidth={isActive ? 2 : 1.25}
         strokeDasharray={isActive ? undefined : "4 4"}
         className="transition-colors duration-300"
       />
@@ -102,8 +102,9 @@ export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
         </g>
       )}
 
-      {/* Edge Label Badge */}
-      {edgeData.label && (
+      {/* Edge Label Badge — only the hop that is live in this step carries a
+          label, so the canvas never shows more than one at a time. */}
+      {isActive && edgeData.label && (
         <EdgeLabelRenderer>
           <div
             style={{
@@ -111,11 +112,7 @@ export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
               transform: `translate(-50%, -100%) translate(${renderLabelX}px,${labelY - 8}px)`,
               pointerEvents: "all",
             }}
-            className={`px-2 py-0.5 rounded-md text-[10px] font-mono border transition-all duration-300 select-none max-w-[170px] truncate ${
-              isActive
-                ? "bg-zinc-950/95 text-cyan-300 border-cyan-500/60 shadow-[0_0_12px_rgba(6,182,212,0.35)] scale-105 font-semibold opacity-100"
-                : "bg-zinc-900/70 text-zinc-600 border-zinc-800/40 opacity-40"
-            }`}
+            className="px-2 py-0.5 rounded-md text-[10px] font-mono border transition-all duration-300 select-none max-w-[170px] truncate bg-zinc-950/95 text-cyan-300 border-cyan-500/60 shadow-[0_0_12px_rgba(6,182,212,0.35)] scale-105 font-semibold opacity-100"
           >
             {edgeData.label}
           </div>

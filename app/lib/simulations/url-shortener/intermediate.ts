@@ -187,20 +187,25 @@ export const intermediateConfig: PhaseConfig = {
       },
     },
   ],
+  // Every step below activates exactly one edge and its two endpoint nodes —
+  // one hop per step, so the canvas never lights up a whole subgraph at once.
   flows: {
     shorten: [
       {
         id: "i-s1",
         flowType: "shorten",
         stepNumber: 1,
-        title: "Client hits Load Balancer (লোড ব্যালেন্সারে রিকোয়েস্ট)",
+        title: "Client → Load Balancer (লোড ব্যালেন্সারে রিকোয়েস্ট)",
         whatHappens:
-          "ক্লায়েন্ট নতুন লিংক তৈরি করতে রিকোয়েস্ট পাঠালো। রিকোয়েস্টটি সরাসরি সার্ভারে না গিয়ে প্রথমে লোড ব্যালেন্সারে আসলো।",
+          "ক্লায়েন্ট নতুন লিংক তৈরি করতে রিকোয়েস্ট পাঠালো। রিকোয়েস্টটি সরাসরি সার্ভারে না গিয়ে প্রথমে লোড ব্যালেন্সারে আসলো।",
         whyItMatters:
-          "লোড ব্যালেন্সার সিঙ্গেল পয়েন্ট অফ এন্ট্রি হিসেবে কাজ করে এবং ব্যাকএন্ড সার্ভারগুলোর আসল আইপি আড়ালে রাখে।",
-        analogy: "🏢 বড় ব্যাংকের সদর দরজায় গার্ডের কাছে যাওয়া।",
+          "লোড ব্যালেন্সার সিঙ্গেল পয়েন্ট অফ এন্ট্রি হিসেবে কাজ করে এবং ব্যাকএন্ড সার্ভারগুলোর আসল আইপি আড়ালে রাখে।",
+        analogy: "🏢 বড় ব্যাংকের সদর দরজায় গার্ডের কাছে যাওয়া।",
         activeNodeIds: ["node-client", "node-lb"],
         activeEdgeIds: ["edge-client-to-lb"],
+        edgeOverrides: {
+          "edge-client-to-lb": { label: "1. Incoming Request" },
+        },
         nodeStatusMessages: {
           "node-client": "POST /api/v1/shorten",
           "node-lb": "SSL Termination & Routing...",
@@ -211,14 +216,42 @@ export const intermediateConfig: PhaseConfig = {
         id: "i-s2",
         flowType: "shorten",
         stepNumber: 2,
-        title: "Rate Limiter checks user limit (রেট লিমিট ভেরিফিকেশন)",
+        title: "Load Balancer → Rate Limiter (কোটা যাচাই করতে পাঠানো)",
         whatHappens:
-          "রেট লিমিটার পরীক্ষা করলো — এই ইউজার কি সীমা অতিক্রম করেছে? উত্তর আসলো: 'সব ঠিক আছে, অনুমতি দেওয়া হলো!'",
+          "সার্ভারে পাঠানোর আগে লোড ব্যালেন্সার রেট লিমিটারকে জিজ্ঞেস করলো — এই আইপি কি সীমা অতিক্রম করেছে?",
         whyItMatters:
-          "DDoS আক্রমণ এবং স্ক্র্যাপারদের অতিরিক্ত রিকোয়েস্ট ঠেকিয়ে সার্ভারকে নিরাপদ রাখে।",
-        analogy: "🚦 সিগন্যালে গ্রিন লাইট জ্বলে ওঠা।",
+          "ব্যয়বহুল কাজ শুরু করার আগেই খারাপ ট্রাফিক আটকে দেওয়া সবচেয়ে সস্তা প্রতিরক্ষা।",
+        analogy: "🚦 গাড়ি ছাড়ার আগে সিগন্যালের দিকে তাকানো।",
         activeNodeIds: ["node-lb", "node-limiter"],
         activeEdgeIds: ["edge-lb-to-limiter"],
+        edgeOverrides: {
+          "edge-lb-to-limiter": { label: "2. Check IP Quota" },
+        },
+        nodeStatusMessages: {
+          "node-lb": "Asking rate limiter...",
+          "node-limiter": "Looking up IP 203.0.113.195",
+        },
+        payloadSnippet: `INCR ratelimit:203.0.113.195 (window: 60s)`,
+      },
+      {
+        id: "i-s3",
+        flowType: "shorten",
+        stepNumber: 3,
+        title: "Rate Limiter → Load Balancer (অনুমতি পাওয়া গেলো)",
+        whatHappens:
+          "রেট লিমিটার উত্তর পাঠালো: 'সব ঠিক আছে, ১০টির মধ্যে মাত্র ৩টি ব্যবহার হয়েছে — অনুমতি দেওয়া হলো!'",
+        whyItMatters:
+          "DDoS আক্রমণ এবং স্ক্র্যাপারদের অতিরিক্ত রিকোয়েস্ট ঠেকিয়ে সার্ভারকে নিরাপদ রাখে।",
+        analogy: "✅ সিগন্যালে গ্রিন লাইট জ্বলে ওঠা।",
+        activeNodeIds: ["node-limiter", "node-lb"],
+        activeEdgeIds: ["edge-lb-to-limiter"],
+        edgeOverrides: {
+          "edge-lb-to-limiter": {
+            label: "3. Quota OK (ALLOWED)",
+            isReverse: true,
+            particleColor: "#22c55e",
+          },
+        },
         nodeStatusMessages: {
           "node-limiter": "IP 203.0.113.195: 3/10 tokens used (ALLOWED)",
           "node-lb": "Rate limit PASSED",
@@ -226,58 +259,83 @@ export const intermediateConfig: PhaseConfig = {
         payloadSnippet: `HTTP 200 OK\nX-RateLimit-Limit: 10\nX-RateLimit-Remaining: 7\nX-RateLimit-Reset: 1718000000`,
       },
       {
-        id: "i-s3",
-        flowType: "shorten",
-        stepNumber: 3,
-        title: "Forwarded to App Server 1 (সার্ভার ১-এ ডেলিভারি)",
-        whatHappens:
-          "লোড ব্যালেন্সার দেখলো সার্ভার ১ ফ্রি আছে, তাই রিকোয়েস্টটি সার্ভার ১-এ পাঠিয়ে দিলো। সার্ভার ১ একটি নতুন শর্ট কোড 'mR8vX1' তৈরি করলো।",
-        whyItMatters:
-          "Stateless আর্কিটেকচারের কারণে যেকোনো সার্ভার যেকোনো রিকোয়েস্ট হ্যান্ডেল করতে পারে।",
-        analogy: "👉 'কাউন্টার ১ ফাঁকা আছে, ওখানে যান!'",
-        activeNodeIds: ["node-lb", "node-server-1", "node-server-2"],
-        activeEdgeIds: ["edge-lb-to-s1", "edge-lb-to-s2"],
-        nodeStatusMessages: {
-          "node-lb": "Round-Robin Balancing (S1 & S2)",
-          "node-server-1": "Processing request... 'mR8vX1'",
-          "node-server-2": "Processing concurrent request...",
-        },
-        payloadSnippet: `Generated Base62 ID: "mR8vX1" (Length: 6 chars)`,
-      },
-      {
         id: "i-s4",
         flowType: "shorten",
         stepNumber: 4,
-        title: "Write to DB & warm the Redis Cache (ডাটাবেজ ও ক্যাশে সংরক্ষণ)",
+        title: "Load Balancer → App Server 1 (সার্ভার ১-এ ডেলিভারি)",
         whatHappens:
-          "সার্ভার ১ ডাটাবেজে লিংকটি স্থায়ীভাবে সেভ করলো এবং সাথে সাথে Redis ক্যাশেও রেখে দিলো যাতে একটু পরেই কেউ সার্চ করলে সাথে সাথে পাওয়া যায়!",
+          "লোড ব্যালেন্সার দেখলো সার্ভার ১ ফ্রি আছে, তাই রিকোয়েস্টটি সেখানে পাঠিয়ে দিলো। সার্ভার ১ একটি নতুন শর্ট কোড 'mR8vX1' তৈরি করলো।",
         whyItMatters:
-          "Write-Through বা Cache Invalidation স্ট্র্যাটেজি নিশ্চিত করে যে ক্যাশ ও ডাটাবেজ সবসময় সিঙ্কে থাকে।",
-        analogy: "📌 ডায়েরিতে লিখে একই সাথে সামনে নোটিস বোর্ডেও পিন মেরে রাখা।",
-        activeNodeIds: ["node-server-1", "node-db", "node-cache"],
-        activeEdgeIds: ["edge-s1-to-db", "edge-s1-to-cache"],
-        nodeStatusMessages: {
-          "node-db": "Persisted to table: urls (ID: 59302)",
-          "node-cache": "SET 'url:mR8vX1' -> TTL 24h",
-          "node-server-1": "Saved in DB & Cache!",
+          "একটি রিকোয়েস্ট একবারে একটিমাত্র সার্ভারে যায়। Stateless আর্কিটেকচারের কারণে সার্ভার ২-ও একই কাজ করতে পারতো।",
+        analogy: "👉 'কাউন্টার ১ ফাঁকা আছে, ওখানে যান!'",
+        activeNodeIds: ["node-lb", "node-server-1"],
+        activeEdgeIds: ["edge-lb-to-s1"],
+        edgeOverrides: {
+          "edge-lb-to-s1": { label: "4. Forward to Server 1" },
         },
-        payloadSnippet: `// 1. Save to DB\nINSERT INTO urls (code, url) VALUES ('mR8vX1', 'https://...');\n\n// 2. Cache warm-up\nREDIS.SETEX("url:mR8vX1", 86400, "https://...");`,
+        nodeStatusMessages: {
+          "node-lb": "Round-Robin -> Server 1",
+          "node-server-1": "Processing request... 'mR8vX1'",
+        },
+        payloadSnippet: `Generated Base62 ID: "mR8vX1" (Length: 6 chars)`,
       },
       {
         id: "i-s5",
         flowType: "shorten",
         stepNumber: 5,
-        title: "App Server 1 responds to Load Balancer (সার্ভার ১ লোড ব্যালেন্সারে রেসপন্স প্রদান)",
+        title: "App Server 1 → Database (স্থায়ীভাবে সংরক্ষণ)",
+        whatHappens:
+          "সার্ভার ১ ডাটাবেজে লিংকটি স্থায়ীভাবে সেভ করলো।",
+        whyItMatters:
+          "ডাটাবেজই একমাত্র স্থায়ী উৎস — ক্যাশ মুছে গেলেও এখান থেকে ডেটা ফিরে পাওয়া যায়।",
+        analogy: "📓 ডায়েরিতে কলম দিয়ে পাকাপাকিভাবে লিখে ফেলা।",
+        activeNodeIds: ["node-server-1", "node-db"],
+        activeEdgeIds: ["edge-s1-to-db"],
+        edgeOverrides: {
+          "edge-s1-to-db": { label: "5. Persist to DB" },
+        },
+        nodeStatusMessages: {
+          "node-server-1": "Writing to database...",
+          "node-db": "Persisted to table: urls (ID: 59302)",
+        },
+        payloadSnippet: `INSERT INTO urls (code, url) VALUES ('mR8vX1', 'https://...');`,
+      },
+      {
+        id: "i-s6",
+        flowType: "shorten",
+        stepNumber: 6,
+        title: "App Server 1 → Redis Cache (ক্যাশ গরম করা)",
+        whatHappens:
+          "ডাটাবেজে সেভ হওয়ার পর সার্ভার ১ লিংকটি Redis ক্যাশেও রেখে দিলো, যাতে একটু পরেই কেউ সার্চ করলে সাথে সাথে পাওয়া যায়!",
+        whyItMatters:
+          "Write-Through স্ট্র্যাটেজি নিশ্চিত করে যে ক্যাশ ও ডাটাবেজ সবসময় সিঙ্কে থাকে।",
+        analogy: "📌 ডায়েরিতে লেখার পর সামনের নোটিস বোর্ডেও পিন মেরে রাখা।",
+        activeNodeIds: ["node-server-1", "node-cache"],
+        activeEdgeIds: ["edge-s1-to-cache"],
+        edgeOverrides: {
+          "edge-s1-to-cache": { label: "6. Warm the Cache" },
+        },
+        nodeStatusMessages: {
+          "node-server-1": "Warming cache...",
+          "node-cache": "SET 'url:mR8vX1' -> TTL 24h",
+        },
+        payloadSnippet: `REDIS.SETEX("url:mR8vX1", 86400, "https://...");`,
+      },
+      {
+        id: "i-s7",
+        flowType: "shorten",
+        stepNumber: 7,
+        title: "App Server 1 → Load Balancer (রেসপন্স ফেরত)",
         whatHappens:
           "অ্যাপ সার্ভার ১ শর্ট ইউআরএল তৈরি সম্পন্ন করে লোড ব্যালেন্সারে রেসপন্স ফেরত পাঠালো।",
         whyItMatters:
-          "সার্ভার প্রসেসিং শেষ করে লোড ব্যালেন্সারের মাধ্যমে রেসপন্স রুটিং করে।",
-        analogy: "📤 ক্যাশিয়ার টোকেন স্লিপ রেজিস্টারে ফেরত জমা দিলো।",
+          "সার্ভার প্রসেসিং শেষ করে লোড ব্যালেন্সারের মাধ্যমেই রেসপন্স রুটিং করে — ক্লায়েন্ট সরাসরি সার্ভারকে চেনে না।",
+        analogy: "📤 ক্যাশিয়ার টোকেন স্লিপ রেজিস্টারে ফেরত জমা দিলো।",
         activeNodeIds: ["node-server-1", "node-lb"],
         activeEdgeIds: ["edge-lb-to-s1"],
         edgeOverrides: {
           "edge-lb-to-s1": {
-            label: "5. 201 Created Response",
+            label: "7. 201 Created Response",
             isReverse: true,
             particleColor: "#22c55e",
           },
@@ -289,20 +347,20 @@ export const intermediateConfig: PhaseConfig = {
         payloadSnippet: `HTTP/1.1 201 Created\nContent-Type: application/json\n\n{\n  "code": "mR8vX1",\n  "shortUrl": "https://sho.rt/mR8vX1"\n}`,
       },
       {
-        id: "i-s6",
+        id: "i-s8",
         flowType: "shorten",
-        stepNumber: 6,
-        title: "Load Balancer returns Short URL to Client (ইউজারকে ছোট লিংক প্রদান)",
+        stepNumber: 8,
+        title: "Load Balancer → Client (ইউজারকে ছোট লিংক প্রদান)",
         whatHappens:
-          "ইউজারের স্ক্রিনে সাথে সাথে 'https://sho.rt/mR8vX1' ভেসে উঠলো। পুরো প্রক্রিয়াটি মাত্র 15 মিলিসেকেন্ডে শেষ হলো!",
+          "ইউজারের স্ক্রিনে সাথে সাথে 'https://sho.rt/mR8vX1' ভেসে উঠলো। পুরো প্রক্রিয়াটি মাত্র ১৫ মিলিসেকেন্ডে শেষ হলো!",
         whyItMatters:
-          "হাই পারফরম্যান্স সিস্টেমের p95 latency < 50ms রাখা নিশ্চিত করা হয়েছে।",
-        analogy: "🎉 সেকেন্ডের মধ্যে কাজ শেষ করে মুখে হাসি নিয়ে বিদায় জানানো।",
+          "হাই পারফরম্যান্স সিস্টেমের p95 latency < 50ms রাখা নিশ্চিত করা হয়েছে।",
+        analogy: "🎉 সেকেন্ডের মধ্যে কাজ শেষ করে মুখে হাসি নিয়ে বিদায় জানানো।",
         activeNodeIds: ["node-lb", "node-client"],
         activeEdgeIds: ["edge-client-to-lb"],
         edgeOverrides: {
           "edge-client-to-lb": {
-            label: "6. Return Short URL",
+            label: "8. Return Short URL",
             isReverse: true,
             particleColor: "#22c55e",
           },
@@ -319,18 +377,20 @@ export const intermediateConfig: PhaseConfig = {
         id: "i-r1",
         flowType: "redirect",
         stepNumber: 1,
-        title: "User clicks Short URL (লিংক ক্লিক ও লোড ব্যালেন্সার)",
+        title: "Client → Load Balancer (লিংক ক্লিক)",
         whatHappens:
-          "একজন ইউজার 'https://sho.rt/mR8vX1' লিংকে ক্লিক করলেন। লোড ব্যালেন্সার রিকোয়েস্টটি গ্রহণ করে সার্ভার ১-এ পাঠালো।",
+          "একজন ইউজার 'https://sho.rt/mR8vX1' লিংকে ক্লিক করলেন। রিকোয়েস্টটি লোড ব্যালেন্সারে পৌঁছালো।",
         whyItMatters:
-          "HTTP GET রিকোয়েস্ট খুব দ্রুত প্রসেস করতে হবে কারণ রিডাইরেক্ট লেটেন্সি ব্যবহারকারী সরাসরি অনুভব করে।",
-        analogy: "🚪 সদর দরজা দিয়ে দ্রুত ভেতরে ঢোকা।",
-        activeNodeIds: ["node-client", "node-lb", "node-server-2"],
-        activeEdgeIds: ["edge-client-to-lb", "edge-lb-to-s2"],
+          "HTTP GET রিকোয়েস্ট খুব দ্রুত প্রসেস করতে হবে, কারণ রিডাইরেক্ট লেটেন্সি ব্যবহারকারী সরাসরি অনুভব করে।",
+        analogy: "🚪 সদর দরজা দিয়ে দ্রুত ভেতরে ঢোকা।",
+        activeNodeIds: ["node-client", "node-lb"],
+        activeEdgeIds: ["edge-client-to-lb"],
+        edgeOverrides: {
+          "edge-client-to-lb": { label: "1. Incoming Request" },
+        },
         nodeStatusMessages: {
           "node-client": "GET /mR8vX1",
-          "node-lb": "Forwarding to App Server 2",
-          "node-server-2": "Checking Redis Cache first...",
+          "node-lb": "SSL Termination & Routing...",
         },
         payloadSnippet: `GET /mR8vX1 HTTP/1.1\nHost: sho.rt`,
       },
@@ -338,49 +398,118 @@ export const intermediateConfig: PhaseConfig = {
         id: "i-r2",
         flowType: "redirect",
         stepNumber: 2,
-        title: "Cache Hit! Ultra-fast in-memory lookup (ক্যাশ হিট!)",
+        title: "Load Balancer → App Server 2 (সার্ভার ২-এ ডেলিভারি)",
         whatHappens:
-          "সার্ভার ডাটাবেজের কাছে যাওয়ার আগেই দ্রুত Redis ক্যাশ চেক করলো। ওয়াও! ক্যাশেই লিংকটি পাওয়া গেলো! ডাটাবেজে যাওয়ারই দরকার পড়লো না!",
+          "লোড ব্যালেন্সার এবার সার্ভার ২-কে বেছে নিলো এবং রিকোয়েস্টটি সেখানে পাঠিয়ে দিলো।",
         whyItMatters:
-          "Cache-Aside প্যাটার্নে ৮০-৯০% রিড রিকোয়েস্ট ক্যাশ থেকে মেটানো হয়, যার ফলে ডাটাবেজ ওভারলোড হওয়া থেকে বাঁচে এবং লেটেন্সি ১-২ms এ নেমে আসে।",
-        analogy: "⚡ টেবিলের উপরের খাতা থেকেই উত্তর পেয়ে যাওয়া — আলমারি খোলার প্রয়োজনই হলো না!",
-        activeNodeIds: ["node-server-2", "node-cache"],
-        activeEdgeIds: ["edge-s2-to-cache"],
-        nodeStatusMessages: {
-          "node-cache": "CACHE HIT! key='url:mR8vX1' (Time: 0.8ms)",
-          "node-server-2": "Found in RAM! Bypassing Database.",
+          "লোড দুই সার্ভারের মধ্যে ভাগ হয়ে যায়, তাই একটির উপর চাপ পড়লে অন্যটি সামলে নেয়।",
+        analogy: "👉 'এবার কাউন্টার ২ ফাঁকা, ওখানে যান!'",
+        activeNodeIds: ["node-lb", "node-server-2"],
+        activeEdgeIds: ["edge-lb-to-s2"],
+        edgeOverrides: {
+          "edge-lb-to-s2": { label: "2. Forward to Server 2" },
         },
-        payloadSnippet: `REDIS.GET("url:mR8vX1")\n=> "https://example.com/system-design-intermediate"\nLatency: 0.8ms [CACHE HIT]`,
+        nodeStatusMessages: {
+          "node-lb": "Round-Robin -> Server 2",
+          "node-server-2": "Checking Redis Cache first...",
+        },
+        payloadSnippet: `upstream: app-server-2:8080 (active conns: 12)`,
       },
       {
         id: "i-r3",
         flowType: "redirect",
         stepNumber: 3,
-        title: "Immediate 301 Redirect to User (তাত্ক্ষণিক রিডাইরেক্ট)",
+        title: "App Server 2 → Redis Cache (ক্যাশে খোঁজা)",
         whatHappens:
-          "সার্ভার পলকের মধ্যে ব্রাউজারকে আসল ঠিকানায় পাঠিয়ে দিলো। ব্যবহারকারী চোখের পলক ফেলার আগেই আসল ওয়েবসাইট খুলে গেলো!",
+          "সার্ভার ডাটাবেজের কাছে যাওয়ার আগেই দ্রুত Redis ক্যাশে 'mR8vX1' কোডটি খুঁজলো।",
         whyItMatters:
-          "ক্যাশ থাকার কারণে সমগ্র রিডাইরেক্ট সাইকেল মাত্র ৫ মিলিসেকেন্ডে শেষ হলো।",
-        analogy: "🚀 সুপারফাস্ট রকেটের মতো সঠিক গন্তব্যে পৌঁছে যাওয়া।",
-        activeNodeIds: ["node-server-2", "node-lb", "node-client"],
-        activeEdgeIds: ["edge-lb-to-s2", "edge-client-to-lb"],
+          "Cache-Aside প্যাটার্নে সবসময় আগে ক্যাশ দেখা হয়, যাতে ডাটাবেজ অপ্রয়োজনীয় চাপ থেকে বাঁচে।",
+        analogy: "🔍 আলমারি খোলার আগে টেবিলের উপরের খাতাটা দেখে নেওয়া।",
+        activeNodeIds: ["node-server-2", "node-cache"],
+        activeEdgeIds: ["edge-s2-to-cache"],
+        edgeOverrides: {
+          "edge-s2-to-cache": { label: "3. Cache Lookup" },
+        },
+        nodeStatusMessages: {
+          "node-server-2": "Checking Redis first...",
+          "node-cache": "Searching key 'url:mR8vX1'",
+        },
+        payloadSnippet: `REDIS.GET("url:mR8vX1")`,
+      },
+      {
+        id: "i-r4",
+        flowType: "redirect",
+        stepNumber: 4,
+        title: "Redis Cache → App Server 2 (ক্যাশ হিট!)",
+        whatHappens:
+          "ওয়াও! ক্যাশেই লিংকটি পাওয়া গেলো, মাত্র ০.৮ মিলিসেকেন্ডে! ডাটাবেজে যাওয়ারই দরকার পড়লো না।",
+        whyItMatters:
+          "৮০-৯০% রিড রিকোয়েস্ট ক্যাশ থেকে মেটানো হয়, যার ফলে ডাটাবেজ ওভারলোড থেকে বাঁচে এবং লেটেন্সি ১-২ms এ নেমে আসে।",
+        analogy: "⚡ টেবিলের উপরের খাতা থেকেই উত্তর পেয়ে যাওয়া — আলমারি খোলার প্রয়োজনই হলো না!",
+        activeNodeIds: ["node-cache", "node-server-2"],
+        activeEdgeIds: ["edge-s2-to-cache"],
+        edgeOverrides: {
+          "edge-s2-to-cache": {
+            label: "4. CACHE HIT (0.8ms)",
+            isReverse: true,
+            particleColor: "#a855f7",
+          },
+        },
+        nodeStatusMessages: {
+          "node-cache": "CACHE HIT! key='url:mR8vX1' (0.8ms)",
+          "node-server-2": "Found in RAM! Bypassing Database.",
+        },
+        payloadSnippet: `=> "https://example.com/system-design-intermediate"\nLatency: 0.8ms [CACHE HIT]`,
+      },
+      {
+        id: "i-r5",
+        flowType: "redirect",
+        stepNumber: 5,
+        title: "App Server 2 → Load Balancer (301 রেসপন্স ফেরত)",
+        whatHappens:
+          "সার্ভার ২ একটি HTTP 301 Moved Permanently রেসপন্স তৈরি করে লোড ব্যালেন্সারে ফেরত পাঠালো।",
+        whyItMatters:
+          "301 ব্যবহার করলে ব্রাউজার ঠিকানাটি মনে রাখে — পরের বার আর সার্ভারে আসতেই হয় না।",
+        analogy: "📤 'ঠিকানা বদলেছে' লেখা চিঠি ফেরত পাঠানো।",
+        activeNodeIds: ["node-server-2", "node-lb"],
+        activeEdgeIds: ["edge-lb-to-s2"],
         edgeOverrides: {
           "edge-lb-to-s2": {
-            label: "3a. 301 Redirect Response",
-            isReverse: true,
-            particleColor: "#22c55e",
-          },
-          "edge-client-to-lb": {
-            label: "3b. Redirecting to Long URL",
+            label: "5. 301 Redirect Response",
             isReverse: true,
             particleColor: "#22c55e",
           },
         },
         nodeStatusMessages: {
           "node-server-2": "301 Moved Permanently",
-          "node-client": "Redirecting...",
+          "node-lb": "Receiving response from Server 2...",
         },
-        payloadSnippet: `HTTP/1.1 301 Moved Permanently\nLocation: https://example.com/system-design-intermediate\nX-Cache: HIT`,
+        payloadSnippet: `HTTP/1.1 301 Moved Permanently\nLocation: https://example.com/system-design-intermediate`,
+      },
+      {
+        id: "i-r6",
+        flowType: "redirect",
+        stepNumber: 6,
+        title: "Load Balancer → Client (তাৎক্ষণিক রিডাইরেক্ট)",
+        whatHappens:
+          "ব্রাউজার রেসপন্স পেয়ে পলকের মধ্যে আসল ওয়েবসাইটে চলে গেলো!",
+        whyItMatters:
+          "ক্যাশ থাকার কারণে সমগ্র রিডাইরেক্ট সাইকেল মাত্র ৫ মিলিসেকেন্ডে শেষ হলো।",
+        analogy: "🚀 সুপারফাস্ট রকেটের মতো সঠিক গন্তব্যে পৌঁছে যাওয়া।",
+        activeNodeIds: ["node-lb", "node-client"],
+        activeEdgeIds: ["edge-client-to-lb"],
+        edgeOverrides: {
+          "edge-client-to-lb": {
+            label: "6. Redirecting to Long URL",
+            isReverse: true,
+            particleColor: "#22c55e",
+          },
+        },
+        nodeStatusMessages: {
+          "node-lb": "Delivering 301 to Client",
+          "node-client": "Redirected in 4.9ms!",
+        },
+        payloadSnippet: `Location: https://example.com/system-design-intermediate\nTotal latency: 4.9ms`,
       },
     ],
   },
