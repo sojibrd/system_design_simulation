@@ -20,6 +20,7 @@ const flowBadge: Record<FlowKind, string> = {
   redirect: "REDIRECT · HIT",
   "redirect-miss": "REDIRECT · MISS",
   failover: "FAILOVER",
+  analytics: "ANALYTICS",
 };
 
 interface WalkthroughPanelProps {

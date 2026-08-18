@@ -5,7 +5,7 @@ export const expertConfig: PhaseConfig = {
   name: "Expert",
   badge: "🚀 Production Scale (বিলিয়ন স্কেল)",
   tagline: "Distributed ID generator, DB replication and an asynchronous analytics pipeline",
-  componentCount: 12,
+  componentCount: 13,
   conceptSummary:
     "বিলিয়ন বিলিয়ন ইউআরএল এবং প্রতি সেকেন্ডে লক্ষ লক্ষ ক্লিক হ্যান্ডেল করার জন্য বিশ্বমানের এন্টারপ্রাইজ আর্কিটেকচার। এখানে ডিস্ট্রিবিউটেড আইডি জেনারেটর (Twitter Snowflake), রিড-রাইট আলাদা করতে Primary ও Read Replicas ডাটাবেজ, এবং ইউজারের স্পিড না কমিয়ে ব্যাকগ্রাউন্ডে ক্লিক গোনার জন্য Kafka কিউ ব্যবহার করা হয়।",
   keyConcepts: [
@@ -128,6 +128,25 @@ export const expertConfig: PhaseConfig = {
       ],
       chosen: "Async — Kafka-তে ছুড়ে দিয়ে সাথে সাথে redirect",
       why: "ইউজারের কাজ হলো গন্তব্যে পৌঁছানো; ক্লিক গোনা আমাদের নিজেদের প্রয়োজন। নিজেদের প্রয়োজনকে কখনোই ইউজারের পথে দাঁড় করানো উচিত নয়। এই কারণেই redirect flow-এ Kafka-র ধাপটি ইউজারের রেসপন্স চলে যাওয়ার পরে আসে, আগে নয়।",
+    },
+    {
+      question: "পরের ধাপ — একাধিক রিজিয়ন কি দরকার?",
+      options: [
+        {
+          name: "Single-region write + global CDN (এখন)",
+          note: "লেখা একটিমাত্র রিজিয়নে, পড়া CDN ও ক্যাশ থেকে বিশ্বজুড়ে। কোনো conflict নেই, কিন্তু দূরের ইউজারের write-এ ২০০ms+ লাগে, আর পুরো রিজিয়ন বসে গেলে write সম্পূর্ণ বন্ধ।",
+        },
+        {
+          name: "Active-passive (দ্বিতীয় রিজিয়ন standby)",
+          note: "দ্বিতীয় রিজিয়ন শুধু ডেটা কপি নিয়ে বসে থাকে, দুর্যোগে দায়িত্ব নেয়। বিপর্যয় থেকে সুরক্ষা মেলে, কিন্তু অর্ধেক হার্ডওয়্যার সারাক্ষণ অলস।",
+        },
+        {
+          name: "Active-active (দুই রিজিয়নেই write)",
+          note: "সব জায়গায় write দ্রুত। কিন্তু দুই রিজিয়নে একই short code একসাথে তৈরি হলে কে জিতবে — সেই conflict resolution লিখতে হয়।",
+        },
+      ],
+      chosen: "Single-region write + global CDN (এখন)",
+      why: "URL shortener-এ read আর write-এর ভূগোল সম্পূর্ণ আলাদা: read বিশ্বজুড়ে ছড়ানো (তাই CDN ও Redis), কিন্তু write বিরল — মাত্র ১,০০০/sec। যে কাজ সেকেন্ডে হাজারবারই হয়, তাকে বিশ্বজুড়ে ছড়ানোর খরচ পোষায় না। আর Snowflake আইডি এখানে একটা লুকানো সুবিধা দেয়: মেশিন আইডি আলাদা বলে দুই রিজিয়নেও কখনো একই কোড তৈরি হবে না — অর্থাৎ active-active-এ যাওয়ার পথ ইতিমধ্যেই খোলা আছে, শুধু আজ সেই খরচের দরকার নেই।",
     },
     {
       question: "লিংক কি চিরকাল থাকবে? আর ক্ষতিকর লিংক?",
@@ -318,6 +337,21 @@ export const expertConfig: PhaseConfig = {
         techSpecs: "Columnar DB / Real-time OLAP",
       },
     },
+    {
+      id: "node-dashboard",
+      type: "simulationNode",
+      position: { x: 2340, y: 765 },
+      data: {
+        label: "Owner Dashboard",
+        subLabel: "Analytics UI",
+        category: "client",
+        emoji: "📈",
+        analogy: "লিংকের মালিকের রিপোর্ট কার্ড — কত ক্লিক, কোন দেশ থেকে, কোন ব্রাউজারে।",
+        description:
+          "লিংকের মালিক এখান থেকে তার ক্লিক পরিসংখ্যান দেখেন। এটি সম্পূর্ণ আলাদা একটি read path — redirect-এর পথে এর কোনো ভূমিকা নেই।",
+        techSpecs: "OLAP Query / Aggregations",
+      },
+    },
   ],
   edges: [
     {
@@ -486,6 +520,18 @@ export const expertConfig: PhaseConfig = {
       data: {
         label: "Batch Consume & Aggregate",
         particleColor: "error",
+      },
+    },
+    {
+      id: "edge-worker-to-dashboard",
+      type: "animatedFlowEdge",
+      source: "node-worker",
+      sourceHandle: "r-s",
+      target: "node-dashboard",
+      targetHandle: "l-t",
+      data: {
+        label: "OLAP Query",
+        particleColor: "read",
       },
     },
   ],
@@ -1394,6 +1440,62 @@ export const expertConfig: PhaseConfig = {
             "node-replica-db": "PRIMARY — accepting writes",
           },
           payloadSnippet: `# post-mortem\ntotal write downtime:  24s\nwrites lost (async replication gap):  ~3 rows\nredirect impact:  none`,
+        },
+      ],
+    },
+    {
+      id: "analytics",
+      name: "Analytics",
+      icon: "analytics",
+      steps: [
+        {
+          id: "e-a1",
+          flowType: "analytics",
+          stepNumber: 1,
+          title: "Dashboard → Analytics Engine (মালিক তার রিপোর্ট চাইলেন)",
+          whatHappens:
+            "লিংকের মালিক ড্যাশবোর্ড খুলে জানতে চাইলেন — গত ৩০ দিনে এই লিংকে কোন দেশ থেকে কত ক্লিক পড়েছে? প্রশ্নটি ClickHouse-এ গেলো।",
+          whyItMatters:
+            "লক্ষ করুন এই পথে PostgreSQL, Redis বা অ্যাপ pod — কিছুই নেই। Analytics একটি সম্পূর্ণ আলাদা read path। এই বিচ্ছিন্নতাই মূল কথা: একজন মালিক ভুল করে ভারী কোনো কোয়েরি চালালেও একটিও redirect ধীর হবে না।",
+          analogy: "📋 দোকানদার হিসাবরক্ষকের কাছে গিয়ে জিজ্ঞেস করলেন 'এ মাসে কত বিক্রি হলো?' — সামনের কাউন্টারের লাইন এতে থামে না।",
+          activeNodeIds: ["node-dashboard", "node-worker"],
+          activeEdgeIds: ["edge-worker-to-dashboard"],
+          edgeOverrides: {
+            "edge-worker-to-dashboard": {
+              label: "1. OLAP Aggregation Query",
+              isReverse: true,
+              particleColor: "read",
+            },
+          },
+          nodeStatusMessages: {
+            "node-dashboard": "GET /stats/9wK2pL?days=30",
+            "node-worker": "Scanning 12.4M rows (columnar)",
+          },
+          payloadSnippet: `SELECT country, count() AS clicks\nFROM click_analytics\nWHERE short_code = '9wK2pL'\n  AND clicked_at > now() - INTERVAL 30 DAY\nGROUP BY country ORDER BY clicks DESC;`,
+        },
+        {
+          id: "e-a2",
+          flowType: "analytics",
+          stepNumber: 2,
+          title: "Analytics Engine → Dashboard (১.২ কোটি সারি, ৯০ মিলিসেকেন্ডে)",
+          whatHappens:
+            "ClickHouse ১.২ কোটি সারি ঘেঁটে দেশভিত্তিক হিসাব বানিয়ে ৯০ মিলিসেকেন্ডে ফেরত দিলো। ড্যাশবোর্ডে গ্রাফ ভেসে উঠলো।",
+          whyItMatters:
+            "একই কাজ PostgreSQL-এ করতে গেলে কয়েক সেকেন্ড লাগত। পার্থক্যটা কলামনার স্টোরেজে: ClickHouse শুধু `country` কলামটাই ডিস্ক থেকে পড়ে, পুরো সারি নয়। এই কারণেই analytics-এর জন্য আলাদা ডাটাবেজ — একই ডেটা, কিন্তু প্রশ্নের ধরন সম্পূর্ণ ভিন্ন বলে স্টোরেজের আকারও ভিন্ন হতে হয়।",
+          analogy: "📊 হিসাবরক্ষক পুরো খাতা না পড়ে শুধু 'দেশ' কলামটা চোখ বুলিয়ে যোগফল বলে দিলেন।",
+          activeNodeIds: ["node-worker", "node-dashboard"],
+          activeEdgeIds: ["edge-worker-to-dashboard"],
+          edgeOverrides: {
+            "edge-worker-to-dashboard": {
+              label: "2. Aggregated Result (90ms)",
+              particleColor: "success",
+            },
+          },
+          nodeStatusMessages: {
+            "node-worker": "12.4M rows scanned in 90ms",
+            "node-dashboard": "Chart rendered — BD 61%, IN 18%, US 9%",
+          },
+          payloadSnippet: `[\n  { "country": "BD", "clicks": 2841903 },\n  { "country": "IN", "clicks":  842117 },\n  { "country": "US", "clicks":  418266 }\n]\nElapsed: 90ms  |  rows scanned: 12,400,000`,
         },
       ],
     },

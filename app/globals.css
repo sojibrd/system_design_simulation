@@ -6,7 +6,7 @@
    Every visual value lives in the imported file; nothing below it is
    theme-specific.
    ========================================================================= */
-@import "./themes/editorial.css";
+@import "./themes/control-room.css";
 
 /* ============================================================================
    THEME CONTRACT

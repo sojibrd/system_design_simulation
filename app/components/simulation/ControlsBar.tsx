@@ -15,6 +15,7 @@ import {
   PanelRight,
   SearchX,
   ShieldAlert,
+  BarChart3,
   type LucideIcon,
   PanelRightClose,
 } from "lucide-react";
@@ -26,6 +27,7 @@ const flowIcons: Record<FlowIcon, LucideIcon> = {
   redirect: CornerUpRight,
   miss: SearchX,
   failover: ShieldAlert,
+  analytics: BarChart3,
 };
 
 interface ControlsBarProps {

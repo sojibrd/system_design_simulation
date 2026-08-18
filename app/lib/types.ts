@@ -60,10 +60,11 @@ export type FlowKind =
   | "shorten"
   | "redirect"
   | "redirect-miss"
-  | "failover";
+  | "failover"
+  | "analytics";
 
 /** Name of a lucide icon the controls bar renders for a flow. */
-export type FlowIcon = "link" | "redirect" | "miss" | "failover";
+export type FlowIcon = "link" | "redirect" | "miss" | "failover" | "analytics";
 
 export interface FlowDefinition {
   id: FlowKind;
