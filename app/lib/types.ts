@@ -18,12 +18,16 @@ export interface SimulationNodeData extends Record<string, unknown> {
   description: string;
   techSpecs?: string;
   isActive?: boolean;
+  /** False once the flow has finished — highlight stays, motion stops. */
+  isAnimated?: boolean;
   statusMessage?: string;
 }
 
 export interface SimulationEdgeData extends Record<string, unknown> {
   label?: string;
   isActive?: boolean;
+  /** False once the flow has finished — highlight stays, motion stops. */
+  isAnimated?: boolean;
   isReverse?: boolean;
   particleColor?: string;
   highlightText?: string;

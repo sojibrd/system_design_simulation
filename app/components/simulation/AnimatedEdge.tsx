@@ -20,6 +20,8 @@ export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
 }) => {
   const edgeData = (data as unknown as SimulationEdgeData) || {};
   const isActive = Boolean(edgeData.isActive);
+  // Highlight stays on after the flow finishes, but the motion stops.
+  const isAnimated = isActive && edgeData.isAnimated !== false;
   const isReverse = Boolean(edgeData.isReverse);
   const particleColor = edgeData.particleColor || "#22d3ee";
 
@@ -53,13 +55,19 @@ export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
           fill="none"
           stroke={particleColor}
           strokeWidth={2.5}
-          className={isReverse ? "animated-edge-active-reverse" : "animated-edge-active"}
+          className={
+            isAnimated
+              ? isReverse
+                ? "animated-edge-active-reverse"
+                : "animated-edge-active"
+              : undefined
+          }
           filter="drop-shadow(0 0 4px rgba(6, 182, 212, 0.6))"
         />
       )}
 
       {/* Moving Packet / Dot along the path (SVG animateMotion) */}
-      {isActive && (
+      {isAnimated && (
         <g>
           {/* Outer glow ring */}
           <circle r="7" fill={particleColor} opacity="0.3">

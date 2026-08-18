@@ -19,6 +19,8 @@ interface WalkthroughPanelProps {
   totalSteps: number;
   steps: SimulationStep[];
   onSelectStep: (index: number) => void;
+  /** Flow has run to the end — freeze the live indicators. */
+  isFinished?: boolean;
 }
 
 export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
@@ -27,6 +29,7 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
   totalSteps,
   steps,
   onSelectStep,
+  isFinished = false,
 }) => {
   const [showPayload, setShowPayload] = useState<boolean>(true);
   const [showAllSteps, setShowAllSteps] = useState<boolean>(false);
@@ -114,7 +117,11 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
                 {isCompleted ? (
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                 ) : isCurrent ? (
-                  <span className="w-3.5 h-3.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
+                  <span
+                    className={`w-3.5 h-3.5 rounded-full bg-cyan-400 shrink-0 ${
+                      isFinished ? "" : "animate-pulse"
+                    }`}
+                  />
                 ) : (
                   <span className="w-3.5 h-3.5 rounded-full border border-zinc-700 shrink-0 flex items-center justify-center text-[9px]">
                     {idx + 1}

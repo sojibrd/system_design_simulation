@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import {
   ReactFlow,
+  ReactFlowInstance,
   Background,
   Controls,
   BackgroundVariant,
@@ -13,12 +14,35 @@ import { SimulationNode } from "./SimulationNode";
 import { AnimatedFlowEdge } from "./AnimatedEdge";
 import { CustomNodeType, CustomEdgeType } from "@/app/lib/types";
 
+const FIT_VIEW_OPTIONS = { padding: 0.22, minZoom: 0.4, maxZoom: 1.5 };
+
 interface FlowDiagramProps {
   nodes: CustomNodeType[];
   edges: CustomEdgeType[];
+  /** Changing this re-fits the viewport — used when the canvas width changes. */
+  fitViewSignal?: unknown;
 }
 
-export const FlowDiagram: React.FC<FlowDiagramProps> = ({ nodes, edges }) => {
+export const FlowDiagram: React.FC<FlowDiagramProps> = ({
+  nodes,
+  edges,
+  fitViewSignal,
+}) => {
+  const instanceRef = useRef<ReactFlowInstance<
+    CustomNodeType,
+    CustomEdgeType
+  > | null>(null);
+
+  // The canvas width changes when the walkthrough panel is toggled; the CSS
+  // grid transition takes a moment, so re-fit once it has settled.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      instanceRef.current?.fitView(FIT_VIEW_OPTIONS);
+    }, 260);
+
+    return () => clearTimeout(timer);
+  }, [fitViewSignal]);
+
   const nodeTypes: NodeTypes = useMemo(
     () => ({
       simulationNode: SimulationNode,
@@ -40,8 +64,11 @@ export const FlowDiagram: React.FC<FlowDiagramProps> = ({ nodes, edges }) => {
         edges={edges}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
+        onInit={(instance) => {
+          instanceRef.current = instance;
+        }}
         fitView
-        fitViewOptions={{ padding: 0.22, minZoom: 0.4, maxZoom: 1.5 }}
+        fitViewOptions={FIT_VIEW_OPTIONS}
         minZoom={0.3}
         maxZoom={1.8}
         nodesDraggable={false}

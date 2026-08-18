@@ -49,6 +49,8 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
 
   const colors = categoryColors[nodeData.category] || categoryColors.compute;
   const isActive = Boolean(nodeData.isActive);
+  // Highlight stays on after the flow finishes, but the motion stops.
+  const isAnimated = isActive && nodeData.isAnimated !== false;
 
   return (
     <div
@@ -123,7 +125,11 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
         {/* Live Active Status Badge */}
         {isActive && nodeData.statusMessage && (
           <div className="mt-2 py-1 px-2 rounded-md bg-cyan-500/15 border border-cyan-500/30 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping shrink-0" />
+            <span
+              className={`w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0 ${
+                isAnimated ? "animate-ping" : ""
+              }`}
+            />
             <span className="text-[10px] text-cyan-200 font-medium truncate">
               {nodeData.statusMessage}
             </span>

@@ -12,6 +12,8 @@ import {
   Gauge,
   Link,
   CornerUpRight,
+  PanelRight,
+  PanelRightClose,
 } from "lucide-react";
 
 interface ControlsBarProps {
@@ -27,6 +29,8 @@ interface ControlsBarProps {
   onReset: () => void;
   onSpeedChange: (speed: SpeedOption) => void;
   onFlowChange: (flow: FlowType) => void;
+  isPanelOpen: boolean;
+  onTogglePanel: () => void;
 }
 
 export const ControlsBar: React.FC<ControlsBarProps> = ({
@@ -42,10 +46,12 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
   onReset,
   onSpeedChange,
   onFlowChange,
+  isPanelOpen,
+  onTogglePanel,
 }) => {
   return (
     <div className="w-full bg-zinc-900/90 border border-zinc-800 rounded-xl md:rounded-2xl p-3 md:p-4 shadow-lg backdrop-blur-md overflow-x-auto">
-      <div className="flex items-center justify-between gap-3 min-w-[460px]">
+      <div className="flex items-center justify-between gap-3 min-w-[560px]">
       {/* 1. Flow Type Switcher (Shorten vs Redirect) */}
       <div className="flex items-center bg-zinc-950 p-1 rounded-xl border border-zinc-800">
         <button
@@ -150,6 +156,30 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
           </button>
         ))}
       </div>
+
+      {/* 4. Step Walkthrough Panel Toggle */}
+      <button
+        onClick={onTogglePanel}
+        className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-all shrink-0 ${
+          isPanelOpen
+            ? "bg-zinc-800 text-cyan-300 border-zinc-700"
+            : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/80 border-zinc-800"
+        }`}
+        title={
+          isPanelOpen
+            ? "ধাপের প্যানেল লুকান (ডায়াগ্রাম ফুল-স্ক্রিন)"
+            : "ধাপগুলো দেখুন (Show Steps)"
+        }
+        aria-pressed={isPanelOpen}
+        aria-label="Toggle step walkthrough panel"
+      >
+        {isPanelOpen ? (
+          <PanelRightClose className="w-4 h-4" />
+        ) : (
+          <PanelRight className="w-4 h-4" />
+        )}
+        <span className="hidden sm:inline">Steps</span>
+      </button>
       </div>
     </div>
   );

@@ -24,9 +24,6 @@ export const Header: React.FC = () => {
                   Interactive
                 </span>
               </div>
-              <p className="text-[10px] text-zinc-500 hidden sm:block">
-                ইন্টারেক্টিভ আর্কিটেকচার সিমুলেশন ও স্টেপ-বাই-স্টেপ ভিজ্যুয়ালাইজার
-              </p>
             </div>
           </div>
 

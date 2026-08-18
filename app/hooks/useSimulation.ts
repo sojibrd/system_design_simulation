@@ -8,6 +8,7 @@ export type SpeedOption = 0.5 | 1 | 2;
 export interface UseSimulationReturn {
   currentStepIndex: number;
   isPlaying: boolean;
+  isFinished: boolean;
   speed: SpeedOption;
   flowType: FlowType;
   totalSteps: number;
@@ -37,6 +38,11 @@ export function useSimulation(phaseConfig: PhaseConfig): UseSimulationReturn {
 
   const totalSteps = steps.length;
   const currentStep = currentStepIndex >= 0 ? steps[currentStepIndex] || null : null;
+
+  // Sitting on the last step with playback stopped means the flow is done —
+  // the diagram keeps its highlight but all motion is switched off.
+  const isFinished =
+    !isPlaying && totalSteps > 0 && currentStepIndex === totalSteps - 1;
 
   // Reset step index and flow when phase changes
   useEffect(() => {
@@ -123,11 +129,12 @@ export function useSimulation(phaseConfig: PhaseConfig): UseSimulationReturn {
         data: {
           ...node.data,
           isActive,
+          isAnimated: isActive && !isFinished,
           statusMessage,
         },
       };
     });
-  }, [phaseConfig.nodes, currentStep]);
+  }, [phaseConfig.nodes, currentStep, isFinished]);
 
   const edges = useMemo(() => {
     const activeEdges = currentStep?.activeEdgeIds || [];
@@ -139,14 +146,16 @@ export function useSimulation(phaseConfig: PhaseConfig): UseSimulationReturn {
         data: {
           ...edge.data,
           isActive,
+          isAnimated: isActive && !isFinished,
         },
       };
     });
-  }, [phaseConfig.edges, currentStep]);
+  }, [phaseConfig.edges, currentStep, isFinished]);
 
   return {
     currentStepIndex,
     isPlaying,
+    isFinished,
     speed,
     flowType,
     totalSteps,
