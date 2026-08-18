@@ -83,6 +83,7 @@ export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
               path={edgePath}
               dur="1.2s"
               repeatCount="indefinite"
+              calcMode="linear"
               keyPoints={isReverse ? "1;0" : "0;1"}
               keyTimes="0;1"
             />
@@ -93,6 +94,7 @@ export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
               path={edgePath}
               dur="1.2s"
               repeatCount="indefinite"
+              calcMode="linear"
               keyPoints={isReverse ? "1;0" : "0;1"}
               keyTimes="0;1"
             />

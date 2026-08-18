@@ -79,28 +79,6 @@ export const beginnerConfig: PhaseConfig = {
         particleColor: "#3b82f6",
       },
     },
-    {
-      id: "edge-db-to-server",
-      type: "animatedFlowEdge",
-      source: "node-db",
-      target: "node-server",
-      data: {
-        label: "3. SQL Result (OK)",
-        isReverse: true,
-        particleColor: "#10b981",
-      },
-    },
-    {
-      id: "edge-server-to-client",
-      type: "animatedFlowEdge",
-      source: "node-server",
-      target: "node-client",
-      data: {
-        label: "4. Return Short URL",
-        isReverse: true,
-        particleColor: "#22c55e",
-      },
-    },
   ],
   flows: {
     shorten: [
@@ -151,7 +129,14 @@ export const beginnerConfig: PhaseConfig = {
           "ACID ট্রানজাকশনের মাধ্যমে নিশ্চিত হওয়া যায় যে ডাটাবেজ ক্র্যাশ করলেও ডাটা হারাবে না।",
         analogy: "✍️ ডায়েরিতে লিখে কলমের মুখ বন্ধ করে দেওয়া — যাতে লেখা মোছা না যায়।",
         activeNodeIds: ["node-db", "node-server"],
-        activeEdgeIds: ["edge-db-to-server"],
+        activeEdgeIds: ["edge-server-to-db"],
+        edgeOverrides: {
+          "edge-server-to-db": {
+            label: "3. SQL Result (OK)",
+            isReverse: true,
+            particleColor: "#10b981",
+          },
+        },
         nodeStatusMessages: {
           "node-db": "Saved successfully! Row ID: 10482",
           "node-server": "DB confirmation received.",
@@ -169,7 +154,14 @@ export const beginnerConfig: PhaseConfig = {
           "HTTP 201 Created স্ট্যাটাস কোড সহ শর্ট URL এবং মেটাডাটা রেসপন্স হিসেবে পাঠানো হয়।",
         analogy: "🎟️ ক্যাশিয়ারের হাত থেকে টোকেন স্লিপ হাতে পাওয়া।",
         activeNodeIds: ["node-server", "node-client"],
-        activeEdgeIds: ["edge-server-to-client"],
+        activeEdgeIds: ["edge-client-to-server"],
+        edgeOverrides: {
+          "edge-client-to-server": {
+            label: "4. Return Short URL",
+            isReverse: true,
+            particleColor: "#22c55e",
+          },
+        },
         nodeStatusMessages: {
           "node-server": "HTTP 201 Created -> Sending response",
           "node-client": "Ready! Copy: https://sho.rt/xK9pL2",
@@ -225,7 +217,14 @@ export const beginnerConfig: PhaseConfig = {
           "ডাটাবেজ থেকে আসল ইউআরএল মেমরিতে লোড হয় এবং সার্ভার রিডাইরেক্ট রেসপন্স তৈরি করে।",
         analogy: "🎯 খাতায় লেখা আসল ঠিকানা চোখে পড়া।",
         activeNodeIds: ["node-db", "node-server"],
-        activeEdgeIds: ["edge-db-to-server"],
+        activeEdgeIds: ["edge-server-to-db"],
+        edgeOverrides: {
+          "edge-server-to-db": {
+            label: "3. SQL Result (OK)",
+            isReverse: true,
+            particleColor: "#10b981",
+          },
+        },
         nodeStatusMessages: {
           "node-db": "Found: https://example.com/very/long...",
           "node-server": "Preparing HTTP 301 Redirect...",
@@ -243,7 +242,14 @@ export const beginnerConfig: PhaseConfig = {
           "HTTP 301 (Moved Permanently) রেসপন্সের Location হেডারে আসল URL দিয়ে দেওয়া হয়, ফলে ব্রাউজার নিজে থেকেই আসল ওয়েবসাইটে চলে যায়।",
         analogy: "➡️ সাইনবোর্ড দেখে গাড়ি সঠিক হাইওয়েতে ঢুকে পড়া।",
         activeNodeIds: ["node-server", "node-client"],
-        activeEdgeIds: ["edge-server-to-client"],
+        activeEdgeIds: ["edge-client-to-server"],
+        edgeOverrides: {
+          "edge-client-to-server": {
+            label: "4. Return Short URL",
+            isReverse: true,
+            particleColor: "#22c55e",
+          },
+        },
         nodeStatusMessages: {
           "node-server": "HTTP/1.1 301 Moved Permanently",
           "node-client": "Redirecting to original URL...",
