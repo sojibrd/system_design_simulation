@@ -89,12 +89,28 @@ export interface SimulationStep {
   payloadSnippet?: string;
 }
 
-export type PhaseId = "beginner" | "intermediate" | "expert";
+/**
+ * A level is a PROMISE the architecture keeps, not a difficulty rating. The
+ * order cannot be shuffled: you only reach for replicas after you have split
+ * reads out, and you only think about geography once one region is solid.
+ *
+ * - functional — it works, in the fewest components possible
+ * - scalable   — it survives load; the first bottleneck has been removed
+ * - reliable   — it stays CORRECT when machines die AND when writers collide
+ * - global     — it survives distance (optional: meaningless for a system that
+ *                is inherently single-region, e.g. a per-city dispatch service)
+ */
+export type LevelId = "functional" | "scalable" | "reliable" | "global";
 
 /**
- * The back-of-the-envelope numbers this phase is sized for. These are what
+ * The back-of-the-envelope numbers this level is sized for. These are what
  * justify the component count — without them each tier looks like an arbitrary
  * pile of boxes.
+ *
+ * Only the four universal figures are fields. Anything system-specific (a URL
+ * shortener's code length, a chat system's fan-out, a feed's follower ceiling)
+ * goes in `extras`, so this type never grows a column that most simulations
+ * would have to leave blank.
  */
 export interface ScaleEstimate {
   /** e.g. "১০০ writes/sec" */
@@ -104,8 +120,8 @@ export interface ScaleEstimate {
   readWriteRatio: string;
   /** Storage needed after five years. */
   storage5y: string;
-  /** Short code length and the keyspace it buys. */
-  codeLength: string;
+  /** System-specific figures, rendered after the four universal ones. */
+  extras?: { label: string; value: string }[];
 }
 
 /**
@@ -116,13 +132,14 @@ export interface TradeOff {
   /** The question being settled, e.g. "301 না 302?" */
   question: string;
   options: { name: string; note: string }[];
-  /** Which option this phase takes, and why. */
+  /** Which option this level takes, and why. */
   chosen: string;
   why: string;
 }
 
-export interface PhaseConfig {
-  id: PhaseId;
+export interface LevelConfig {
+  id: LevelId;
+  /** Display name — normally the level's own word ("Scalable"). */
   name: string;
   badge: string;
   tagline: string;
@@ -133,6 +150,21 @@ export interface PhaseConfig {
   tradeOffs?: TradeOff[];
   nodes: CustomNodeType[];
   edges: CustomEdgeType[];
-  /** First entry is the flow selected when the phase opens. */
+  /** First entry is the flow selected when the level opens. */
   flows: FlowDefinition[];
+}
+
+/**
+ * One complete system design problem. A simulation declares only the levels
+ * that teach it something — three is a perfectly valid architecture story, and
+ * an empty "Global" tab would be worse than no tab at all.
+ */
+export interface SimulationConfig {
+  /** Stable slug — also the future route segment. */
+  id: string;
+  name: string;
+  /** One line describing the problem, shown in the picker. */
+  tagline: string;
+  /** Ordered functional → global. First entry is the default level. */
+  levels: LevelConfig[];
 }

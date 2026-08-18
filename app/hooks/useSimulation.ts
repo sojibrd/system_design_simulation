@@ -4,10 +4,10 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   FlowKind,
   FlowDefinition,
-  PhaseConfig,
+  LevelConfig,
   CustomNodeType,
   CustomEdgeType,
-  PhaseId,
+  LevelId,
   SimulationStep,
 } from "@/app/lib/types";
 
@@ -19,7 +19,7 @@ export interface UseSimulationReturn {
   isFinished: boolean;
   speed: SpeedOption;
   flowType: FlowKind;
-  /** The flows this phase declares, in selector order. */
+  /** The flows this level declares, in selector order. */
   availableFlows: FlowDefinition[];
   totalSteps: number;
   currentStep: SimulationStep | null;
@@ -36,22 +36,22 @@ export interface UseSimulationReturn {
   setFlowType: (flow: FlowKind) => void;
 }
 
-export function useSimulation(phaseConfig: PhaseConfig): UseSimulationReturn {
+export function useSimulation(levelConfig: LevelConfig): UseSimulationReturn {
   const [flowType, setFlowTypeState] = useState<FlowKind>(
-    phaseConfig.flows[0].id
+    levelConfig.flows[0].id
   );
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(-1);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [speed, setSpeed] = useState<SpeedOption>(1);
 
-  // A phase only declares the flows that make sense for it — beginner has no
-  // cache, so it has no cache-miss flow. Falling back to the first flow keeps
-  // the selector honest when switching between phases.
+  // A level only declares the flows that make sense for it — the functional
+  // level has no cache, so it has no cache-miss flow. Falling back to the first
+  // flow keeps the selector honest when switching between levels.
   const steps = useMemo(() => {
     const flow =
-      phaseConfig.flows.find((f) => f.id === flowType) ?? phaseConfig.flows[0];
+      levelConfig.flows.find((f) => f.id === flowType) ?? levelConfig.flows[0];
     return flow?.steps ?? [];
-  }, [phaseConfig, flowType]);
+  }, [levelConfig, flowType]);
 
   const totalSteps = steps.length;
   const currentStep = currentStepIndex >= 0 ? steps[currentStepIndex] || null : null;
@@ -61,15 +61,15 @@ export function useSimulation(phaseConfig: PhaseConfig): UseSimulationReturn {
   const isFinished =
     !isPlaying && totalSteps > 0 && currentStepIndex === totalSteps - 1;
 
-  // Switching phase starts a fresh simulation: back to the first flow, before
-  // step one, paused. Adjusted during render rather than in an effect so the
-  // diagram never paints one frame of the old phase's state.
-  const [lastPhaseId, setLastPhaseId] = useState<PhaseId>(phaseConfig.id);
-  if (lastPhaseId !== phaseConfig.id) {
-    setLastPhaseId(phaseConfig.id);
+  // Switching level starts a fresh run: back to the first flow, before step
+  // one, paused. Adjusted during render rather than in an effect so the
+  // diagram never paints one frame of the old level's state.
+  const [lastLevelId, setLastLevelId] = useState<LevelId>(levelConfig.id);
+  if (lastLevelId !== levelConfig.id) {
+    setLastLevelId(levelConfig.id);
     setCurrentStepIndex(-1);
     setIsPlaying(false);
-    setFlowTypeState(phaseConfig.flows[0].id);
+    setFlowTypeState(levelConfig.flows[0].id);
   }
 
   // Auto-play timer
@@ -142,7 +142,7 @@ export function useSimulation(phaseConfig: PhaseConfig): UseSimulationReturn {
     const focusedNodeId = activeNodes[0];
     const statusMsgs = currentStep?.nodeStatusMessages || {};
 
-    return phaseConfig.nodes.map((node) => {
+    return levelConfig.nodes.map((node) => {
       const isActive = activeNodes.includes(node.id);
       const isFocused = node.id === focusedNodeId;
       const statusMessage = statusMsgs[node.id];
@@ -158,13 +158,13 @@ export function useSimulation(phaseConfig: PhaseConfig): UseSimulationReturn {
         },
       };
     });
-  }, [phaseConfig.nodes, currentStep, isFinished]);
+  }, [levelConfig.nodes, currentStep, isFinished]);
 
   const edges = useMemo(() => {
     const activeEdges = currentStep?.activeEdgeIds || [];
     const edgeOverrides = currentStep?.edgeOverrides || {};
 
-    return phaseConfig.edges.map((edge) => {
+    return levelConfig.edges.map((edge) => {
       const isActive = activeEdges.includes(edge.id);
       const override = edgeOverrides[edge.id] || {};
       return {
@@ -177,7 +177,7 @@ export function useSimulation(phaseConfig: PhaseConfig): UseSimulationReturn {
         },
       };
     });
-  }, [phaseConfig.edges, currentStep, isFinished]);
+  }, [levelConfig.edges, currentStep, isFinished]);
 
   return {
     currentStepIndex,
@@ -185,7 +185,7 @@ export function useSimulation(phaseConfig: PhaseConfig): UseSimulationReturn {
     isFinished,
     speed,
     flowType,
-    availableFlows: phaseConfig.flows,
+    availableFlows: levelConfig.flows,
     totalSteps,
     currentStep,
     currentSteps: steps,

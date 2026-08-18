@@ -1,9 +1,9 @@
-import { PhaseConfig } from "../../types";
+import { LevelConfig } from "../../types";
 
-export const intermediateConfig: PhaseConfig = {
-  id: "intermediate",
-  name: "Intermediate",
-  badge: "⚡ Scaled (মাঝারি স্কেল)",
+export const scalableLevel: LevelConfig = {
+  id: "scalable",
+  name: "Scalable",
+  badge: "⚡ এটা চাপ সামলায়",
   tagline: "Load balancer, rate limiter, caching and multiple servers",
   componentCount: 7,
   conceptSummary:
@@ -20,7 +20,7 @@ export const intermediateConfig: PhaseConfig = {
     readQps: "~১,০০০ /sec",
     readWriteRatio: "১০০ : ১",
     storage5y: "~৮০০ GB (১৫৮ কোটি লিংক × ৫০০ B)",
-    codeLength: "৭ অক্ষর → ৬২⁷ ≈ ৩.৫ ট্রিলিয়ন",
+    extras: [{ label: "Short code", value: "৭ অক্ষর → ৬২⁷ ≈ ৩.৫ ট্রিলিয়ন" }],
   },
   tradeOffs: [
     {

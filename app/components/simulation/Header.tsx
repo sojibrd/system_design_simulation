@@ -1,10 +1,16 @@
 "use client";
 
 import React from "react";
-import { Link2, Cpu } from "lucide-react";
+import { Cpu } from "lucide-react";
 import { Badge } from "@/app/components/ui";
+import { SimulationConfig } from "@/app/lib/types";
+import { SimulationPicker } from "./SimulationPicker";
 
-export const Header: React.FC = () => {
+export const Header: React.FC<{
+  simulations: SimulationConfig[];
+  currentSimulationId: string;
+  onSelectSimulation: (id: string) => void;
+}> = ({ simulations, currentSimulationId, onSelectSimulation }) => {
   return (
     /* The rack header plate: ident on the left, the unit under test on the right. */
     <header className="surface-panel w-full seam-b-heavy px-4 py-2 shrink-0 z-40">
@@ -24,10 +30,11 @@ export const Header: React.FC = () => {
           </div>
         </div>
 
-        <div className="chip hidden sm:flex px-2.5 py-1 text-xs">
-          <Link2 className="w-3.5 h-3.5 t-accent" />
-          <span>URL Shortener</span>
-        </div>
+        <SimulationPicker
+          simulations={simulations}
+          currentId={currentSimulationId}
+          onSelect={onSelectSimulation}
+        />
       </div>
     </header>
   );

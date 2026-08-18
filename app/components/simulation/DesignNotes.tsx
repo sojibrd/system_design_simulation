@@ -1,31 +1,32 @@
 "use client";
 
 import React, { useState } from "react";
-import { PhaseConfig } from "@/app/lib/types";
+import { LevelConfig } from "@/app/lib/types";
 import { ChevronDown, ChevronUp, Calculator, GitCompare } from "lucide-react";
 import { Badge } from "@/app/components/ui";
 
 /**
- * Phase-scoped reasoning: the numbers this tier is sized for, and the decisions
+ * Level-scoped reasoning: the numbers this tier is sized for, and the decisions
  * that have no hop to animate. Kept out of the walkthrough panel because that
  * panel is step-scoped — it is replaced every time the step advances, while
  * these facts belong to the whole architecture.
  *
  * Collapsed by default: this is reading material, and the canvas needs the room.
  */
-export const DesignNotes: React.FC<{ phase: PhaseConfig }> = ({ phase }) => {
+export const DesignNotes: React.FC<{ level: LevelConfig }> = ({ level }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const { scaleEstimate, tradeOffs } = phase;
+  const { scaleEstimate, tradeOffs } = level;
   if (!scaleEstimate && !tradeOffs?.length) return null;
 
+  // Four universal figures, then whatever this particular system also needs.
   const rows = scaleEstimate
     ? [
         { label: "Write QPS", value: scaleEstimate.writeQps },
         { label: "Read QPS", value: scaleEstimate.readQps },
         { label: "Read : Write", value: scaleEstimate.readWriteRatio },
         { label: "Storage (৫ বছর)", value: scaleEstimate.storage5y },
-        { label: "Short code", value: scaleEstimate.codeLength },
+        ...(scaleEstimate.extras ?? []),
       ]
     : [];
 

@@ -1,9 +1,9 @@
-import { PhaseConfig } from "../../types";
+import { LevelConfig } from "../../types";
 
-export const expertConfig: PhaseConfig = {
-  id: "expert",
-  name: "Expert",
-  badge: "🚀 Production Scale (বিলিয়ন স্কেল)",
+export const reliableLevel: LevelConfig = {
+  id: "reliable",
+  name: "Reliable",
+  badge: "🛡️ এটা ভাঙন ও সংঘর্ষে সঠিক থাকে",
   tagline: "Distributed ID generator, DB replication and an asynchronous analytics pipeline",
   componentCount: 13,
   conceptSummary:
@@ -20,7 +20,7 @@ export const expertConfig: PhaseConfig = {
     readQps: "~১,০০,০০০ /sec",
     readWriteRatio: "১০০ : ১",
     storage5y: "~৮০ TB (১৫,৮০০ কোটি লিংক × ৫০০ B)",
-    codeLength: "৭ অক্ষর → ৬২⁷ ≈ ৩.৫ ট্রিলিয়ন",
+    extras: [{ label: "Short code", value: "৭ অক্ষর → ৬২⁷ ≈ ৩.৫ ট্রিলিয়ন" }],
   },
   tradeOffs: [
     {

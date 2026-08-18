@@ -1,9 +1,9 @@
-import { PhaseConfig } from "../../types";
+import { LevelConfig } from "../../types";
 
-export const beginnerConfig: PhaseConfig = {
-  id: "beginner",
-  name: "Beginner",
-  badge: "🌱 Basic (মৌলিক স্তর)",
+export const functionalLevel: LevelConfig = {
+  id: "functional",
+  name: "Functional",
+  badge: "🌱 এটা কাজ করে",
   tagline: "Simple 3-component architecture — one server and one database",
   componentCount: 3,
   conceptSummary:
@@ -19,7 +19,7 @@ export const beginnerConfig: PhaseConfig = {
     readQps: "~১০০ /sec",
     readWriteRatio: "১০০ : ১",
     storage5y: "~৮০ GB (১৫.৮ কোটি লিংক × ৫০০ B)",
-    codeLength: "৬ অক্ষর → ৬২⁶ ≈ ৫,৭০০ কোটি",
+    extras: [{ label: "Short code", value: "৬ অক্ষর → ৬২⁶ ≈ ৫,৭০০ কোটি" }],
   },
   tradeOffs: [
     {
