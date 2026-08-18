@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
 import { SimulationNodeData } from "@/app/lib/types";
 import { Info } from "lucide-react";
@@ -49,8 +49,14 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
 
   const colors = categoryColors[nodeData.category] || categoryColors.compute;
   const isActive = Boolean(nodeData.isActive);
+  const isFocused = Boolean(nodeData.isFocused);
   // Highlight stays on after the flow finishes, but the motion stops.
   const isAnimated = isActive && nodeData.isAnimated !== false;
+
+  // Auto-open tooltip ONLY when node is the focused component in the current step, and close when moving to next step / not focused
+  useEffect(() => {
+    setShowTooltip(isFocused);
+  }, [isFocused, nodeData.statusMessage]);
 
   return (
     <div

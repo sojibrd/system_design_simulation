@@ -1,4 +1,4 @@
-﻿import type { Node, Edge } from "@xyflow/react";
+import type { Node, Edge } from "@xyflow/react";
 
 export type ComponentCategory =
   | "client"
@@ -18,6 +18,7 @@ export interface SimulationNodeData extends Record<string, unknown> {
   description: string;
   techSpecs?: string;
   isActive?: boolean;
+  isFocused?: boolean;
   /** False once the flow has finished — highlight stays, motion stops. */
   isAnimated?: boolean;
   statusMessage?: string;

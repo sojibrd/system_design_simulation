@@ -118,10 +118,12 @@ export function useSimulation(phaseConfig: PhaseConfig): UseSimulationReturn {
   // Compute active state on nodes and edges
   const nodes = useMemo(() => {
     const activeNodes = currentStep?.activeNodeIds || [];
+    const focusedNodeId = activeNodes[0];
     const statusMsgs = currentStep?.nodeStatusMessages || {};
 
     return phaseConfig.nodes.map((node) => {
       const isActive = activeNodes.includes(node.id);
+      const isFocused = node.id === focusedNodeId;
       const statusMessage = statusMsgs[node.id];
 
       return {
@@ -129,6 +131,7 @@ export function useSimulation(phaseConfig: PhaseConfig): UseSimulationReturn {
         data: {
           ...node.data,
           isActive,
+          isFocused,
           isAnimated: isActive && !isFinished,
           statusMessage,
         },
