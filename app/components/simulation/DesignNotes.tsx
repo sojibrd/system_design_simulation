@@ -2,22 +2,37 @@
 
 import React, { useState } from "react";
 import { LevelConfig } from "@/app/lib/types";
-import { ChevronDown, ChevronUp, Calculator, GitCompare } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Calculator,
+  GitCompare,
+  Lightbulb,
+} from "lucide-react";
 import { Badge } from "@/app/components/ui";
 
 /**
- * Level-scoped reasoning: the numbers this tier is sized for, and the decisions
- * that have no hop to animate. Kept out of the walkthrough panel because that
- * panel is step-scoped — it is replaced every time the step advances, while
- * these facts belong to the whole architecture.
+ * Everything that describes the LEVEL rather than the current step: what this
+ * tier is, the concepts it introduces, the numbers it is sized for, and the
+ * decisions that have no hop to animate. Kept out of the walkthrough panel
+ * because that panel is step-scoped — it is replaced every time the step
+ * advances, while these facts belong to the whole architecture.
  *
- * Collapsed by default: this is reading material, and the canvas needs the room.
+ * This row also carries the level tagline. It used to have its own callout
+ * above, which cost a full row (two on a wide screen, once the concept tags
+ * wrapped) to say the same kind of thing this row was already saying with a
+ * static subtitle. One row, one job.
+ *
+ * The body is collapsed by default: it is reading material, and the canvas
+ * needs the room.
  */
 export const DesignNotes: React.FC<{ level: LevelConfig }> = ({ level }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const { scaleEstimate, tradeOffs } = level;
-  if (!scaleEstimate && !tradeOffs?.length) return null;
+  const { scaleEstimate, tradeOffs, keyConcepts, tagline } = level;
+  // The tagline alone is not worth a disclosure — without a body to open, the
+  // row stays but stops pretending to be a button.
+  const hasBody = Boolean(scaleEstimate || tradeOffs?.length || keyConcepts?.length);
 
   // Four universal figures, then whatever this particular system also needs.
   const rows = scaleEstimate
@@ -32,30 +47,46 @@ export const DesignNotes: React.FC<{ level: LevelConfig }> = ({ level }) => {
 
   return (
     <div className="w-full">
+      {/* One row: what this level is (tagline), and the way into everything
+          else about it. */}
       <button
         type="button"
-        onClick={() => setIsOpen((open) => !open)}
-        aria-expanded={isOpen}
-        className="control w-full justify-start gap-2 px-3 py-1.5 min-h-10 sm:min-h-0"
+        onClick={() => hasBody && setIsOpen((open) => !open)}
+        aria-expanded={hasBody ? isOpen : undefined}
+        disabled={!hasBody}
+        className="control w-full justify-start gap-2 px-3 py-1.5 min-h-10 sm:min-h-0 disabled:opacity-100"
       >
         <Calculator className="t-muted w-3.5 h-3.5 shrink-0" />
-        <span className="t-label">
-          Scale &amp; Trade-offs
-        </span>
-        <span className="t-body text-xs truncate hidden sm:inline normal-case">
-          — এই কনফিগারেশন কোন সংখ্যার জন্য, আর কেন এই সিদ্ধান্তগুলো
-        </span>
-        <span className="t-muted ml-auto shrink-0">
-          {isOpen ? (
-            <ChevronUp className="w-3.5 h-3.5" />
-          ) : (
-            <ChevronDown className="w-3.5 h-3.5" />
-          )}
-        </span>
+        <span className="t-label shrink-0">Note</span>
+        <span className="t-body text-xs truncate normal-case">{tagline}</span>
+        {hasBody && (
+          <span className="t-muted ml-auto shrink-0">
+            {isOpen ? (
+              <ChevronUp className="w-3.5 h-3.5" />
+            ) : (
+              <ChevronDown className="w-3.5 h-3.5" />
+            )}
+          </span>
+        )}
       </button>
 
       {isOpen && (
-        <div className="surface-panel mt-2 max-h-[38vh] overflow-y-auto p-3 flex flex-col gap-4">
+        <div className="surface-panel mt-2 max-h-[50dvh] sm:max-h-[38vh] overflow-y-auto p-3 flex flex-col gap-4">
+          {/* Lightest first: what this tier introduces, before the numbers. */}
+          {keyConcepts && keyConcepts.length > 0 && (
+            <section>
+              <h4 className="t-label t-accent mb-2 flex items-center gap-1.5">
+                <Lightbulb className="w-3 h-3" />
+                Key Concepts
+              </h4>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {keyConcepts.map((concept) => (
+                  <Badge key={concept}>{concept}</Badge>
+                ))}
+              </div>
+            </section>
+          )}
+
           {scaleEstimate && (
             <section>
               <h4 className="t-label t-accent mb-2">
