@@ -26,7 +26,6 @@ export const Header: React.FC<{
               </h1>
               <Badge tone="accent">INTERACTIVE</Badge>
             </div>
-            <p className="t-label">Rack 01 / architecture walkthrough</p>
           </div>
         </div>
 

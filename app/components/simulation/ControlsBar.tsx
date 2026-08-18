@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { FlowKind, FlowDefinition, FlowIcon } from "@/app/lib/types";
 import { SpeedOption } from "@/app/hooks/useSimulation";
 import {
@@ -16,6 +16,7 @@ import {
   SearchX,
   ShieldAlert,
   BarChart3,
+  MoreHorizontal,
   type LucideIcon,
   PanelRightClose,
 } from "lucide-react";
@@ -65,14 +66,47 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
   isPanelOpen,
   onTogglePanel,
 }) => {
+  /**
+   * Phones only. The controls split by WHEN they are used, not by importance:
+   * flow, speed and reset are set once before a run, so on a phone they wait
+   * behind the overflow button instead of costing the canvas a permanent row.
+   * From `sm` up everything is on one line and this state is ignored.
+   */
+  const [isSetupOpen, setIsSetupOpen] = useState(false);
+
+  const selectFlow = (flow: FlowKind) => {
+    onFlowChange(flow);
+    // Picking a scenario is the end of the setup errand — get out of the way.
+    setIsSetupOpen(false);
+  };
+
+  // Rendered in the playback row on a phone and on the right on desktop, so it
+  // never forces a second row just to exist.
+  const stepsToggle = (
+    <Button
+      variant={isPanelOpen ? "primary" : "outline"}
+      onClick={onTogglePanel}
+      className="px-3! py-2! text-xs! shrink-0 min-h-11 sm:min-h-0"
+      title={isPanelOpen ? "Hide steps panel (full-width diagram)" : "Show steps panel"}
+      aria-pressed={isPanelOpen}
+      aria-label="Toggle step walkthrough panel"
+    >
+      {isPanelOpen ? <PanelRightClose className="w-4 h-4" /> : <PanelRight className="w-4 h-4" />}
+      <span className="hidden sm:inline">Steps</span>
+    </Button>
+  );
+
   return (
     <Panel className="w-full p-2.5 md:p-3 overflow-x-auto">
-      {/* One row from `sm` up. On a phone it wraps into two: playback alone on
-          the first row where the thumb reaches, everything else below. */}
       <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-2 sm:gap-3">
-        {/* 1. Flow selector — built from what the phase declares, so a tier can
-               offer a cache-miss or failover scenario without touching this file */}
-        <div className="sm:flex-1 flex items-center justify-center sm:justify-start min-w-0">
+        {/* 1. Setup: flow selector. Built from what the level declares, so a
+               tier can offer a cache-miss or failover scenario without touching
+               this file. Hidden behind the overflow button on a phone. */}
+        <div
+          className={`sm:flex-1 items-center justify-center sm:justify-start min-w-0 ${
+            isSetupOpen ? "flex" : "hidden sm:flex"
+          }`}
+        >
           <div className="segment-group max-w-full overflow-x-auto">
             {availableFlows.map((flow) => {
               const Icon = flowIcons[flow.icon];
@@ -80,7 +114,7 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
                 <button
                   key={flow.id}
                   type="button"
-                  onClick={() => onFlowChange(flow.id)}
+                  onClick={() => selectFlow(flow.id)}
                   aria-pressed={flowType === flow.id}
                   className="segment text-xs shrink-0 min-h-10 sm:min-h-0"
                 >
@@ -92,14 +126,16 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
           </div>
         </div>
 
-        {/* 2. Playback — dead centre on desktop, its own row on a phone */}
+        {/* 2. Playback — the only row a phone always shows */}
         <div className="shrink-0 flex items-center justify-center gap-2">
+          {/* Reset lives in the setup drawer on a phone: it is rare, and sitting
+              next to Simulate it invites a mis-tap. */}
           <IconButton
             variant="ghost"
             onClick={onReset}
             title="Reset"
             aria-label="Reset simulation"
-            className="min-w-11 min-h-11 sm:min-w-0 sm:min-h-0"
+            className="hidden sm:inline-flex"
           >
             <RotateCcw className="w-4 h-4" />
           </IconButton>
@@ -145,10 +181,28 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
           >
             <SkipForward className="w-4 h-4" />
           </IconButton>
+
+          <span className="sm:hidden">{stepsToggle}</span>
+
+          {/* Phone-only gateway to the setup row */}
+          <IconButton
+            onClick={() => setIsSetupOpen((open) => !open)}
+            aria-expanded={isSetupOpen}
+            aria-label="Flow, speed and reset options"
+            title="Flow, speed & reset"
+            className="sm:hidden min-w-11 min-h-11"
+          >
+            <MoreHorizontal className="w-4 h-4" />
+          </IconButton>
         </div>
 
-        {/* 3. Speed & panel toggle — mirrors the left side's flex weight */}
-        <div className="sm:flex-1 flex items-center justify-center sm:justify-end gap-2">
+        {/* 3. Setup: speed and reset. Collapsed on a phone; always shown from
+               `sm` up, where it also carries the steps toggle. */}
+        <div
+          className={`sm:flex-1 items-center justify-center sm:justify-end gap-2 ${
+            isSetupOpen ? "flex" : "hidden sm:flex"
+          }`}
+        >
           <div className="segment-group px-2 py-1 gap-1">
             <Gauge className="t-muted w-3.5 h-3.5 shrink-0" />
             <span className="t-label hidden md:inline mr-1">Speed</span>
@@ -166,17 +220,17 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
             ))}
           </div>
 
-          <Button
-            variant={isPanelOpen ? "primary" : "outline"}
-            onClick={onTogglePanel}
-            className="px-3! py-2! text-xs! shrink-0 min-h-10 sm:min-h-0"
-            title={isPanelOpen ? "Hide steps panel (full-width diagram)" : "Show steps panel"}
-            aria-pressed={isPanelOpen}
-            aria-label="Toggle step walkthrough panel"
+          <IconButton
+            variant="ghost"
+            onClick={onReset}
+            title="Reset"
+            aria-label="Reset simulation"
+            className="min-w-11 min-h-11 sm:hidden"
           >
-            {isPanelOpen ? <PanelRightClose className="w-4 h-4" /> : <PanelRight className="w-4 h-4" />}
-            <span className="hidden sm:inline">Steps</span>
-          </Button>
+            <RotateCcw className="w-4 h-4" />
+          </IconButton>
+
+          <span className="hidden sm:inline-flex">{stepsToggle}</span>
         </div>
       </div>
     </Panel>
