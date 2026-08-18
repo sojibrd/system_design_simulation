@@ -11,6 +11,7 @@ import {
 import { useSimulation } from "@/app/hooks/useSimulation";
 import { Header } from "@/app/components/simulation/Header";
 import { PhaseTabs } from "@/app/components/simulation/PhaseTabs";
+import { DesignNotes } from "@/app/components/simulation/DesignNotes";
 import { FlowDiagram } from "@/app/components/simulation/FlowDiagram";
 import { ControlsBar } from "@/app/components/simulation/ControlsBar";
 import { WalkthroughPanel } from "@/app/components/simulation/WalkthroughPanel";
@@ -28,6 +29,7 @@ export default function Home() {
     isFinished,
     speed,
     flowType,
+    availableFlows,
     totalSteps,
     currentStep,
     currentSteps,
@@ -51,12 +53,13 @@ export default function Home() {
       {/* Main Container — fills exactly what the header leaves behind */}
       <main className="flex-1 min-h-0 w-full px-3 md:px-5 lg:px-6 py-3 flex flex-col gap-3">
         {/* Phase Selector Tabs */}
-        <div className="shrink-0">
+        <div className="shrink-0 flex flex-col gap-2">
           <PhaseTabs
             currentPhaseId={currentPhaseId}
             phases={phaseList}
             onSelectPhase={(phaseId) => setCurrentPhaseId(phaseId)}
           />
+          <DesignNotes phase={currentPhaseConfig} />
         </div>
 
         {/* Simulation stage — takes every pixel the other rows do not need */}
@@ -96,6 +99,7 @@ export default function Home() {
             isPlaying={isPlaying}
             speed={speed}
             flowType={flowType}
+            availableFlows={availableFlows}
             currentStepIndex={currentStepIndex}
             totalSteps={totalSteps}
             onPlay={play}

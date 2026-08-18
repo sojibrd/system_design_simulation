@@ -1,7 +1,15 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { FlowType, PhaseConfig, CustomNodeType, CustomEdgeType } from "@/app/lib/types";
+import {
+  FlowKind,
+  FlowDefinition,
+  PhaseConfig,
+  CustomNodeType,
+  CustomEdgeType,
+  PhaseId,
+  SimulationStep,
+} from "@/app/lib/types";
 
 export type SpeedOption = 0.5 | 1 | 2;
 
@@ -10,10 +18,12 @@ export interface UseSimulationReturn {
   isPlaying: boolean;
   isFinished: boolean;
   speed: SpeedOption;
-  flowType: FlowType;
+  flowType: FlowKind;
+  /** The flows this phase declares, in selector order. */
+  availableFlows: FlowDefinition[];
   totalSteps: number;
-  currentStep: PhaseConfig["flows"]["shorten"][number] | null;
-  currentSteps: PhaseConfig["flows"]["shorten"];
+  currentStep: SimulationStep | null;
+  currentSteps: SimulationStep[];
   nodes: CustomNodeType[];
   edges: CustomEdgeType[];
   play: () => void;
@@ -23,17 +33,24 @@ export interface UseSimulationReturn {
   goToStep: (index: number) => void;
   reset: () => void;
   setSpeed: (speed: SpeedOption) => void;
-  setFlowType: (flow: FlowType) => void;
+  setFlowType: (flow: FlowKind) => void;
 }
 
 export function useSimulation(phaseConfig: PhaseConfig): UseSimulationReturn {
-  const [flowType, setFlowTypeState] = useState<FlowType>("shorten");
+  const [flowType, setFlowTypeState] = useState<FlowKind>(
+    phaseConfig.flows[0].id
+  );
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(-1);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [speed, setSpeed] = useState<SpeedOption>(1);
 
+  // A phase only declares the flows that make sense for it — beginner has no
+  // cache, so it has no cache-miss flow. Falling back to the first flow keeps
+  // the selector honest when switching between phases.
   const steps = useMemo(() => {
-    return phaseConfig.flows[flowType] || [];
+    const flow =
+      phaseConfig.flows.find((f) => f.id === flowType) ?? phaseConfig.flows[0];
+    return flow?.steps ?? [];
   }, [phaseConfig, flowType]);
 
   const totalSteps = steps.length;
@@ -44,12 +61,16 @@ export function useSimulation(phaseConfig: PhaseConfig): UseSimulationReturn {
   const isFinished =
     !isPlaying && totalSteps > 0 && currentStepIndex === totalSteps - 1;
 
-  // Reset step index and flow when phase changes
-  useEffect(() => {
+  // Switching phase starts a fresh simulation: back to the first flow, before
+  // step one, paused. Adjusted during render rather than in an effect so the
+  // diagram never paints one frame of the old phase's state.
+  const [lastPhaseId, setLastPhaseId] = useState<PhaseId>(phaseConfig.id);
+  if (lastPhaseId !== phaseConfig.id) {
+    setLastPhaseId(phaseConfig.id);
     setCurrentStepIndex(-1);
     setIsPlaying(false);
-    setFlowTypeState("shorten");
-  }, [phaseConfig.id]);
+    setFlowTypeState(phaseConfig.flows[0].id);
+  }
 
   // Auto-play timer
   useEffect(() => {
@@ -109,7 +130,7 @@ export function useSimulation(phaseConfig: PhaseConfig): UseSimulationReturn {
     setCurrentStepIndex(-1);
   }, []);
 
-  const setFlowType = useCallback((flow: FlowType) => {
+  const setFlowType = useCallback((flow: FlowKind) => {
     setFlowTypeState(flow);
     setCurrentStepIndex(-1);
     setIsPlaying(false);
@@ -164,6 +185,7 @@ export function useSimulation(phaseConfig: PhaseConfig): UseSimulationReturn {
     isFinished,
     speed,
     flowType,
+    availableFlows: phaseConfig.flows,
     totalSteps,
     currentStep,
     currentSteps: steps,

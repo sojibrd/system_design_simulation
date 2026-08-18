@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { FlowType } from "@/app/lib/types";
+import { FlowKind, FlowDefinition, FlowIcon } from "@/app/lib/types";
 import { SpeedOption } from "@/app/hooks/useSimulation";
 import {
   Play,
@@ -13,14 +13,26 @@ import {
   Link,
   CornerUpRight,
   PanelRight,
+  SearchX,
+  ShieldAlert,
+  type LucideIcon,
   PanelRightClose,
 } from "lucide-react";
 import { Button, IconButton, Panel } from "@/app/components/ui";
 
+/** Flow definitions name an icon; the controls bar owns the mapping. */
+const flowIcons: Record<FlowIcon, LucideIcon> = {
+  link: Link,
+  redirect: CornerUpRight,
+  miss: SearchX,
+  failover: ShieldAlert,
+};
+
 interface ControlsBarProps {
   isPlaying: boolean;
   speed: SpeedOption;
-  flowType: FlowType;
+  flowType: FlowKind;
+  availableFlows: FlowDefinition[];
   currentStepIndex: number;
   totalSteps: number;
   onPlay: () => void;
@@ -29,7 +41,7 @@ interface ControlsBarProps {
   onPrev: () => void;
   onReset: () => void;
   onSpeedChange: (speed: SpeedOption) => void;
-  onFlowChange: (flow: FlowType) => void;
+  onFlowChange: (flow: FlowKind) => void;
   isPanelOpen: boolean;
   onTogglePanel: () => void;
 }
@@ -46,6 +58,7 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
   isPlaying,
   speed,
   flowType,
+  availableFlows,
   currentStepIndex,
   totalSteps,
   onPlay,
@@ -61,17 +74,24 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
   return (
     <Panel className="w-full p-2.5 md:p-3 overflow-x-auto">
       <div className="flex items-center gap-3 min-w-[560px]">
-        {/* 1. Flow selector — equal-weight side keeps playback centred */}
+        {/* 1. Flow selector — built from what the phase declares, so a tier can
+               offer a cache-miss or failover scenario without touching this file */}
         <div className="flex-1 flex items-center justify-start">
           <div className="flex items-center rounded-box border border-bezel-strong overflow-hidden divide-x divide-bezel-strong">
-            <button type="button" onClick={() => onFlowChange("shorten")} className={segment(flowType === "shorten")}>
-              <Link className="w-3.5 h-3.5" />
-              <span>Shorten</span>
-            </button>
-            <button type="button" onClick={() => onFlowChange("redirect")} className={segment(flowType === "redirect")}>
-              <CornerUpRight className="w-3.5 h-3.5" />
-              <span>Redirect</span>
-            </button>
+            {availableFlows.map((flow) => {
+              const Icon = flowIcons[flow.icon];
+              return (
+                <button
+                  key={flow.id}
+                  type="button"
+                  onClick={() => onFlowChange(flow.id)}
+                  className={segment(flowType === flow.id)}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  <span>{flow.name}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 

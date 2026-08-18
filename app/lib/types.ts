@@ -51,11 +51,31 @@ export interface SimulationEdgeData extends Record<string, unknown> {
 export type CustomNodeType = Node<SimulationNodeData, "simulationNode">;
 export type CustomEdgeType = Edge<SimulationEdgeData, "animatedFlowEdge">;
 
-export type FlowType = "shorten" | "redirect";
+/**
+ * Which scenario a flow depicts. Cache hit and cache miss are ALTERNATIVES to
+ * each other, not consecutive moments, so each gets its own timeline instead of
+ * being spliced into one.
+ */
+export type FlowKind =
+  | "shorten"
+  | "redirect"
+  | "redirect-miss"
+  | "failover";
+
+/** Name of a lucide icon the controls bar renders for a flow. */
+export type FlowIcon = "link" | "redirect" | "miss" | "failover";
+
+export interface FlowDefinition {
+  id: FlowKind;
+  /** Short label on the flow selector button. */
+  name: string;
+  icon: FlowIcon;
+  steps: SimulationStep[];
+}
 
 export interface SimulationStep {
   id: string;
-  flowType: FlowType;
+  flowType: FlowKind;
   stepNumber: number;
   title: string;
   whatHappens: string; // Kid-friendly bold summary in Bangla
@@ -70,6 +90,36 @@ export interface SimulationStep {
 
 export type PhaseId = "beginner" | "intermediate" | "expert";
 
+/**
+ * The back-of-the-envelope numbers this phase is sized for. These are what
+ * justify the component count — without them each tier looks like an arbitrary
+ * pile of boxes.
+ */
+export interface ScaleEstimate {
+  /** e.g. "১০০ writes/sec" */
+  writeQps: string;
+  readQps: string;
+  /** e.g. "১০০ : ১" */
+  readWriteRatio: string;
+  /** Storage needed after five years. */
+  storage5y: string;
+  /** Short code length and the keyspace it buys. */
+  codeLength: string;
+}
+
+/**
+ * A decision that shaped this architecture but has no hop to animate — the
+ * "why", as opposed to the "what happens".
+ */
+export interface TradeOff {
+  /** The question being settled, e.g. "301 না 302?" */
+  question: string;
+  options: { name: string; note: string }[];
+  /** Which option this phase takes, and why. */
+  chosen: string;
+  why: string;
+}
+
 export interface PhaseConfig {
   id: PhaseId;
   name: string;
@@ -78,10 +128,10 @@ export interface PhaseConfig {
   componentCount: number;
   conceptSummary: string;
   keyConcepts: string[];
+  scaleEstimate?: ScaleEstimate;
+  tradeOffs?: TradeOff[];
   nodes: CustomNodeType[];
   edges: CustomEdgeType[];
-  flows: {
-    shorten: SimulationStep[];
-    redirect: SimulationStep[];
-  };
+  /** First entry is the flow selected when the phase opens. */
+  flows: FlowDefinition[];
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { SimulationStep } from "@/app/lib/types";
+import { FlowKind, SimulationStep } from "@/app/lib/types";
 import {
   BookOpen,
   Code2,
@@ -13,6 +13,14 @@ import {
   Play,
 } from "lucide-react";
 import { Badge, Callout, Panel } from "@/app/components/ui";
+
+/** Which scenario the current step belongs to, shown beside the step counter. */
+const flowBadge: Record<FlowKind, string> = {
+  shorten: "SHORTEN",
+  redirect: "REDIRECT · HIT",
+  "redirect-miss": "REDIRECT · MISS",
+  failover: "FAILOVER",
+};
 
 interface WalkthroughPanelProps {
   currentStep: SimulationStep | null;
@@ -78,7 +86,7 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
             STEP {stepNo(currentStepIndex)} / {String(totalSteps).padStart(2, "0")}
           </span>
           <Badge tone="accent">
-            {currentStep.flowType === "shorten" ? "SHORTEN" : "REDIRECT"}
+            {flowBadge[currentStep.flowType]}
           </Badge>
         </div>
 
