@@ -5,8 +5,6 @@ import { FlowKind, SimulationStep } from "@/app/lib/types";
 import {
   BookOpen,
   Code2,
-  ChevronDown,
-  ChevronUp,
   CheckCircle2,
   HelpCircle,
   Lightbulb,
@@ -48,7 +46,8 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
   onClose,
 }) => {
   const [showPayload, setShowPayload] = useState<boolean>(true);
-  const [showAllSteps, setShowAllSteps] = useState<boolean>(false);
+  // The panel shows one thing at a time: the current step, or the whole log.
+  const [mode, setMode] = useState<"step" | "log">("step");
   const bodyRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll body to top on step change
@@ -95,15 +94,29 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
           </Badge>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setShowAllSteps((prev) => !prev)}
-          className="row t-label flex items-center gap-1 px-1.5 py-1"
-          title="সব ধাপের তালিকা দেখুন"
-        >
-          <span>Log ({totalSteps})</span>
-          {showAllSteps ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-        </button>
+        {/* Two modes rather than an accordion: the step list used to open
+            between the header and the body, hiding the very explanation it is
+            meant to complement. */}
+        <div className="segment-group shrink-0">
+          <button
+            type="button"
+            onClick={() => setMode("step")}
+            aria-pressed={mode === "step"}
+            className="segment t-label px-2 py-1"
+            title="বর্তমান ধাপের ব্যাখ্যা"
+          >
+            Step
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("log")}
+            aria-pressed={mode === "log"}
+            className="segment t-label px-2 py-1"
+            title="সব ধাপের তালিকা"
+          >
+            Log ({totalSteps})
+          </button>
+        </div>
 
         {/* Phones only — on a wide screen the panel is a column, not an overlay. */}
         {onClose && (
@@ -118,9 +131,10 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
         )}
       </div>
 
-      {/* Index of every step on the sheet */}
-      {showAllSteps && (
-        <div className="surface-well my-2 p-1.5 max-h-48 overflow-y-auto">
+      {/* LOG — the whole scenario at a glance. This is the one thing the
+          progress ruler cannot give: the story, not just the position. */}
+      {mode === "log" && (
+        <div className="surface-well flex-1 min-h-0 my-2 p-1.5 overflow-y-auto">
           {steps.map((step, idx) => {
             const isCurrent = idx === currentStepIndex;
             const isCompleted = idx < currentStepIndex;
@@ -131,7 +145,7 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
                 type="button"
                 onClick={() => {
                   onSelectStep(idx);
-                  setShowAllSteps(false);
+                  setMode("step");
                 }}
                 aria-current={isCurrent}
                 className="row w-full text-left px-2 py-1.5 text-xs flex items-center gap-2"
@@ -148,8 +162,12 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
         </div>
       )}
 
-      {/* Body of the note */}
-      <div ref={bodyRef} className="flex-1 overflow-y-auto py-3 space-y-3 pr-1">
+      {/* STEP — the current step in full */}
+      <div
+        ref={bodyRef}
+        hidden={mode !== "step"}
+        className="flex-1 overflow-y-auto py-3 space-y-3 pr-1"
+      >
         <h3 className="t-title text-sm md:text-base leading-snug">
           {currentStep.title}
         </h3>
