@@ -47,7 +47,7 @@ export const intermediateConfig: PhaseConfig = {
     {
       id: "node-limiter",
       type: "simulationNode",
-      position: { x: 720, y: 80 },
+      position: { x: 820, y: 50 },
       data: {
         label: "Rate Limiter",
         subLabel: "Token Bucket (Redis based)",
@@ -61,7 +61,7 @@ export const intermediateConfig: PhaseConfig = {
     {
       id: "node-server-1",
       type: "simulationNode",
-      position: { x: 720, y: 265 },
+      position: { x: 820, y: 200 },
       data: {
         label: "App Server 1",
         subLabel: "Stateless Node.js",
@@ -75,7 +75,7 @@ export const intermediateConfig: PhaseConfig = {
     {
       id: "node-server-2",
       type: "simulationNode",
-      position: { x: 720, y: 450 },
+      position: { x: 820, y: 450 },
       data: {
         label: "App Server 2",
         subLabel: "Stateless Node.js",
@@ -89,7 +89,7 @@ export const intermediateConfig: PhaseConfig = {
     {
       id: "node-cache",
       type: "simulationNode",
-      position: { x: 1060, y: 130 },
+      position: { x: 1220, y: 130 },
       data: {
         label: "Cache (Redis)",
         subLabel: "In-Memory Key-Value",
@@ -103,7 +103,7 @@ export const intermediateConfig: PhaseConfig = {
     {
       id: "node-db",
       type: "simulationNode",
-      position: { x: 1060, y: 420 },
+      position: { x: 1220, y: 420 },
       data: {
         label: "Database",
         subLabel: "PostgreSQL Primary",

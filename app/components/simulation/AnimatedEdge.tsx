@@ -35,6 +35,14 @@ export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
     borderRadius: 16,
   });
 
+  // Calculate label anchor position: for left-to-right edges, bias towards 38% from source to ensure complete clearance from target node
+  let renderLabelX = labelX;
+  if (targetX > sourceX + 60) {
+    renderLabelX = sourceX + (targetX - sourceX) * 0.38;
+  } else if (sourceX > targetX + 60) {
+    renderLabelX = targetX + (sourceX - targetX) * 0.38;
+  }
+
   return (
     <>
       {/* Base static/dim edge */}
@@ -98,10 +106,10 @@ export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
           <div
             style={{
               position: "absolute",
-              transform: `translate(-50%, -100%) translate(${labelX}px,${labelY - 8}px)`,
+              transform: `translate(-50%, -100%) translate(${renderLabelX}px,${labelY - 8}px)`,
               pointerEvents: "all",
             }}
-            className={`px-2 py-0.5 rounded-md text-[10px] font-mono border transition-all duration-300 select-none ${
+            className={`px-2 py-0.5 rounded-md text-[10px] font-mono border transition-all duration-300 select-none max-w-[170px] truncate ${
               isActive
                 ? "bg-zinc-950/95 text-cyan-300 border-cyan-500/60 shadow-[0_0_12px_rgba(6,182,212,0.35)] scale-105 font-semibold opacity-100"
                 : "bg-zinc-900/70 text-zinc-600 border-zinc-800/40 opacity-40"
