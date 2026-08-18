@@ -8,7 +8,7 @@ export const Header: React.FC = () => {
 
   return (
     <>
-      <header className="w-full bg-zinc-950/90 border-b border-zinc-800/80 backdrop-blur-md px-4 py-3 sticky top-0 z-40">
+      <header className="w-full bg-zinc-950/90 border-b border-zinc-800/80 backdrop-blur-md px-4 py-2.5 shrink-0 z-40">
         <div className="w-full flex items-center justify-between gap-3">
           {/* Logo & Platform Name */}
           <div className="flex items-center gap-2.5">

@@ -4,7 +4,7 @@ export const beginnerConfig: PhaseConfig = {
   id: "beginner",
   name: "Beginner",
   badge: "🌱 Basic (মৌলিক স্তর)",
-  tagline: "সহজ ৩-কম্পোনেন্ট আর্কিটেকচার — একটি সার্ভার ও একটি ডাটাবেজ",
+  tagline: "Simple 3-component architecture — one server and one database",
   componentCount: 3,
   conceptSummary:
     "এটি একটি URL Shortener-এর সবচেয়ে সরল রূপ। এখানে ক্লায়েন্ট সরাসরি অ্যাপ সার্ভারের সাথে কথা বলে এবং অ্যাপ সার্ভার সরাসরি ডাটাবেজে শর্ট আইডি ও লং ইউআরএল জমা রাখে।",

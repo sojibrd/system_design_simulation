@@ -51,8 +51,9 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
 }) => {
   return (
     <div className="w-full bg-zinc-900/90 border border-zinc-800 rounded-xl md:rounded-2xl p-3 md:p-4 shadow-lg backdrop-blur-md overflow-x-auto">
-      <div className="flex items-center justify-between gap-3 min-w-[560px]">
-      {/* 1. Flow Type Switcher (Shorten vs Redirect) */}
+      <div className="flex items-center gap-3 min-w-[560px]">
+      {/* 1. Flow Type Switcher (Shorten vs Redirect) — equal-weight side keeps playback centred */}
+      <div className="flex-1 flex items-center justify-start">
       <div className="flex items-center bg-zinc-950 p-1 rounded-xl border border-zinc-800">
         <button
           onClick={() => onFlowChange("shorten")}
@@ -63,8 +64,7 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
           }`}
         >
           <Link className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Shorten (লিংক তৈরি)</span>
-          <span className="sm:hidden">Shorten</span>
+          <span>Shorten</span>
         </button>
 
         <button
@@ -76,18 +76,18 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
           }`}
         >
           <CornerUpRight className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Redirect (রিডাইরেক্ট)</span>
-          <span className="sm:hidden">Redirect</span>
+          <span>Redirect</span>
         </button>
       </div>
+      </div>
 
-      {/* 2. Main Playback Controls */}
-      <div className="flex items-center gap-2">
+      {/* 2. Main Playback Controls — always dead centre of the bar */}
+      <div className="shrink-0 flex items-center gap-2">
         {/* Reset button */}
         <button
           onClick={onReset}
           className="p-2 rounded-xl text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/80 border border-zinc-800 transition-colors"
-          title="শুরু থেকে আবার দেখুন (Reset)"
+          title="Reset"
           aria-label="Reset simulation"
         >
           <RotateCcw className="w-4 h-4" />
@@ -98,7 +98,7 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
           onClick={onPrev}
           disabled={currentStepIndex < 0}
           className="p-2 rounded-xl text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800/80 border border-zinc-800 disabled:opacity-40 disabled:pointer-events-none transition-colors"
-          title="আগের ধাপ (Previous Step)"
+          title="Previous step"
           aria-label="Previous step"
         >
           <SkipBack className="w-4 h-4" />
@@ -112,7 +112,7 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
             aria-label="Pause simulation"
           >
             <Pause className="w-4 h-4 fill-current" />
-            <span>Pause (বিরতি)</span>
+            <span>Pause</span>
           </button>
         ) : (
           <button
@@ -121,7 +121,7 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
             aria-label="Simulate flow"
           >
             <Play className="w-4 h-4 fill-current" />
-            <span>Simulate (সিমুলেট করুন)</span>
+            <span>Simulate</span>
           </button>
         )}
 
@@ -130,14 +130,15 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
           onClick={onNext}
           disabled={currentStepIndex >= totalSteps - 1}
           className="p-2 rounded-xl text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800/80 border border-zinc-800 disabled:opacity-40 disabled:pointer-events-none transition-colors"
-          title="পরের ধাপ (Next Step)"
+          title="Next step"
           aria-label="Next step"
         >
           <SkipForward className="w-4 h-4" />
         </button>
       </div>
 
-      {/* 3. Speed Multiplier Selection */}
+      {/* 3. Speed & Steps toggle — mirrors the left side's flex weight */}
+      <div className="flex-1 flex items-center justify-end gap-2">
       <div className="flex items-center gap-1.5 bg-zinc-950 px-2 py-1 rounded-xl border border-zinc-800 text-xs">
         <Gauge className="w-3.5 h-3.5 text-zinc-500 ml-1 shrink-0" />
         <span className="text-[10px] text-zinc-500 font-mono hidden sm:inline">Speed:</span>
@@ -167,8 +168,8 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
         }`}
         title={
           isPanelOpen
-            ? "ধাপের প্যানেল লুকান (ডায়াগ্রাম ফুল-স্ক্রিন)"
-            : "ধাপগুলো দেখুন (Show Steps)"
+            ? "Hide steps panel (full-width diagram)"
+            : "Show steps panel"
         }
         aria-pressed={isPanelOpen}
         aria-label="Toggle step walkthrough panel"
@@ -180,6 +181,7 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
         )}
         <span className="hidden sm:inline">Steps</span>
       </button>
+      </div>
       </div>
     </div>
   );

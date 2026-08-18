@@ -58,7 +58,7 @@ export const FlowDiagram: React.FC<FlowDiagramProps> = ({
   );
 
   return (
-    <div className="w-full h-full min-h-[360px] md:min-h-[480px] bg-zinc-950 rounded-xl md:rounded-2xl border border-zinc-800/80 overflow-hidden relative shadow-inner">
+    <div className="w-full h-full min-h-0 bg-zinc-950 rounded-xl md:rounded-2xl border border-zinc-800/80 overflow-hidden relative shadow-inner">
       <ReactFlow
         nodes={nodes}
         edges={edges}

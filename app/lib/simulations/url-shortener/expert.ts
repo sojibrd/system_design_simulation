@@ -4,7 +4,7 @@ export const expertConfig: PhaseConfig = {
   id: "expert",
   name: "Expert",
   badge: "🚀 Production Scale (বিলিয়ন স্কেল)",
-  tagline: "ডিস্ট্রিবিউটেড আইডি জেনারেটর, ডিবি রেপ্লিকেশন ও অ্যাসিনক্রোনাস অ্যানালিটিক্স পাইপলাইন",
+  tagline: "Distributed ID generator, DB replication and an asynchronous analytics pipeline",
   componentCount: 12,
   conceptSummary:
     "বিলিয়ন বিলিয়ন ইউআরএল এবং প্রতি সেকেন্ডে লক্ষ লক্ষ ক্লিক হ্যান্ডেল করার জন্য বিশ্বমানের এন্টারপ্রাইজ আর্কিটেকচার। এখানে ডিস্ট্রিবিউটেড আইডি জেনারেটর (Twitter Snowflake), রিড-রাইট আলাদা করতে Primary ও Read Replicas ডাটাবেজ, এবং ইউজারের স্পিড না কমিয়ে ব্যাকগ্রাউন্ডে ক্লিক গোনার জন্য Kafka কিউ ব্যবহার করা হয়।",

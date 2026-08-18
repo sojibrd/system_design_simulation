@@ -4,7 +4,7 @@ export const intermediateConfig: PhaseConfig = {
   id: "intermediate",
   name: "Intermediate",
   badge: "⚡ Scaled (মাঝারি স্কেল)",
-  tagline: "লোড ব্যালেন্সার, রেট লিমিটার, ক্যাশিং ও মাল্টিপল সার্ভার",
+  tagline: "Load balancer, rate limiter, caching and multiple servers",
   componentCount: 7,
   conceptSummary:
     "যখন লাখ লাখ মানুষ একসাথে সাইটে আসে, তখন একটি সার্ভার লোড নিতে পারে না। তাই আমরা সামনে একটি লোড ব্যালেন্সার বসিয়ে একাধিক সার্ভারে ট্র্যাফিক ভাগ করে দিই, রোবট আটকাতে রেট লিমিটার এবং ডাটাবেজের চাপ কমাতে মেমোরি ক্যাশ (Redis) ব্যবহার করি।",

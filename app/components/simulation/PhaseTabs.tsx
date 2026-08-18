@@ -16,9 +16,9 @@ export const PhaseTabs: React.FC<PhaseTabsProps> = ({
   onSelectPhase,
 }) => {
   return (
-    <div className="w-full flex flex-col gap-2">
+    <div className="w-full flex flex-col gap-1.5">
       {/* Tab Buttons */}
-      <div className="grid grid-cols-3 gap-2 bg-zinc-950/80 p-1.5 rounded-2xl border border-zinc-800/90 shadow-lg backdrop-blur">
+      <div className="grid grid-cols-3 gap-2 bg-zinc-950/80 p-1 rounded-2xl border border-zinc-800/90 shadow-lg backdrop-blur">
         {phases.map((phase) => {
           const isSelected = phase.id === currentPhaseId;
 
@@ -26,7 +26,7 @@ export const PhaseTabs: React.FC<PhaseTabsProps> = ({
             <button
               key={phase.id}
               onClick={() => onSelectPhase(phase.id)}
-              className={`relative flex flex-col items-center justify-center py-2.5 px-2 md:px-4 rounded-xl transition-all duration-300 text-center ${
+              className={`relative flex flex-col items-center justify-center py-1.5 px-2 md:px-4 rounded-xl transition-all duration-300 text-center ${
                 isSelected
                   ? "bg-zinc-900 border border-cyan-500/50 shadow-md shadow-cyan-500/10 text-zinc-50 font-bold scale-[1.02]"
                   : "hover:bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 border border-transparent"
@@ -57,7 +57,7 @@ export const PhaseTabs: React.FC<PhaseTabsProps> = ({
         return (
           <div
             key={phase.id}
-            className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 bg-zinc-900/60 border border-zinc-800/80 rounded-xl text-xs"
+            className="flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 bg-zinc-900/60 border border-zinc-800/80 rounded-xl text-xs"
           >
             <div className="flex items-center gap-2 text-zinc-300 min-w-0">
               <Sparkles className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
