@@ -15,6 +15,7 @@ import { DesignNotes } from "@/app/components/simulation/DesignNotes";
 import { FlowDiagram } from "@/app/components/simulation/FlowDiagram";
 import { ControlsBar } from "@/app/components/simulation/ControlsBar";
 import { WalkthroughPanel } from "@/app/components/simulation/WalkthroughPanel";
+import { Sheet } from "@/app/components/ui";
 
 export default function Home() {
   const [currentPhaseId, setCurrentPhaseId] = useState<PhaseId>("beginner");
@@ -46,12 +47,14 @@ export default function Home() {
   } = useSimulation(currentPhaseConfig);
 
   return (
-    <div className="surface-app h-screen overflow-hidden flex flex-col antialiased">
+    /* `h-dvh`, not `h-screen`: on a phone the address bar eats into 100vh and
+       the controls row gets cut off below the fold. */
+    <div className="surface-app h-dvh overflow-hidden flex flex-col antialiased">
       {/* Top Navigation Header */}
       <Header />
 
       {/* Main Container — fills exactly what the header leaves behind */}
-      <main className="flex-1 min-h-0 w-full px-3 md:px-5 lg:px-6 py-3 flex flex-col gap-3">
+      <main className="flex-1 min-h-0 w-full px-2 sm:px-3 md:px-5 lg:px-6 py-2 md:py-3 flex flex-col gap-2 md:gap-3">
         {/* Phase Selector Tabs */}
         <div className="shrink-0 flex flex-col gap-2">
           <PhaseTabs
@@ -63,8 +66,11 @@ export default function Home() {
         </div>
 
         {/* Simulation stage — takes every pixel the other rows do not need */}
-        <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4">
-          {/* Architecture Canvas */}
+        {/* `relative` so the mobile walkthrough sheet can anchor to the stage
+            rather than the viewport — it must not cover the controls row. */}
+        <div className="relative flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4">
+          {/* Architecture Canvas. On a phone it keeps the full stage even when
+              the walkthrough is open — the walkthrough floats over it. */}
           <div
             className={`min-h-0 h-full ${
               isPanelOpen ? "lg:col-span-7 xl:col-span-8" : "lg:col-span-12"
@@ -78,19 +84,24 @@ export default function Home() {
             />
           </div>
 
-          {/* Step-by-Step Walkthrough Panel (toggleable) */}
-          {isPanelOpen && (
-            <div className="min-h-0 h-full lg:col-span-5 xl:col-span-4">
-              <WalkthroughPanel
-                currentStep={currentStep}
-                currentStepIndex={currentStepIndex}
-                totalSteps={totalSteps}
-                steps={currentSteps}
-                onSelectStep={goToStep}
-                isFinished={isFinished}
-              />
-            </div>
-          )}
+          {/* Step-by-step walkthrough: a column on desktop, a bottom sheet on
+              a phone. */}
+          <Sheet
+            open={isPanelOpen}
+            onClose={() => setIsPanelOpen(false)}
+            label="Step walkthrough"
+            className="min-h-0 lg:col-span-5 xl:col-span-4"
+          >
+            <WalkthroughPanel
+              currentStep={currentStep}
+              currentStepIndex={currentStepIndex}
+              totalSteps={totalSteps}
+              steps={currentSteps}
+              onSelectStep={goToStep}
+              isFinished={isFinished}
+              onClose={() => setIsPanelOpen(false)}
+            />
+          </Sheet>
         </div>
 
         {/* Playback & Flow Controls — always full width, pinned to the bottom */}

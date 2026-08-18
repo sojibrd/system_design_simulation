@@ -26,12 +26,14 @@ export const PhaseTabs: React.FC<{
               onClick={() => onSelectPhase(phase.id)}
               aria-selected={isSelected}
               role="tab"
-              className="tab relative py-1.5 px-2 md:px-4"
+              className="tab relative min-h-11 sm:min-h-0 py-1.5 px-1.5 sm:px-2 md:px-4"
             >
-              <span className="t-label">
+              {/* On a phone only the phase name survives — the ident and the
+                  component count are context, not navigation. */}
+              <span className="t-label hidden sm:inline">
                 CFG {String.fromCharCode(65 + index)}
               </span>
-              <span className="t-title text-xs md:text-sm">
+              <span className="t-title text-xs md:text-sm truncate">
                 {phase.name}
               </span>
               <span className="t-label hidden md:flex items-center gap-1">
@@ -53,7 +55,9 @@ export const PhaseTabs: React.FC<{
             <span className="truncate">{active.tagline}</span>
           </div>
 
-          <div className="flex items-center gap-1.5 flex-wrap">
+          {/* Concept tags are supporting detail; a phone has no room for them
+              beside the tagline. */}
+          <div className="hidden md:flex items-center gap-1.5 flex-wrap">
             {active.keyConcepts.map((concept) => (
               <Badge key={concept}>{concept}</Badge>
             ))}

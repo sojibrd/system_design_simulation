@@ -11,8 +11,9 @@ import {
   HelpCircle,
   Lightbulb,
   Play,
+  X,
 } from "lucide-react";
-import { Badge, Callout, Panel } from "@/app/components/ui";
+import { Badge, Callout, IconButton, Panel } from "@/app/components/ui";
 
 /** Which scenario the current step belongs to, shown beside the step counter. */
 const flowBadge: Record<FlowKind, string> = {
@@ -31,6 +32,8 @@ interface WalkthroughPanelProps {
   onSelectStep: (index: number) => void;
   /** Flow has run to the end — freeze the live indicators. */
   isFinished?: boolean;
+  /** Dismisses the sheet. Only acted on for phones, where it overlays the canvas. */
+  onClose?: () => void;
 }
 
 const stepNo = (idx: number) => String(idx + 1).padStart(2, "0");
@@ -42,6 +45,7 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
   steps,
   onSelectStep,
   isFinished = false,
+  onClose,
 }) => {
   const [showPayload, setShowPayload] = useState<boolean>(true);
   const [showAllSteps, setShowAllSteps] = useState<boolean>(false);
@@ -57,7 +61,7 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
   // Placeholder when no step is selected yet (before simulation starts)
   if (!currentStep) {
     return (
-      <Panel className="flex flex-col h-full items-center justify-center p-6 text-center gap-4">
+      <Panel className="flex flex-col h-full items-center justify-center p-4 sm:p-6 text-center gap-4">
         <div className="surface-well t-accent w-14 h-14 flex items-center justify-center">
           <Play className="w-6 h-6" />
         </div>
@@ -79,7 +83,7 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
   }
 
   return (
-    <Panel className="flex flex-col h-full p-4 md:p-5 overflow-hidden">
+    <Panel className="flex flex-col h-full p-3 sm:p-4 md:p-5 overflow-hidden">
       {/* Title block of the note sheet */}
       <div className="flex items-center justify-between gap-2 pb-2 seam-b-heavy">
         <div className="flex items-center gap-2 min-w-0">
@@ -100,6 +104,18 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
           <span>Log ({totalSteps})</span>
           {showAllSteps ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
         </button>
+
+        {/* Phones only — on a wide screen the panel is a column, not an overlay. */}
+        {onClose && (
+          <IconButton
+            variant="ghost"
+            onClick={onClose}
+            aria-label="Close walkthrough"
+            className="lg:hidden"
+          >
+            <X className="w-4 h-4" />
+          </IconButton>
+        )}
       </div>
 
       {/* Index of every step on the sheet */}

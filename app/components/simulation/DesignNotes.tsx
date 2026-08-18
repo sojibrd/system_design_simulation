@@ -35,7 +35,7 @@ export const DesignNotes: React.FC<{ phase: PhaseConfig }> = ({ phase }) => {
         type="button"
         onClick={() => setIsOpen((open) => !open)}
         aria-expanded={isOpen}
-        className="control w-full justify-start gap-2 px-3 py-1.5"
+        className="control w-full justify-start gap-2 px-3 py-1.5 min-h-10 sm:min-h-0"
       >
         <Calculator className="t-muted w-3.5 h-3.5 shrink-0" />
         <span className="t-label">
@@ -60,7 +60,7 @@ export const DesignNotes: React.FC<{ phase: PhaseConfig }> = ({ phase }) => {
               <h4 className="t-label t-accent mb-2">
                 Capacity Estimate
               </h4>
-              <dl className="grid grid-cols-2 md:grid-cols-5 gap-2">
+              <dl className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
                 {rows.map((row) => (
                   <div
                     key={row.label}
