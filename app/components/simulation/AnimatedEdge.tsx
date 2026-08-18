@@ -50,8 +50,8 @@ export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
         id={id}
         d={edgePath}
         fill="none"
-        stroke={isActive ? "rgba(6, 182, 212, 0.3)" : "#1f1f23"}
-        strokeWidth={isActive ? 2 : 1.25}
+        stroke={isActive ? "rgba(6, 182, 212, 0.3)" : "#3f3f46"}
+        strokeWidth={isActive ? 2 : 1.5}
         strokeDasharray={isActive ? undefined : "4 4"}
         className="transition-colors duration-300"
       />

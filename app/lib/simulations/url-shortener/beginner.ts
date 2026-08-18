@@ -63,7 +63,9 @@ export const beginnerConfig: PhaseConfig = {
       id: "edge-client-to-server",
       type: "animatedFlowEdge",
       source: "node-client",
+      sourceHandle: "r-s",
       target: "node-server",
+      targetHandle: "l-t",
       data: {
         label: "1. POST /api/shorten",
         particleColor: "#06b6d4",
@@ -73,7 +75,9 @@ export const beginnerConfig: PhaseConfig = {
       id: "edge-server-to-db",
       type: "animatedFlowEdge",
       source: "node-server",
+      sourceHandle: "r-s",
       target: "node-db",
+      targetHandle: "l-t",
       data: {
         label: "2. INSERT INTO urls",
         particleColor: "#3b82f6",

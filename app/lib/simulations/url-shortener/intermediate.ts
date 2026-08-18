@@ -120,7 +120,9 @@ export const intermediateConfig: PhaseConfig = {
       id: "edge-client-to-lb",
       type: "animatedFlowEdge",
       source: "node-client",
+      sourceHandle: "r-s",
       target: "node-lb",
+      targetHandle: "l-t",
       data: {
         label: "1. Incoming Request",
         particleColor: "#06b6d4",
@@ -130,7 +132,9 @@ export const intermediateConfig: PhaseConfig = {
       id: "edge-lb-to-limiter",
       type: "animatedFlowEdge",
       source: "node-lb",
+      sourceHandle: "r-s",
       target: "node-limiter",
+      targetHandle: "l-t",
       data: {
         label: "2. Check IP Quota",
         particleColor: "#f59e0b",
@@ -140,7 +144,9 @@ export const intermediateConfig: PhaseConfig = {
       id: "edge-lb-to-s1",
       type: "animatedFlowEdge",
       source: "node-lb",
+      sourceHandle: "r-s",
       target: "node-server-1",
+      targetHandle: "l-t",
       data: {
         label: "3a. Forward to Server 1",
         particleColor: "#06b6d4",
@@ -150,7 +156,9 @@ export const intermediateConfig: PhaseConfig = {
       id: "edge-lb-to-s2",
       type: "animatedFlowEdge",
       source: "node-lb",
+      sourceHandle: "r-s",
       target: "node-server-2",
+      targetHandle: "l-t",
       data: {
         label: "3b. Forward to Server 2",
         particleColor: "#06b6d4",
@@ -160,7 +168,9 @@ export const intermediateConfig: PhaseConfig = {
       id: "edge-s1-to-cache",
       type: "animatedFlowEdge",
       source: "node-server-1",
+      sourceHandle: "r-s",
       target: "node-cache",
+      targetHandle: "l-t",
       data: {
         label: "4a. Cache Check / Set",
         particleColor: "#a855f7",
@@ -170,7 +180,9 @@ export const intermediateConfig: PhaseConfig = {
       id: "edge-s1-to-db",
       type: "animatedFlowEdge",
       source: "node-server-1",
+      sourceHandle: "r-s",
       target: "node-db",
+      targetHandle: "l-t",
       data: {
         label: "4b. DB Query",
         particleColor: "#3b82f6",
@@ -180,7 +192,9 @@ export const intermediateConfig: PhaseConfig = {
       id: "edge-s2-to-cache",
       type: "animatedFlowEdge",
       source: "node-server-2",
+      sourceHandle: "r-s",
       target: "node-cache",
+      targetHandle: "l-t",
       data: {
         label: "4c. Cache Check",
         particleColor: "#a855f7",

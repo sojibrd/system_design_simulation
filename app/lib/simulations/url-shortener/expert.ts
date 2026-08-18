@@ -190,7 +190,9 @@ export const expertConfig: PhaseConfig = {
       id: "edge-client-to-cdn",
       type: "animatedFlowEdge",
       source: "node-client",
+      sourceHandle: "r-s",
       target: "node-cdn",
+      targetHandle: "l-t",
       data: {
         label: "0. GeoDNS Routing",
         particleColor: "#06b6d4",
@@ -200,7 +202,9 @@ export const expertConfig: PhaseConfig = {
       id: "edge-cdn-to-lb",
       type: "animatedFlowEdge",
       source: "node-cdn",
+      sourceHandle: "b-s",
       target: "node-lb",
+      targetHandle: "t-t",
       data: {
         label: "1. Edge Pass to LB",
         particleColor: "#06b6d4",
@@ -210,7 +214,9 @@ export const expertConfig: PhaseConfig = {
       id: "edge-client-to-lb",
       type: "animatedFlowEdge",
       source: "node-client",
+      sourceHandle: "r-s",
       target: "node-lb",
+      targetHandle: "l-t",
       data: {
         label: "1. Direct Ingress",
         particleColor: "#06b6d4",
@@ -220,7 +226,9 @@ export const expertConfig: PhaseConfig = {
       id: "edge-lb-to-gw",
       type: "animatedFlowEdge",
       source: "node-lb",
+      sourceHandle: "r-s",
       target: "node-gw",
+      targetHandle: "l-t",
       data: {
         label: "2. Gateway Ingress",
         particleColor: "#06b6d4",
@@ -230,7 +238,9 @@ export const expertConfig: PhaseConfig = {
       id: "edge-gw-to-s1",
       type: "animatedFlowEdge",
       source: "node-gw",
+      sourceHandle: "r-s",
       target: "node-server-1",
+      targetHandle: "l-t",
       data: {
         label: "3a. Pod-1 Route",
         particleColor: "#06b6d4",
@@ -240,7 +250,9 @@ export const expertConfig: PhaseConfig = {
       id: "edge-gw-to-s2",
       type: "animatedFlowEdge",
       source: "node-gw",
+      sourceHandle: "r-s",
       target: "node-server-2",
+      targetHandle: "l-t",
       data: {
         label: "3b. Pod-2 Route",
         particleColor: "#06b6d4",
@@ -250,7 +262,9 @@ export const expertConfig: PhaseConfig = {
       id: "edge-s1-to-idgen",
       type: "animatedFlowEdge",
       source: "node-server-1",
+      sourceHandle: "t-s",
       target: "node-idgen",
+      targetHandle: "b-t",
       data: {
         label: "4a. Fetch Snowflake ID",
         particleColor: "#eab308",
@@ -260,7 +274,9 @@ export const expertConfig: PhaseConfig = {
       id: "edge-s1-to-primary",
       type: "animatedFlowEdge",
       source: "node-server-1",
+      sourceHandle: "r-s",
       target: "node-primary-db",
+      targetHandle: "l-t",
       data: {
         label: "5a. Write to Master",
         particleColor: "#3b82f6",
@@ -270,7 +286,9 @@ export const expertConfig: PhaseConfig = {
       id: "edge-s1-to-cache",
       type: "animatedFlowEdge",
       source: "node-server-1",
+      sourceHandle: "r-s",
       target: "node-cache",
+      targetHandle: "l-t",
       data: {
         label: "5b. Populate Cache",
         particleColor: "#a855f7",
@@ -280,7 +298,9 @@ export const expertConfig: PhaseConfig = {
       id: "edge-primary-to-replica",
       type: "animatedFlowEdge",
       source: "node-primary-db",
+      sourceHandle: "b-s",
       target: "node-replica-db",
+      targetHandle: "t-t",
       data: {
         label: "Replicate WAL stream",
         particleColor: "#64748b",
@@ -290,7 +310,9 @@ export const expertConfig: PhaseConfig = {
       id: "edge-s1-to-replica",
       type: "animatedFlowEdge",
       source: "node-server-1",
+      sourceHandle: "r-s",
       target: "node-replica-db",
+      targetHandle: "l-t",
       data: {
         label: "Read Query (Fallback)",
         particleColor: "#10b981",
@@ -300,7 +322,9 @@ export const expertConfig: PhaseConfig = {
       id: "edge-s1-to-queue",
       type: "animatedFlowEdge",
       source: "node-server-1",
+      sourceHandle: "b-s",
       target: "node-queue",
+      targetHandle: "t-t",
       data: {
         label: "Async Publish: click_event",
         particleColor: "#ec4899",
@@ -310,7 +334,9 @@ export const expertConfig: PhaseConfig = {
       id: "edge-s2-to-queue",
       type: "animatedFlowEdge",
       source: "node-server-2",
+      sourceHandle: "b-s",
       target: "node-queue",
+      targetHandle: "t-t",
       data: {
         label: "Async Publish: click_event",
         particleColor: "#ec4899",
@@ -320,7 +346,9 @@ export const expertConfig: PhaseConfig = {
       id: "edge-s2-to-cache",
       type: "animatedFlowEdge",
       source: "node-server-2",
+      sourceHandle: "r-s",
       target: "node-cache",
+      targetHandle: "l-t",
       data: {
         label: "Redis Lookup",
         particleColor: "#a855f7",
@@ -330,7 +358,9 @@ export const expertConfig: PhaseConfig = {
       id: "edge-queue-to-worker",
       type: "animatedFlowEdge",
       source: "node-queue",
+      sourceHandle: "r-s",
       target: "node-worker",
+      targetHandle: "l-t",
       data: {
         label: "Batch Consume & Aggregate",
         particleColor: "#f43f5e",
