@@ -1,0 +1,257 @@
+/* ============================================================================
+   THEME — Editorial / Swiss
+
+   A printed page, not a screen: white stock, black ink, thick horizontal
+   rules, and exactly one accent that never appears twice on the same line.
+   Type does the work that colour and depth do elsewhere.
+
+   Character rules this theme commits to:
+   - Zero radius. Every corner is square.
+   - Zero shadow. Nothing floats; hierarchy comes from rule weight and scale.
+   - One accent (vermilion) and nothing else chromatic in the chrome.
+     Category and signal colours stay, because they carry information.
+   - Emphasis is a black fill with reversed-out white type.
+   ========================================================================= */
+
+:root {
+  /* --- Palette --------------------------------------------------------- */
+  --paper: #ffffff;
+  --paper-2: #f4f4f1;
+  --paper-3: #e8e8e3;
+  --ink: #0a0a0a;
+  --ink-2: #3d3d3a;
+  --ink-3: #787872;
+  --ink-4: #a8a8a1;
+  --vermilion: #ff4a1c;
+  --vermilion-soft: #ffe9e3;
+  --green: #0f8a4d;
+  --green-soft: #e2f2e9;
+
+  /* --- Type: the grotesk does everything ------------------------------- */
+  --t-font-sans: var(--font-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --t-font-mono: var(--font-mono-family), ui-monospace, monospace;
+
+  --t-title-family: var(--t-font-sans);
+  --t-title-weight: 700;
+  --t-title-tracking: -0.03em;
+  --t-title-transform: none;
+
+  /* Swiss labels are set in the same grotesk, not a mono — tight caps with
+     generous letter-spacing. */
+  --t-label-family: var(--t-font-sans);
+  --t-label-size: 0.625rem;
+  --t-label-weight: 700;
+  --t-label-tracking: 0.12em;
+  --t-label-transform: uppercase;
+
+  /* --- Motion: linear and unfussy -------------------------------------- */
+  --t-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* --- App ------------------------------------------------------------- */
+  --t-app-bg: var(--paper);
+  --t-app-bg-image: none;
+  --t-select-bg: var(--vermilion);
+  --t-select-fg: var(--paper);
+  --t-overlay-bg: rgb(10 10 10 / 0.55);
+  --t-overlay-filter: none;
+  --t-disabled-opacity: 0.3;
+  --t-hover-fill: var(--paper-2);
+  --t-selected-bg: var(--ink);
+  --t-selected-fg: var(--paper);
+  --t-accent: var(--vermilion);
+  --t-ok: var(--green);
+  --t-ok-soft: var(--green-soft);
+
+  /* --- Text ------------------------------------------------------------ */
+  --t-text-title: var(--ink);
+  --t-text-body: var(--ink-2);
+  --t-text-label: var(--ink-3);
+  --t-text-muted: var(--ink-3);
+  --t-text-faint: var(--ink-4);
+
+  /* --- Surfaces: no shadow anywhere, ever ------------------------------ */
+  --t-panel-bg: var(--paper);
+  --t-panel-border: var(--ink);
+  --t-panel-border-width: 2px;
+  --t-panel-radius: 0px;
+  --t-panel-shadow: none;
+
+  --t-raised-bg: var(--paper);
+  --t-raised-border: var(--ink);
+  --t-raised-border-width: 2px;
+  --t-raised-radius: 0px;
+  --t-raised-shadow: none;
+
+  --t-well-bg: var(--paper-2);
+  --t-well-border: var(--paper-3);
+  --t-well-border-width: 1px;
+  --t-well-radius: 0px;
+  --t-well-shadow: none;
+
+  /* --- Rules: the load-bearing element of the whole design ------------- */
+  --t-seam: var(--paper-3);
+  --t-seam-width: 1px;
+  --t-seam-heavy: var(--ink);
+  --t-seam-heavy-width: 3px;
+
+  /* --- Controls: flat type on paper, black fill when engaged ----------- */
+  --t-control-family: var(--t-font-sans);
+  --t-control-weight: 700;
+  --t-control-tracking: 0.08em;
+  --t-control-transform: uppercase;
+  --t-control-border-width: 2px;
+  --t-control-radius: 0px;
+  --t-control-bg: var(--paper);
+  --t-control-border: var(--ink);
+  --t-control-fg: var(--ink);
+  --t-control-shadow: none;
+  --t-control-bg-hover: var(--ink);
+  --t-control-border-hover: var(--ink);
+  --t-control-fg-hover: var(--paper);
+  --t-control-press-transform: none;
+  --t-control-press-shadow: none;
+
+  --t-primary-bg: var(--ink);
+  --t-primary-bg-hover: var(--vermilion);
+  --t-primary-border: var(--ink);
+  --t-primary-fg: var(--paper);
+  --t-primary-shadow: none;
+
+  --t-alert-bg: var(--vermilion);
+  --t-alert-bg-hover: var(--ink);
+  --t-alert-border: var(--vermilion);
+  --t-alert-fg: var(--paper);
+  --t-alert-soft: var(--vermilion-soft);
+
+  /* --- Chips: rules, not capsules -------------------------------------- */
+  --t-chip-border-width: 1px;
+  --t-chip-radius: 0px;
+  --t-chip-bg: var(--paper);
+  --t-chip-border: var(--ink);
+  --t-chip-fg: var(--ink);
+  --t-chip-accent-bg: var(--paper);
+  --t-chip-accent-border: var(--vermilion);
+  --t-chip-accent-fg: var(--vermilion);
+
+  /* --- Callouts: a heavy left rule and nothing else -------------------- */
+  --t-callout-bg: var(--paper);
+  --t-callout-border: transparent;
+  --t-callout-border-width: 0px;
+  --t-callout-edge: var(--ink);
+  --t-callout-edge-width: 3px;
+  --t-callout-radius: 0px;
+  --t-callout-shadow: none;
+
+  /* --- Unit: a boxed entry in a directory ------------------------------ */
+  --t-unit-bg: var(--paper);
+  --t-unit-border: var(--ink);
+  --t-unit-border-width: 2px;
+  --t-unit-radius: 0px;
+  --t-unit-shadow: none;
+  --t-unit-selected-border: var(--ink-3);
+  --t-unit-active-bg: var(--paper);
+  --t-unit-active-border: var(--vermilion);
+  --t-unit-active-border-width: 3px;
+  --t-unit-active-shadow: none;
+  --t-unit-active-animation: ruleFlash 1.4s var(--t-ease) infinite;
+
+  /* --- Ornament: off. A Swiss box is defined by its rule, not trim ----- */
+  --t-ornament-display: none;
+  --t-ornament-size: 0;
+  --t-ornament-inset: 0;
+  --t-ornament-radius: 0;
+  --t-ornament-fill: transparent;
+  --t-ornament-color: transparent;
+  --t-ornament-stroke: 0;
+  --t-ornament-shadow: none;
+
+  /* --- Lamps: printed squares. Nothing glows on paper ------------------ */
+  --t-lamp-size: 7px;
+  --t-lamp-radius: 0px;
+  --t-lamp-off-fill: var(--paper-3);
+  --t-lamp-glow: none;
+  --t-lamp-blink-animation: inkBlink 1s step-end infinite;
+
+  /* --- Terminals ------------------------------------------------------- */
+  --t-terminal-size: 7px;
+  --t-terminal-radius: 0px;
+  --t-terminal-fill: var(--ink-4);
+  --t-terminal-border: 0;
+  --t-terminal-fill-hover: var(--vermilion);
+
+  /* --- Wires & packets: ruled lines, square marks ---------------------- */
+  --t-wire-dormant: var(--ink-4);
+  --t-wire-dormant-width: 1;
+  --t-wire-dormant-dash: 2 3;
+  --t-wire-live-width: 3;
+  --t-wire-live-dash: 8, 5;
+  --t-wire-live-filter: none;
+  --t-wire-dash-speed: 0.75s;
+  --t-wire-corner-radius: 0;
+  --t-packet-size: 9;
+  --t-packet-rx: 0px;
+  --t-packet-halo-size: 9;
+  --t-packet-halo-rx: 0px;
+  --t-packet-halo-opacity: 0;
+  --t-edge-tag-bg: var(--paper);
+
+  /* --- Tabs: a rule underneath, black fill when current ---------------- */
+  --t-tab-bg: var(--paper);
+  --t-tab-border: var(--paper-3);
+  --t-tab-border-hover: var(--ink);
+  --t-tab-shadow: none;
+  --t-tab-selected-bg: var(--ink);
+  --t-tab-selected-border: var(--ink);
+  --t-tab-selected-shadow: none;
+
+  /* --- Progress: a measure rule ---------------------------------------- */
+  --t-progress-width: 14px;
+  --t-progress-radius: 0px;
+  --t-progress-todo: var(--paper-3);
+  --t-progress-todo-height: 3px;
+  --t-progress-done: var(--ink);
+  --t-progress-done-height: 6px;
+  --t-progress-current: var(--vermilion);
+  --t-progress-current-height: 14px;
+
+  /* --- Canvas: near-invisible register grid ---------------------------- */
+  --t-canvas-dot: #e2e2dd;
+  --t-canvas-gap: 32;
+  --t-canvas-dot-size: 1;
+
+  /* --- Scrollbars ------------------------------------------------------ */
+  --t-scrollbar-size: 8px;
+  --t-scrollbar-track: var(--paper-2);
+  --t-scrollbar-thumb: var(--ink);
+  --t-scrollbar-thumb-hover: var(--vermilion);
+
+  /* --- Category colours: darkened for ink on white --------------------- */
+  --t-cat-client: #1a5fb4;
+  --t-cat-compute: #6b32ad;
+  --t-cat-storage: #0f8a4d;
+  --t-cat-network: #0a7d80;
+  --t-cat-security: #a35c00;
+  --t-cat-queue: #a8195f;
+  --t-cat-analytics: #b03a1e;
+
+  /* --- Signal colours -------------------------------------------------- */
+  --t-signal-request: #1a5fb4;
+  --t-signal-write: #6b32ad;
+  --t-signal-read: #0a7d80;
+  --t-signal-success: #0f8a4d;
+  --t-signal-cache: #a35c00;
+  --t-signal-event: #a8195f;
+  --t-signal-error: #d32b0c;
+  --t-signal-meta: var(--ink-3);
+}
+
+/* The live unit is marked the way a proof is marked: the rule thickens. */
+@keyframes ruleFlash {
+  0%, 100% { border-color: var(--vermilion); }
+  50% { border-color: var(--ink); }
+}
+
+@keyframes inkBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}

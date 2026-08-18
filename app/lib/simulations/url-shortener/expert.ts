@@ -15,6 +15,140 @@ export const expertConfig: PhaseConfig = {
     "API Gateway Pattern (Routing, Auth, Telemetry)",
     "High Availability & Zero Downtime Failover",
   ],
+  scaleEstimate: {
+    writeQps: "~১,০০০ /sec (peak ~৫,০০০)",
+    readQps: "~১,০০,০০০ /sec",
+    readWriteRatio: "১০০ : ১",
+    storage5y: "~৮০ TB (১৫,৮০০ কোটি লিংক × ৫০০ B)",
+    codeLength: "৭ অক্ষর → ৬২⁷ ≈ ৩.৫ ট্রিলিয়ন",
+  },
+  tradeOffs: [
+    {
+      question: "Short code কে তৈরি করবে?",
+      options: [
+        {
+          name: "DB counter",
+          note: "একটিমাত্র counter মানে একটিমাত্র bottleneck। ১,০০০ write/sec-এ এটাই প্রথমে ভাঙবে, আর counter-টি বসে গেলে কোনো নতুন লিংকই তৈরি হবে না।",
+        },
+        {
+          name: "Hash + collision retry",
+          note: "১৫,৮০০ কোটি সারিতে জন্মদিনের সমস্যা (birthday paradox) নির্মম — collision ঘন ঘন হবে, আর প্রতিটি retry-তে একটা করে DB lookup লাগবে।",
+        },
+        {
+          name: "Snowflake (timestamp + machine id + sequence)",
+          note: "প্রতিটি pod কারো সাথে কথা না বলেই আইডি বানায়। কোনো সমন্বয় নেই, তাই কোনো bottleneck-ও নেই। আইডি সময়-অনুসারী ক্রমবর্ধমান, ফলে DB ইনডেক্সও সাজানো থাকে।",
+        },
+        {
+          name: "KGS (আগে থেকে বানানো কী)",
+          note: "সমান দ্রুত, তবে কী-গুলোর নিজস্ব স্টোরেজ ও HA লাগে; বিনিময়ে কোড অনুমান করা যায় না।",
+        },
+      ],
+      chosen: "Snowflake (timestamp + machine id + sequence)",
+      why: "beginner স্তরের counter এখানে কাজ করবে না — বহু pod একসাথে লিখছে। Snowflake সমন্বয়ের প্রয়োজনই মুছে দেয়: ৪১ বিট সময়, ১০ বিট মেশিন, ১২ বিট ক্রম — দুটি pod কখনোই একই আইডি বানাতে পারে না, কারণ তাদের মেশিন নম্বর আলাদা। বিনিময়ে কোড অনুমানযোগ্য হয়ে যায়; গোপনীয়তা দরকার হলে KGS বেছে নিতে হতো।",
+    },
+    {
+      question: "301 না 302 — এবার হিসাব উল্টে যায়",
+      options: [
+        {
+          name: "301 Moved Permanently",
+          note: "ব্রাউজার ক্যাশ করে, তাই read QPS-এর বড় অংশ বেঁচে যায়। কিন্তু সেই ক্লিকগুলো সার্ভারে আসে না মানে Kafka-তেও যায় না — analytics চিরতরে অন্ধ।",
+        },
+        {
+          name: "302 Found",
+          note: "প্রতিটি ক্লিক সার্ভার পর্যন্ত আসে, তাই প্রতিটি ক্লিক গোনা যায় এবং পরে গন্তব্য বদলানোও সম্ভব। বিনিময়ে পুরো ১,০০,০০০ read/sec সামলাতে হয়।",
+        },
+      ],
+      chosen: "302 Found",
+      why: "এই স্তরে Kafka ও ClickHouse বসানোই হয়েছে প্রতিটি ক্লিক গোনার জন্য — 301 পাঠিয়ে সেটা করা অসম্ভব। এটাই এই পুরো সিমুলেটরের সবচেয়ে গুরুত্বপূর্ণ trade-off: beginner ও intermediate-এ 301 সঠিক ছিল কারণ সেখানে analytics ছিল না; analytics চাওয়ার মুহূর্তেই সিদ্ধান্তটি উল্টে যায়। আর 301-এর ক্ষতি স্থায়ী — যে ব্রাউজার একবার 301 পেয়েছে, সে আর কখনো ফিরে আসবে না।",
+    },
+    {
+      question: "১৫,৮০০ কোটি সারি কীভাবে ভাগ করব?",
+      options: [
+        {
+          name: "Range-based sharding",
+          note: "আইডি ০-১ কোটি প্রথম shard-এ, পরেরটা দ্বিতীয়তে। কিন্তু Snowflake আইডি সময়-অনুসারী বাড়ে, তাই সব নতুন write সবসময় শেষ shard-এই পড়বে — hotspot।",
+        },
+        {
+          name: "Hash-based sharding (short_code)",
+          note: "কোডের hash দিয়ে shard বাছা হয়, তাই write সমানভাবে ছড়ায়। কিন্তু shard সংখ্যা বদলালে প্রায় সব ডেটা সরাতে হয়।",
+        },
+        {
+          name: "Consistent hashing",
+          note: "নতুন shard যোগ করলে শুধু ১/N ডেটা সরে। বিনিময়ে রাউটিং লজিক জটিল ও ভার্চুয়াল নোড সামলাতে হয়।",
+        },
+      ],
+      chosen: "Hash-based sharding (short_code)",
+      why: "প্রতিটি lookup-ই ঠিক একটি short_code ধরে হয় — কখনো range query নয়। তাই hash করে shard বাছাই সবচেয়ে সহজ ও সমান বণ্টন দেয়। Range sharding এখানে সবচেয়ে খারাপ পছন্দ হতো, কারণ Snowflake আইডি ক্রমবর্ধমান — সব নতুন লেখা একটিমাত্র shard-এ গিয়ে পড়ত।",
+    },
+    {
+      question: "Read replica বাসি ডেটা দিলে?",
+      options: [
+        {
+          name: "সব read replica থেকে",
+          note: "Primary-র উপর চাপ সবচেয়ে কম। কিন্তু replication lag-এর কারণে সদ্য তৈরি লিংক কয়েক মিলিসেকেন্ড 'not found' দেখাতে পারে।",
+        },
+        {
+          name: "Read-your-writes: নতুন লিংক primary থেকে",
+          note: "যে ইউজার লিংকটি বানিয়েছে, তার নিজের read কিছুক্ষণ primary থেকে সার্ভ হয়। সঠিকতা নিশ্চিত, primary-তে সামান্য বাড়তি চাপ।",
+        },
+      ],
+      chosen: "Read-your-writes: নতুন লিংক primary থেকে",
+      why: "সবচেয়ে বিব্রতকর bug-টা হলো: ইউজার লিংক বানানোর ১ সেকেন্ড পর নিজেই সেটা খুলে '404 Not Found' দেখল। Shorten flow-এ যে ক্যাশ ব্যাকফিল করা হয়, সেটা এই সমস্যার প্রথম প্রতিরক্ষা — লিংকটি ইতিমধ্যেই Redis-এ থাকে, তাই replica পর্যন্ত যেতেই হয় না।",
+    },
+    {
+      question: "Primary DB বসে গেলে কী হবে?",
+      options: [
+        {
+          name: "Manual failover",
+          note: "কেউ একজন ম্যানুয়ালি replica-কে promote করে। মিনিটের পর মিনিট downtime, কিন্তু কোনো ভুল স্বয়ংক্রিয় সিদ্ধান্তের ঝুঁকি নেই।",
+        },
+        {
+          name: "Automatic failover (Raft / Patroni)",
+          note: "একটি consensus গোষ্ঠী নতুন primary বেছে নেয়, সাধারণত ৩০ সেকেন্ডের মধ্যে। ঝুঁকি: নেটওয়ার্ক ভাগ হলে দুটি primary তৈরি হতে পারে (split-brain)।",
+        },
+        {
+          name: "Read-only degraded mode",
+          note: "primary ফিরে না আসা পর্যন্ত write বন্ধ, কিন্তু redirect (read) চলতেই থাকে।",
+        },
+      ],
+      chosen: "Automatic failover (Raft / Patroni)",
+      why: "Read আর write-এর গুরুত্ব এখানে সমান নয়: নতুন লিংক তৈরি ৩০ সেকেন্ড বন্ধ থাকলে কেউ খুব একটা টের পায় না, কিন্তু ১,০০,০০০ redirect/sec এক মিনিট বন্ধ থাকা মানে ৬০ লক্ষ ভাঙা লিংক। তাই read পথটি কখনোই primary-র উপর নির্ভর করে না — 'Failover' flow-এ ঠিক এটাই দেখানো হয়েছে।",
+    },
+    {
+      question: "Analytics কি রিডাইরেক্টের পথেই বসবে?",
+      options: [
+        {
+          name: "Synchronous — ClickHouse-এ লিখে তবেই redirect",
+          note: "গণনা নিখুঁত, কিন্তু analytics DB ধীর হলে বা বসে গেলে প্রতিটি redirect-ও আটকে যায়।",
+        },
+        {
+          name: "Async — Kafka-তে ছুড়ে দিয়ে সাথে সাথে redirect",
+          note: "Redirect-এর গতি analytics-এর উপর নির্ভর করে না। Kafka বসে গেলে কিছু ইভেন্ট হারায়, কিন্তু কোনো ইউজার ক্ষতিগ্রস্ত হয় না।",
+        },
+      ],
+      chosen: "Async — Kafka-তে ছুড়ে দিয়ে সাথে সাথে redirect",
+      why: "ইউজারের কাজ হলো গন্তব্যে পৌঁছানো; ক্লিক গোনা আমাদের নিজেদের প্রয়োজন। নিজেদের প্রয়োজনকে কখনোই ইউজারের পথে দাঁড় করানো উচিত নয়। এই কারণেই redirect flow-এ Kafka-র ধাপটি ইউজারের রেসপন্স চলে যাওয়ার পরে আসে, আগে নয়।",
+    },
+    {
+      question: "লিংক কি চিরকাল থাকবে? আর ক্ষতিকর লিংক?",
+      options: [
+        {
+          name: "TTL + cleanup + reclaim",
+          note: "মেয়াদোত্তীর্ণ সারি মুছে ফেলা হয় এবং কোডগুলো আবার ব্যবহারযোগ্য হয়। স্টোরেজ স্থিতিশীল থাকে, কিন্তু পুরোনো লিংক ভেঙে যায়।",
+        },
+        {
+          name: "Safe Browsing API দিয়ে যাচাই",
+          note: "তৈরির সময় প্রতিটি URL ফিশিং/ম্যালওয়্যার তালিকার বিপরীতে যাচাই করা হয়। প্রতি write-এ একটি বাইরের API কল যোগ হয়।",
+        },
+        {
+          name: "Custom alias",
+          note: "ইউজার নিজের পছন্দের কোড দিতে পারে। এর জন্য আলাদা uniqueness চেক লাগে এবং জনপ্রিয় নামের জন্য কাড়াকাড়ি শুরু হয়।",
+        },
+      ],
+      chosen: "TTL + cleanup + reclaim",
+      why: "৮০ TB-তে স্টোরেজই প্রধান খরচ, তাই TTL এখানে বাধ্যতামূলক — beginner স্তরে যেটা অপ্রয়োজনীয় ছিল। Safe Browsing যাচাইও প্রয়োজনীয়, তবে সেটা shorten পথে async করা উচিত, নইলে প্রতিটি লিংক তৈরিতে বাইরের একটা সার্ভিসের উপর নির্ভরতা তৈরি হবে। Custom alias একটি পণ্য-সিদ্ধান্ত, স্কেলের নয় — তাই এখানে বাদ।",
+    },
+  ],
   nodes: [
     {
       id: "node-client",
@@ -784,26 +918,26 @@ export const expertConfig: PhaseConfig = {
           id: "e-r7",
           flowType: "redirect",
           stepNumber: 7,
-          title: "App Pod 2 → API Gateway (301 রেসপন্স ফেরত)",
+          title: "App Pod 2 → API Gateway (302 রেসপন্স ফেরত)",
           whatHappens:
-            "সার্ভার HTTP 301 Moved Permanently রেসপন্স তৈরি করে গেটওয়েতে ফেরত পাঠালো।",
+            "সার্ভার HTTP 302 Found রেসপন্স তৈরি করে গেটওয়েতে ফেরত পাঠালো।",
           whyItMatters:
-            "301 ব্যবহার করলে ব্রাউজার পরের বার নিজেই মনে রাখে — সার্ভারে দ্বিতীয়বার আসতেই হয় না।",
+            "এখানে ইচ্ছাকৃতভাবে 302, 301 নয়। 301 পেলে ব্রাউজার ঠিকানাটি ক্যাশ করে রাখত এবং পরের ক্লিকগুলো আর সার্ভারেই আসত না — ফলে Kafka-তে কোনো ইভেন্টও যেত না, analytics চিরতরে অন্ধ হয়ে যেত।",
           analogy: "📤 'ঠিকানা বদলেছে' লেখা চিঠি ফেরত পাঠানো।",
           activeNodeIds: ["node-server-2", "node-gw"],
           activeEdgeIds: ["edge-gw-to-s2"],
           edgeOverrides: {
             "edge-gw-to-s2": {
-              label: "7. 301 Response",
+              label: "7. 302 Response",
               isReverse: true,
               particleColor: "success",
             },
           },
           nodeStatusMessages: {
-            "node-server-2": "301 Moved Permanently",
+            "node-server-2": "302 Found (countable)",
             "node-gw": "Receiving response from Pod-2",
           },
-          payloadSnippet: `HTTP/2 301 Moved Permanently\nLocation: https://systemdesign.com/expert-deep-dive`,
+          payloadSnippet: `HTTP/2 302 Found\nLocation: https://systemdesign.com/expert-deep-dive\nCache-Control: no-store   // প্রতিটি ক্লিক গোনার জন্য`,
         },
         {
           id: "e-r8",
@@ -836,7 +970,7 @@ export const expertConfig: PhaseConfig = {
           stepNumber: 9,
           title: "Load Balancer → Client (ব্রাউজার রিডাইরেক্ট হলো)",
           whatHappens:
-            "ব্রাউজার 301 রেসপন্স পেয়ে সাথে সাথে আসল ওয়েবসাইটে চলে গেলো — ইউজার চোখের পলক ফেলার আগেই!",
+            "ব্রাউজার 302 রেসপন্স পেয়ে সাথে সাথে আসল ওয়েবসাইটে চলে গেলো — ইউজার চোখের পলক ফেলার আগেই!",
           whyItMatters:
             "পুরো রিডাইরেক্ট সাইকেল ৩ মিলিসেকেন্ডে শেষ, কারণ কোথাও ডিস্ক পড়তে হয়নি।",
           analogy: "🚀 রকেটের মতো সঠিক গন্তব্যে পৌঁছে যাওয়া।",
@@ -850,7 +984,7 @@ export const expertConfig: PhaseConfig = {
             },
           },
           nodeStatusMessages: {
-            "node-lb": "Delivering 301 to client",
+            "node-lb": "Delivering 302 to client",
             "node-client": "Redirecting instantly (3.1ms)...",
           },
           payloadSnippet: `Location: https://systemdesign.com/expert-deep-dive\nTotal latency: 3.1ms`,
