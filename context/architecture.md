@@ -12,6 +12,7 @@ app/
   lib/simulations/          ডেটা: index.ts → <system>/ → <level>.ts
   hooks/useSimulation.ts    playback ইঞ্জিন
   hooks/useThemeNumber.ts   CSS ভ্যারিয়েবল → number (SVG geometry-র জন্য)
+  hooks/useMediaQuery.ts    media query → boolean (reduced-motion, breakpoint)
   components/simulation/    ডোমেইন কম্পোনেন্ট
   components/ui/            থিম-চালিত প্রিমিটিভ (Panel, Button, Badge, ...)
 ```
@@ -35,6 +36,8 @@ app/
 
 - `currentStepIndex === -1` মানে "শুরুর আগে" — শূন্যতম ধাপ নয়। auto-play শেষে আবার `-1`-এ ফেরে।
 - `isFinished` (শেষ ধাপে থেমে থাকা) হাইলাইট রাখে কিন্তু সব motion বন্ধ করে দেয়।
-- Level বদল render-এর সময়েই state রিসেট করে (effect-এ নয়), যাতে পুরোনো লেভেলের এক ফ্রেমও না আঁকা হয়।
+- Level বদল render-এর সময়েই state রিসেট করে (effect-এ নয়), যাতে পুরোনো লেভেলের এক ফ্রেমও না আঁকা হয়। গার্ডটা `LevelConfig` **অবজেক্ট** মেলায়, `levelConfig.id` নয় — `LevelId` কেবল এক সিমুলেশনের ভেতরে unique, তাই দুটো সিস্টেম দুটোই `functional`-এ খুললে id-চেক ফাঁকি দিয়ে এক সিস্টেমের step index অন্যটায় চলে যেত।
 - `FlowDiagram`-এ `key={simulation.id}-{levelId}` — React Flow-কে জোর করে নতুন করে mount করানোর জন্য।
 - `output: "export"` — কোনো server component data fetch, route handler বা server action নেই।
+- SSR-এ viewport বা reader-preference কিছুই জানা নেই, তাই `useMediaQuery` প্রথম render-এ সবসময় `false` — mount-এর পর একবার শুধরে নেয়।
+- Packet-টা `<animateMotion>` (SMIL), CSS animation নয় — `prefers-reduced-motion`-এর স্টাইলশিট নিয়ম ওটাকে ছুঁতে পারে না, তাই `AnimatedEdge` ওটাকে DOM থেকেই বাদ দেয়।

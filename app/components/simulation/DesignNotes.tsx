@@ -54,7 +54,10 @@ export const DesignNotes: React.FC<{ level: LevelConfig }> = ({ level }) => {
         onClick={() => hasBody && setIsOpen((open) => !open)}
         aria-expanded={hasBody ? isOpen : undefined}
         disabled={!hasBody}
-        className="control w-full justify-start gap-2 px-3 py-1.5 min-h-10 sm:min-h-0 disabled:opacity-100"
+        /* With no body to open the row is a plate, not a dead button — the
+           theme keeps it at full strength rather than dimming it. */
+        data-static={!hasBody}
+        className="control w-full justify-start gap-2 px-3 py-1.5 min-h-10 sm:min-h-0"
       >
         <Calculator className="t-muted w-3.5 h-3.5 shrink-0" />
         <span className="t-label shrink-0">Note</span>
@@ -132,14 +135,10 @@ export const DesignNotes: React.FC<{ level: LevelConfig }> = ({ level }) => {
                         return (
                           <li
                             key={option.name}
-                            className={`t-body text-[11px] pl-2 border-l-2 ${
-                              isChosen ? "t-body" : "t-muted"
-                            }`}
-                            style={{
-                              borderColor: isChosen
-                                ? "var(--t-accent)"
-                                : "var(--t-seam)",
-                            }}
+                            /* Chosen or not is a STATE; how a chosen branch
+                               reads is the theme's decision. */
+                            data-chosen={isChosen}
+                            className="option text-[11px] pl-2"
                           >
                             <span className="t-mono t-strong">
                               {option.name}

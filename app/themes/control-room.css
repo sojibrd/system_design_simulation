@@ -57,6 +57,7 @@
   /* --- App ------------------------------------------------------------- */
   --t-app-bg: var(--chassis);
   --t-app-bg-image: none;
+  --t-app-bg-size: auto;
   --t-select-bg: var(--amber);
   --t-select-fg: var(--chassis);
   --t-overlay-bg: rgb(23 20 15 / 0.8);
@@ -75,6 +76,10 @@
   --t-text-label: var(--readout-muted);
   --t-text-muted: var(--readout-muted);
   --t-text-faint: var(--readout-faint);
+
+  /* Set-apart voice (an analogy) and the ink a literal payload is printed in. */
+  --t-quote-style: italic;
+  --t-payload-fg: var(--green);
 
   /* --- Depth ----------------------------------------------------------- */
   --bezel-shadow:

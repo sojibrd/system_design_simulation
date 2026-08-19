@@ -8,6 +8,7 @@ import {
 } from "@xyflow/react";
 import { SimulationEdgeData, SignalKind } from "@/app/lib/types";
 import { useThemeNumber } from "@/app/hooks/useThemeNumber";
+import { usePrefersReducedMotion } from "@/app/hooks/useMediaQuery";
 
 // Data files name the MEANING of a hop; the theme supplies its colour.
 const signalColor: Record<SignalKind, string> = {
@@ -33,8 +34,13 @@ export const AnimatedFlowEdge: React.FC<EdgeProps> = ({
 }) => {
   const edgeData = (data as unknown as SimulationEdgeData) || {};
   const isActive = Boolean(edgeData.isActive);
+  // The stylesheet neutralises every CSS animation under reduced motion, but
+  // the packet below is an <animateMotion> — SMIL, which those rules cannot
+  // touch. So it is dropped from the DOM instead. The lit wire and its label
+  // still say which hop is live; only the travelling dot goes.
+  const reducedMotion = usePrefersReducedMotion();
   // Highlight stays on after the flow finishes, but the motion stops.
-  const isAnimated = isActive && edgeData.isAnimated !== false;
+  const isAnimated = isActive && edgeData.isAnimated !== false && !reducedMotion;
   const isReverse = Boolean(edgeData.isReverse);
   const color = signalColor[edgeData.particleColor ?? "request"];
 

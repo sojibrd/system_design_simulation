@@ -122,6 +122,26 @@ body {
     color: var(--t-text-muted);
   }
 
+  /* "Correct / succeeded" ink. A component says a thing is OK; the theme
+     decides what OK looks like. */
+  .t-ok {
+    color: var(--t-ok);
+  }
+
+  /* A set-apart voice — an analogy, a quotation. Whether that reads as
+     italics or as nothing at all is the theme's call: a CRT has no italic. */
+  .t-quote {
+    font-style: var(--t-quote-style);
+  }
+
+  /* --- Payload: a literal wire sample (JSON / SQL / HTTP) -------------- */
+
+  .payload {
+    font-family: var(--t-font-mono);
+    color: var(--t-payload-fg);
+    line-height: 1.65;
+  }
+
   /* --- Seams ----------------------------------------------------------- */
 
   .seam {
@@ -179,6 +199,12 @@ body {
     opacity: var(--t-disabled-opacity);
     pointer-events: none;
     box-shadow: none;
+  }
+
+  /* A control with nothing to open is still a readable plate, not a greyed
+     out button — it stops offering, it does not stop informing. */
+  .control[data-static="true"]:disabled {
+    opacity: 1;
   }
 
   .control:focus-visible {
@@ -330,6 +356,18 @@ body {
 
   .callout--alert .t-label {
     color: var(--t-alert-bg);
+  }
+
+  /* --- Option: one branch of a trade-off ------------------------------- */
+
+  .option {
+    border-left: var(--t-callout-edge-width) solid var(--t-seam);
+    color: var(--t-text-muted);
+  }
+
+  .option[data-chosen="true"] {
+    border-left-color: var(--t-accent);
+    color: var(--t-text-body);
   }
 
   /* --- Unit: one architecture component on the canvas ------------------ */
@@ -521,6 +559,19 @@ body {
     font-weight: 600;
   }
 
+  /* --- Focus ----------------------------------------------------------- */
+
+  /* Every keyboard-reachable role gets the SAME ring. Left to the browser
+     default it all but vanished on the darker themes. */
+  .tab:focus-visible,
+  .segment:focus-visible,
+  .row:focus-visible,
+  .progress-mark:focus-visible,
+  .chip:focus-visible {
+    outline: 2px solid var(--t-accent);
+    outline-offset: 2px;
+  }
+
   /* --- Modal overlay --------------------------------------------------- */
 
   .overlay {
@@ -606,15 +657,29 @@ body {
   color: var(--t-accent) !important;
 }
 
-.react-flow__attribution {
-  background: var(--t-panel-bg) !important;
-  color: var(--t-text-faint) !important;
-  padding: 2px 6px !important;
-  border-radius: var(--t-chip-radius) !important;
-}
 
-.react-flow__attribution a {
-  color: var(--t-text-muted) !important;
+/* ---------------------------------------------------------------------------
+   REDUCED MOTION
+
+   Almost everything that moves here loops forever — blinking lamps, marching
+   wires, packets circling a path. That is exactly the class of motion a reader
+   with vestibular sensitivity has asked the OS to stop, so honour the request
+   globally: the diagram keeps every highlight (which is what carries the
+   MEANING) and simply stops moving.
+   ------------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* The travelling packet is an <animateMotion>, not a CSS animation — the
+     rules above cannot reach it, so the component drops it entirely. */
 }
 
 /* --- Scrollbars --------------------------------------------------------- */

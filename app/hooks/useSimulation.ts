@@ -1,17 +1,19 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import {
   FlowKind,
   FlowDefinition,
   LevelConfig,
   CustomNodeType,
   CustomEdgeType,
-  LevelId,
   SimulationStep,
 } from "@/app/lib/types";
 
 export type SpeedOption = 0.5 | 1 | 2;
+
+/** How long one step holds the screen at 1x. */
+const BASE_STEP_MS = 3200;
 
 export interface UseSimulationReturn {
   currentStepIndex: number;
@@ -64,20 +66,36 @@ export function useSimulation(levelConfig: LevelConfig): UseSimulationReturn {
   // Switching level starts a fresh run: back to the first flow, before step
   // one, paused. Adjusted during render rather than in an effect so the
   // diagram never paints one frame of the old level's state.
-  const [lastLevelId, setLastLevelId] = useState<LevelId>(levelConfig.id);
-  if (lastLevelId !== levelConfig.id) {
-    setLastLevelId(levelConfig.id);
+  //
+  // The guard compares the config OBJECT, not `levelConfig.id`: a LevelId is
+  // only unique WITHIN a simulation, so two systems that both open on their
+  // "functional" tier would have slipped past an id check and carried one
+  // system's step index and flow into the other. Level configs are module
+  // constants, so identity is stable across renders and unique across systems.
+  const [lastLevel, setLastLevel] = useState<LevelConfig>(levelConfig);
+  if (lastLevel !== levelConfig) {
+    setLastLevel(levelConfig);
     setCurrentStepIndex(-1);
     setIsPlaying(false);
     setFlowTypeState(levelConfig.flows[0].id);
   }
 
+  // When the step on screen went up. Changing speed re-runs the timer effect
+  // below, and without this the step's clock would restart from zero — a step
+  // you were most of the way through would begin again at 2x.
+  // Seeded by the effect below rather than at declaration — reading the clock
+  // during render is not a pure thing to do, and this effect always runs first.
+  const stepShownAt = useRef<number>(0);
+  useEffect(() => {
+    stepShownAt.current = Date.now();
+  }, [currentStepIndex, isPlaying]);
+
   // Auto-play timer
   useEffect(() => {
-    if (!isPlaying) return;
+    if (!isPlaying || totalSteps === 0) return;
 
-    const baseDelay = 3200; // ms per step
-    const delay = baseDelay / speed;
+    const elapsed = Date.now() - stepShownAt.current;
+    const delay = Math.max(0, BASE_STEP_MS / speed - elapsed);
 
     const timer = setTimeout(() => {
       setCurrentStepIndex((prev) => {
@@ -95,6 +113,8 @@ export function useSimulation(levelConfig: LevelConfig): UseSimulationReturn {
   }, [isPlaying, currentStepIndex, totalSteps, speed]);
 
   const play = useCallback(() => {
+    // An empty flow would otherwise "play" forever with nothing on screen.
+    if (totalSteps === 0) return;
     if (currentStepIndex < 0 || currentStepIndex >= totalSteps - 1) {
       setCurrentStepIndex(0);
     }
@@ -106,6 +126,7 @@ export function useSimulation(levelConfig: LevelConfig): UseSimulationReturn {
   }, []);
 
   const nextStep = useCallback(() => {
+    if (totalSteps === 0) return;
     setIsPlaying(false);
     setCurrentStepIndex((prev) => (prev < 0 ? 0 : prev + 1 < totalSteps ? prev + 1 : -1));
   }, [totalSteps]);

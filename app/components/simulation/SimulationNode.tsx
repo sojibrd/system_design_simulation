@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
 import { SimulationNodeData, ComponentCategory } from "@/app/lib/types";
 import { Info } from "lucide-react";
@@ -24,11 +24,47 @@ const HANDLE_SIDES = [
   { position: Position.Bottom, id: "b" },
 ] as const;
 
+/** Roughly how tall the detail card gets — enough to decide which way it opens. */
+const CARD_CLEARANCE = 260;
+
 export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
   const nodeData = data as unknown as SimulationNodeData;
   // The tooltip is opt-in only. The step narration already lives in the
   // walkthrough panel, so auto-opening it here just covered up the diagram.
   const [showTooltip, setShowTooltip] = useState(false);
+  // The card normally hangs above the unit, but the canvas clips its own
+  // bounds — a unit near the top of the stage would open into nothing.
+  const [openUpwards, setOpenUpwards] = useState(true);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  // Dismissable by tapping away or by Escape. This is also what keeps ONE card
+  // open at a time: opening another unit's card is a pointer-down out here.
+  useEffect(() => {
+    if (!showTooltip) return;
+
+    const onPointerDown = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setShowTooltip(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setShowTooltip(false);
+    };
+
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [showTooltip]);
+
+  const toggleTooltip = () => {
+    setShowTooltip((prev) => {
+      if (prev) return false;
+      const top = rootRef.current?.getBoundingClientRect().top ?? CARD_CLEARANCE;
+      setOpenUpwards(top > CARD_CLEARANCE);
+      return true;
+    });
+  };
 
   const color = categoryColor[nodeData.category] ?? categoryColor.compute;
   const isActive = Boolean(nodeData.isActive);
@@ -37,6 +73,7 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
 
   return (
     <div
+      ref={rootRef}
       data-active={isActive}
       data-animated={isAnimated}
       data-selected={Boolean(selected)}
@@ -81,8 +118,9 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
           </div>
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); setShowTooltip((prev) => !prev); }}
+            onClick={(e) => { e.stopPropagation(); toggleTooltip(); }}
             className="control control--quiet p-1 shrink-0"
+            aria-expanded={showTooltip}
             aria-label="Component info"
           >
             <Info className="w-7 h-7" />
@@ -93,7 +131,7 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
         {isActive && nodeData.statusMessage && (
           <div className="surface-well mt-4 px-3 py-2 flex items-center gap-3">
             <Lamp lit blink={isAnimated} color="var(--t-accent)" />
-            <span className="t-mono t-accent text-base font-medium truncate">
+            <span className="t-mono t-accent text-base truncate">
               {nodeData.statusMessage}
             </span>
           </div>
@@ -102,7 +140,11 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
 
       {/* Detail card on tap. */}
       {showTooltip && (
-        <div className="surface-raised absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 text-left pointer-events-none">
+        <div
+          className={`surface-raised absolute z-50 left-1/2 -translate-x-1/2 w-64 p-3 text-left pointer-events-none ${
+            openUpwards ? "bottom-full mb-2" : "top-full mt-2"
+          }`}
+        >
           <div className="flex items-center gap-2 mb-1.5 pb-1 seam-b">
             <span className="text-base">{nodeData.emoji}</span>
             <span className="t-title text-xs">{nodeData.label}</span>

@@ -30,11 +30,12 @@
 | শ্রেণি | ক্লাস |
 |---|---|
 | Surface | `surface-app` `surface-panel` `surface-raised` `surface-well` |
-| Text | `t-title` `t-label` `t-body` `t-caption` `t-mono` `t-strong` `t-accent` `t-muted` |
+| Text | `t-title` `t-label` `t-body` `t-caption` `t-mono` `t-strong` `t-accent` `t-muted` `t-ok` `t-quote` |
 | Seam | `seam` `seam-b` `seam-b-heavy` `seam-t` |
 | Control | `control` + `control--primary` `control--alert` `control--quiet`; `segment-group` / `segment` |
 | Chip | `chip` + `chip--accent` `chip--alert` `chip--ok` |
 | Callout | `callout` + `callout--accent` `callout--alert` |
+| Content | `payload` (literal JSON/SQL/HTTP নমুনা) · `option` (trade-off-এর একটা শাখা) |
 | Canvas | `unit` `ornament-mark` `lamp` `terminal` `edge-tag` `wire` `packet-core` `packet-halo` |
 | Nav | `tab` `row` `progress-mark` `overlay` |
 
@@ -49,6 +50,8 @@
 | `aria-selected` | `.tab` | নির্বাচিত ফেজ |
 | `aria-pressed` | `.segment` | নির্বাচিত সেগমেন্ট |
 | `aria-current` | `.row` | বর্তমান লিস্ট আইটেম |
+| `data-chosen` | `.option` | trade-off-এ এই শাখাটাই নেওয়া হয়েছে |
+| `data-static` | `.control` | খোলার কিছু নেই — disabled হলেও প্লেট হিসেবে পুরো স্পষ্ট থাকে |
 | `data-corner` (`tl`/`tr`/`bl`/`br`) | `.ornament-mark` | কোন কোণা |
 
 ---
@@ -59,7 +62,7 @@
 
 - **Type:** `font-sans` `font-mono` `title-family|weight|tracking|transform` `label-family|size|weight|tracking|transform` `control-family|weight|tracking|transform`
 - **App:** `app-bg` `app-bg-image` `app-bg-size` `select-bg|fg` `overlay-bg|filter` `hover-fill` `selected-bg|fg` `accent` `ok` `ok-soft` `disabled-opacity` `ease`
-- **Text:** `text-title|body|label|muted|faint`
+- **Text:** `text-title|body|label|muted|faint` `quote-style` `payload-fg`
 - **Surfaces:** `panel-*` `raised-*` `well-*` (প্রতিটির `bg` `border` `border-width` `radius` `shadow`)
 - **Seams:** `seam` `seam-width` `seam-heavy` `seam-heavy-width`
 - **Controls:** `control-bg|border|fg|shadow|radius|border-width` + hover/press ভ্যারিয়েন্ট; `primary-*` `alert-*`
@@ -78,6 +81,12 @@
 কয়েকটা ভ্যালু React-কে সংখ্যা হিসেবে পাস করতে হয় (SVG geometry, canvas grid)। সেগুলো থিমেই থাকে, `useThemeNumber()` হুক রানটাইমে পড়ে নেয় — `wire-corner-radius`, `packet-size`, `packet-halo-size`, `canvas-gap`, `canvas-dot-size`।
 
 ---
+
+## গতি ও `prefers-reduced-motion`
+
+`globals.css`-এর শেষে একটাই global ব্রেক: reader OS-এ motion কমাতে বললে সব CSS animation ও transition কার্যত থেমে যায়। **হাইলাইট থাকে** — অর্থটা ওটাই বহন করে; কেবল নড়াচড়া বন্ধ হয়। নতুন কোনো লুপিং animation থিমে যোগ করলে আলাদা কিছু করতে হয় না, ওই নিয়মেই ঢাকা পড়বে।
+
+ব্যতিক্রম একটাই: travelling packet-টা `<animateMotion>` (SMIL), যেটা CSS-এর নাগালের বাইরে — `AnimatedEdge` `usePrefersReducedMotion()` দেখে ওটাকে render-ই করে না।
 
 ## ফন্ট
 

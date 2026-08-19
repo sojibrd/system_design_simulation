@@ -18,6 +18,9 @@ import { useThemeNumber } from "@/app/hooks/useThemeNumber";
 
 const FIT_VIEW_OPTIONS = { padding: 0.22, minZoom: 0.4, maxZoom: 1.5 };
 
+/** Long enough for the stage grid to settle at its new width before re-fitting. */
+const RELAYOUT_SETTLE_MS = 260;
+
 interface FlowDiagramProps {
   nodes: CustomNodeType[];
   edges: CustomEdgeType[];
@@ -35,12 +38,14 @@ export const FlowDiagram: React.FC<FlowDiagramProps> = ({
     CustomEdgeType
   > | null>(null);
 
-  // The canvas width changes when the walkthrough panel is toggled; the CSS
-  // grid transition takes a moment, so re-fit once it has settled.
+  // Toggling the walkthrough panel changes this canvas's width. React Flow
+  // measures its container, and the new width is not readable until the
+  // browser has laid the grid out again — hence a beat before re-fitting,
+  // rather than fitting into the size the canvas is about to stop being.
   useEffect(() => {
     const timer = setTimeout(() => {
       instanceRef.current?.fitView(FIT_VIEW_OPTIONS);
-    }, 260);
+    }, RELAYOUT_SETTLE_MS);
 
     return () => clearTimeout(timer);
   }, [fitViewSignal]);

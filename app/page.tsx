@@ -5,7 +5,11 @@ import { LevelId } from "@/app/lib/types";
 import { simulations, getSimulation } from "@/app/lib/simulations";
 import { useSimulation } from "@/app/hooks/useSimulation";
 import { Header } from "@/app/components/simulation/Header";
-import { LevelTabs } from "@/app/components/simulation/LevelTabs";
+import {
+  LevelTabs,
+  LEVEL_PANEL_ID,
+  levelTabId,
+} from "@/app/components/simulation/LevelTabs";
 import { DesignNotes } from "@/app/components/simulation/DesignNotes";
 import { FlowDiagram } from "@/app/components/simulation/FlowDiagram";
 import { ControlsBar } from "@/app/components/simulation/ControlsBar";
@@ -85,6 +89,12 @@ export default function Home() {
           {/* Architecture Canvas. On a phone it keeps the full stage even when
               the walkthrough is open — the walkthrough floats over it. */}
           <div
+            /* The canvas IS the panel the level tabs control — saying so is
+               what makes the tablist above a real widget rather than three
+               buttons wearing the role. */
+            id={LEVEL_PANEL_ID}
+            role="tabpanel"
+            aria-labelledby={levelTabId(currentLevel.id)}
             className={`min-h-0 h-full ${
               isPanelOpen ? "lg:col-span-7 xl:col-span-8" : "lg:col-span-12"
             }`}

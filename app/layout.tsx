@@ -43,8 +43,11 @@ const mono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "System Design Simulator — Interactive URL Shortener",
+  // Levels are PROMISES the architecture keeps (functional -> scalable ->
+  // reliable), not difficulty ratings — see `LevelId` in lib/types.ts. The
+  // old "Beginner / Intermediate / Expert" wording said the opposite.
   description:
-    "Interactive architecture simulation and visual walkthrough of URL Shortener across Beginner, Intermediate, and Expert tiers.",
+    "URL Shortener-এর আর্কিটেকচার ধাপে ধাপে অ্যানিমেটেড ডায়াগ্রামে — functional, scalable ও reliable, প্রতিটি স্তরের ব্যাখ্যা বাংলায়।",
 };
 
 export default function RootLayout({
@@ -53,8 +56,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
+    /* Every explanation on this page is Bangla; only the terminology and the
+       UI chrome are English. Declaring `en` had screen readers pronouncing the
+       whole walkthrough with an English voice — unintelligible. Individual
+       English strings carry their own `lang`. */
     <html
-      lang="en"
+      lang="bn"
       className={`${grotesk.variable} ${display.variable} ${condensed.variable} ${mono.variable} h-full`}
     >
       <body className="h-full surface-app">{children}</body>

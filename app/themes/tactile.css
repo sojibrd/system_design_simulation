@@ -51,6 +51,7 @@
   /* --- App ------------------------------------------------------------- */
   --t-app-bg: var(--sheet);
   --t-app-bg-image: none;
+  --t-app-bg-size: auto;
   --t-select-bg: var(--yellow);
   --t-select-fg: var(--stroke);
   --t-overlay-bg: rgb(20 17 13 / 0.45);
@@ -69,6 +70,10 @@
   --t-text-label: var(--text-3);
   --t-text-muted: var(--text-3);
   --t-text-faint: #9a9284;
+
+  /* Set-apart voice (an analogy) and the ink a literal payload is printed in. */
+  --t-quote-style: italic;
+  --t-payload-fg: var(--stroke);
 
   /* --- Depth: hard offsets, never blur --------------------------------- */
   --drop-sm: 3px 3px 0 0 var(--stroke);

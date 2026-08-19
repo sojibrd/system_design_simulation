@@ -6,6 +6,7 @@ import {
   BookOpen,
   Code2,
   CheckCircle2,
+  FileQuestion,
   HelpCircle,
   Lightbulb,
   Play,
@@ -65,6 +66,23 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
     const row = logRef.current?.querySelector('[aria-current="true"]');
     row?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [currentStepIndex, mode]);
+
+  // This flow has nothing to walk through. Only reachable if a data file
+  // declares a flow with an empty `steps` array — without this the reader
+  // would just press Simulate and watch nothing happen, twice.
+  if (totalSteps === 0) {
+    return (
+      <Panel className="flex flex-col h-full items-center justify-center p-4 sm:p-6 text-center gap-3">
+        <div className="surface-well t-muted w-14 h-14 flex items-center justify-center">
+          <FileQuestion className="w-6 h-6" />
+        </div>
+        <h3 className="t-title text-sm">এই flow-টি এখনো লেখা হয়নি</h3>
+        <p className="t-body text-xs max-w-[240px] mx-auto">
+          উপরের অন্য কোনো scenario বেছে নিন, অথবা অন্য একটা লেভেলে যান।
+        </p>
+      </Panel>
+    );
+  }
 
   // Placeholder when no step is selected yet (before simulation starts)
   if (!currentStep) {
@@ -163,7 +181,7 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
                 className="row w-full text-left px-2 py-1.5 text-xs flex items-center gap-2"
               >
                 {isCompleted ? (
-                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--t-ok)" }} />
+                  <CheckCircle2 className="t-ok w-3.5 h-3.5 shrink-0" />
                 ) : (
                   <span className="t-mono text-[10px] w-3.5 shrink-0">{stepNo(idx)}</span>
                 )}
@@ -194,7 +212,7 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
             tone="accent"
             icon={<Lightbulb className="w-3.5 h-3.5" />}
           >
-            <span className="italic">{currentStep.analogy}</span>
+            <span className="t-quote">{currentStep.analogy}</span>
           </Callout>
         )}
 
@@ -220,7 +238,7 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
             </button>
 
             {showPayload && (
-              <pre className="t-mono p-3 text-[11px] overflow-x-auto leading-relaxed" style={{ color: "var(--t-ok)" }}>
+              <pre className="payload p-3 text-[11px] overflow-x-auto">
                 <code>{currentStep.payloadSnippet}</code>
               </pre>
             )}

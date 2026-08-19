@@ -79,6 +79,10 @@
   --t-text-muted: var(--p-dim);
   --t-text-faint: var(--p-faint);
 
+  /* Set-apart voice (an analogy) and the ink a literal payload is printed in. */
+  --t-quote-style: normal;
+  --t-payload-fg: var(--p);
+
   /* --- Surfaces: no elevation, only ruled boxes ------------------------ */
   --t-panel-bg: var(--glass-2);
   --t-panel-border: var(--p-ghost);

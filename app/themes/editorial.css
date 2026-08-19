@@ -50,6 +50,7 @@
   /* --- App ------------------------------------------------------------- */
   --t-app-bg: var(--paper);
   --t-app-bg-image: none;
+  --t-app-bg-size: auto;
   --t-select-bg: var(--vermilion);
   --t-select-fg: var(--paper);
   --t-overlay-bg: rgb(10 10 10 / 0.55);
@@ -68,6 +69,10 @@
   --t-text-label: var(--ink-3);
   --t-text-muted: var(--ink-3);
   --t-text-faint: var(--ink-4);
+
+  /* Set-apart voice (an analogy) and the ink a literal payload is printed in. */
+  --t-quote-style: italic;
+  --t-payload-fg: var(--ink-1);
 
   /* --- Surfaces: no shadow anywhere, ever ------------------------------ */
   --t-panel-bg: var(--paper);
