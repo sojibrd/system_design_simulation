@@ -13,6 +13,7 @@ import {
   Link,
   CornerUpRight,
   PanelRight,
+  Calculator,
   SearchX,
   ShieldAlert,
   BarChart3,
@@ -31,6 +32,9 @@ const flowIcons: Record<FlowIcon, LucideIcon> = {
   analytics: BarChart3,
 };
 
+/** The side slot holds the walkthrough or the design notes — never both. */
+export type PanelKind = "steps" | "notes" | null;
+
 interface ControlsBarProps {
   isPlaying: boolean;
   speed: SpeedOption;
@@ -45,8 +49,11 @@ interface ControlsBarProps {
   onReset: () => void;
   onSpeedChange: (speed: SpeedOption) => void;
   onFlowChange: (flow: FlowKind) => void;
-  isPanelOpen: boolean;
-  onTogglePanel: () => void;
+  /** Which panel occupies the side slot, if any — one at a time. */
+  activePanel: PanelKind;
+  onTogglePanel: (panel: Exclude<PanelKind, null>) => void;
+  /** Levels without capacity numbers, trade-offs or concepts have no notes. */
+  hasNotes: boolean;
 }
 
 export const ControlsBar: React.FC<ControlsBarProps> = ({
@@ -63,8 +70,9 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
   onReset,
   onSpeedChange,
   onFlowChange,
-  isPanelOpen,
+  activePanel,
   onTogglePanel,
+  hasNotes,
 }) => {
   /**
    * Phones only. The controls split by WHEN they are used, not by importance:
@@ -80,20 +88,45 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
     setIsSetupOpen(false);
   };
 
-  // Rendered in the playback row on a phone and on the right on desktop, so it
-  // never forces a second row just to exist.
-  const stepsToggle = (
-    <Button
-      variant={isPanelOpen ? "primary" : "outline"}
-      onClick={onTogglePanel}
-      className="px-3! py-2! text-xs! shrink-0 min-h-11 sm:min-h-0"
-      title={isPanelOpen ? "Hide steps panel (full-width diagram)" : "Show steps panel"}
-      aria-pressed={isPanelOpen}
-      aria-label="Toggle step walkthrough panel"
-    >
-      {isPanelOpen ? <PanelRightClose className="w-4 h-4" /> : <PanelRight className="w-4 h-4" />}
-      <span className="hidden sm:inline">Steps</span>
-    </Button>
+  // Rendered in the playback row on a phone and on the right on desktop, so
+  // neither forces a second row just to exist. Both buttons drive ONE slot: the
+  // open one closes on a second press, the other one swaps into its place.
+  const stepsOpen = activePanel === "steps";
+  const notesOpen = activePanel === "notes";
+
+  const panelToggles = (
+    <>
+      <Button
+        variant={notesOpen ? "primary" : "outline"}
+        onClick={() => onTogglePanel("notes")}
+        disabled={!hasNotes}
+        className="px-3! py-2! text-xs! shrink-0 min-h-11 sm:min-h-0"
+        title={
+          hasNotes
+            ? notesOpen
+              ? "Hide design notes"
+              : "Show design notes"
+            : "এই লেভেলে কোনো নোট নেই"
+        }
+        aria-pressed={notesOpen}
+        aria-label="Toggle design notes panel"
+      >
+        <Calculator className="w-4 h-4" />
+        <span className="hidden sm:inline">Notes</span>
+      </Button>
+
+      <Button
+        variant={stepsOpen ? "primary" : "outline"}
+        onClick={() => onTogglePanel("steps")}
+        className="px-3! py-2! text-xs! shrink-0 min-h-11 sm:min-h-0"
+        title={stepsOpen ? "Hide steps panel (full-width diagram)" : "Show steps panel"}
+        aria-pressed={stepsOpen}
+        aria-label="Toggle step walkthrough panel"
+      >
+        {stepsOpen ? <PanelRightClose className="w-4 h-4" /> : <PanelRight className="w-4 h-4" />}
+        <span className="hidden sm:inline">Steps</span>
+      </Button>
+    </>
   );
 
   return (
@@ -183,7 +216,7 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
             <SkipForward className="w-4 h-4" />
           </IconButton>
 
-          <span className="sm:hidden">{stepsToggle}</span>
+          <span className="sm:hidden flex items-center gap-2">{panelToggles}</span>
 
           {/* Phone-only gateway to the setup row */}
           <IconButton
@@ -231,7 +264,7 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
             <RotateCcw className="w-4 h-4" />
           </IconButton>
 
-          <span className="hidden sm:inline-flex">{stepsToggle}</span>
+          <span className="hidden sm:inline-flex items-center gap-2">{panelToggles}</span>
         </div>
       </div>
     </Panel>

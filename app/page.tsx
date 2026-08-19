@@ -10,9 +10,15 @@ import {
   LEVEL_PANEL_ID,
   levelTabId,
 } from "@/app/components/simulation/LevelTabs";
-import { DesignNotes } from "@/app/components/simulation/DesignNotes";
+import {
+  DesignNotes,
+  hasDesignNotes,
+} from "@/app/components/simulation/DesignNotes";
 import { FlowDiagram } from "@/app/components/simulation/FlowDiagram";
-import { ControlsBar } from "@/app/components/simulation/ControlsBar";
+import {
+  ControlsBar,
+  type PanelKind,
+} from "@/app/components/simulation/ControlsBar";
 import { WalkthroughPanel } from "@/app/components/simulation/WalkthroughPanel";
 import { Sheet } from "@/app/components/ui";
 
@@ -23,7 +29,10 @@ export default function Home() {
   const [currentLevelId, setCurrentLevelId] = useState<LevelId>(
     simulations[0].levels[0].id
   );
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  /* The side slot holds ONE thing: the step walkthrough or the level's design
+     notes. Pressing the open panel's button closes it; pressing the other
+     swaps. */
+  const [activePanel, setActivePanel] = useState<PanelKind>(null);
 
   const simulation = getSimulation(currentSimulationId);
   // A simulation need not offer the level that was selected on the previous one
@@ -31,6 +40,15 @@ export default function Home() {
   const currentLevel =
     simulation.levels.find((level) => level.id === currentLevelId) ??
     simulation.levels[0];
+
+  /* A level may have no notes to show — switching to one while its panel is
+     open would otherwise leave an empty sheet on screen. */
+  const levelHasNotes = hasDesignNotes(currentLevel);
+  const openPanel: PanelKind =
+    activePanel === "notes" && !levelHasNotes ? null : activePanel;
+
+  const togglePanel = (panel: Exclude<PanelKind, null>) =>
+    setActivePanel((open) => (open === panel ? null : panel));
 
   const selectSimulation = (id: string) => {
     setCurrentSimulationId(id);
@@ -73,13 +91,12 @@ export default function Home() {
       {/* Main Container — fills exactly what the header leaves behind */}
       <main className="flex-1 min-h-0 w-full px-2 sm:px-3 md:px-5 lg:px-6 py-2 md:py-3 flex flex-col gap-2 md:gap-3">
         {/* Level Selector Tabs */}
-        <div className="shrink-0 flex flex-col gap-2">
+        <div className="shrink-0">
           <LevelTabs
             currentLevelId={currentLevelId}
             levels={simulation.levels}
             onSelectLevel={(levelId) => setCurrentLevelId(levelId)}
           />
-          <DesignNotes level={currentLevel} />
         </div>
 
         {/* Simulation stage — takes every pixel the other rows do not need */}
@@ -96,34 +113,41 @@ export default function Home() {
             role="tabpanel"
             aria-labelledby={levelTabId(currentLevel.id)}
             className={`min-h-0 h-full ${
-              isPanelOpen ? "lg:col-span-7 xl:col-span-8" : "lg:col-span-12"
+              openPanel ? "lg:col-span-7 xl:col-span-8" : "lg:col-span-12"
             }`}
           >
             <FlowDiagram
               key={`${simulation.id}-${currentLevelId}`}
               nodes={nodes}
               edges={edges}
-              fitViewSignal={isPanelOpen}
+              fitViewSignal={openPanel !== null}
             />
           </div>
 
           {/* Step-by-step walkthrough: a column on desktop, a bottom sheet on
               a phone. */}
           <Sheet
-            open={isPanelOpen}
-            onClose={() => setIsPanelOpen(false)}
-            label="Step walkthrough"
+            open={openPanel !== null}
+            onClose={() => setActivePanel(null)}
+            label={openPanel === "notes" ? "Design notes" : "Step walkthrough"}
             className="min-h-0 lg:col-span-5 xl:col-span-4"
           >
-            <WalkthroughPanel
-              currentStep={currentStep}
-              currentStepIndex={currentStepIndex}
-              totalSteps={totalSteps}
-              steps={currentSteps}
-              onSelectStep={goToStep}
-              isFinished={isFinished}
-              onClose={() => setIsPanelOpen(false)}
-            />
+            {openPanel === "notes" ? (
+              <DesignNotes
+                level={currentLevel}
+                onClose={() => setActivePanel(null)}
+              />
+            ) : (
+              <WalkthroughPanel
+                currentStep={currentStep}
+                currentStepIndex={currentStepIndex}
+                totalSteps={totalSteps}
+                steps={currentSteps}
+                onSelectStep={goToStep}
+                isFinished={isFinished}
+                onClose={() => setActivePanel(null)}
+              />
+            )}
           </Sheet>
         </div>
 
@@ -143,8 +167,9 @@ export default function Home() {
             onReset={reset}
             onSpeedChange={setSpeed}
             onFlowChange={setFlowType}
-            isPanelOpen={isPanelOpen}
-            onTogglePanel={() => setIsPanelOpen((open) => !open)}
+            activePanel={openPanel}
+            onTogglePanel={togglePanel}
+            hasNotes={levelHasNotes}
           />
         </div>
       </main>
