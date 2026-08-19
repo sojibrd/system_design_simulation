@@ -133,6 +133,11 @@ export function useSimulation(levelConfig: LevelConfig): UseSimulationReturn {
     // An empty flow would otherwise "play" forever with nothing on screen.
     if (totalSteps === 0) return;
     if (currentStepIndex < 0 || currentStepIndex >= totalSteps - 1) {
+      // Restarting from the top: the clock starts over even when the index is
+      // already 0 — a one-step flow would otherwise resume with the whole step
+      // banked as watched and skip straight past it.
+      consumed.current = 0;
+      runningSince.current = Date.now();
       setCurrentStepIndex(0);
     }
     setIsPlaying(true);

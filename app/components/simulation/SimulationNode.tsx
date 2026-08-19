@@ -45,15 +45,24 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
 
   // Panning or zooming the canvas moves this unit under a card that has
   // already picked its side, so the choice is re-made whenever the viewport
-  // moves — not once, at open.
-  const transform = useStore((state) => state.transform);
+  // moves — not once, at open. Only while a card is actually open, though:
+  // every unit on the stage runs this, and a live subscription would re-render
+  // all of them on every frame of a pan for the sake of the one that is open.
+  const transform = useStore((state) => (showTooltip ? state.transform : null));
 
   const placeCard = useCallback(() => {
-    const top = rootRef.current?.getBoundingClientRect().top;
-    if (top === undefined) return;
+    const unit = rootRef.current?.getBoundingClientRect();
+    if (!unit) return;
     // Measured, not assumed: the card is as tall as its own content.
     const needed = cardRef.current?.offsetHeight ?? CARD_CLEARANCE;
-    setOpenUpwards(top > needed);
+    // Room is counted inside the canvas, not the window — the header owns the
+    // strip above the stage, and a card opened into it would be clipped.
+    const stage = rootRef.current?.closest(".react-flow")?.getBoundingClientRect();
+    const above = unit.top - (stage?.top ?? 0);
+    const below = (stage?.bottom ?? window.innerHeight) - unit.bottom;
+    // Upwards is the default; downwards only when the card genuinely fits
+    // there and not above. If neither side fits, take the roomier one.
+    setOpenUpwards(above > needed || above >= below);
   }, []);
 
   useEffect(() => {
@@ -85,10 +94,7 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
   const toggleTooltip = () => {
     // First guess from the assumed height so the card opens on the right side
     // immediately; the effect above corrects it against the real one.
-    if (!showTooltip) {
-      const top = rootRef.current?.getBoundingClientRect().top ?? CARD_CLEARANCE;
-      setOpenUpwards(top > CARD_CLEARANCE);
-    }
+    if (!showTooltip) placeCard();
     setShowTooltip((prev) => !prev);
   };
 

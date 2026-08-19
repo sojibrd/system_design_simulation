@@ -41,5 +41,5 @@ app/
 - `output: "export"` — কোনো server component data fetch, route handler বা server action নেই।
 - SSR-এ viewport বা reader-preference কিছুই জানা নেই, তাই `useMediaQuery` প্রথম render-এ সবসময় `false` — mount-এর পর একবার শুধরে নেয়।
 - এক ধাপের ঘড়ি ধাপ বদলালেই কেবল শূন্য থেকে শুরু হয় — speed বদলানো বা pause/resume ইতিমধ্যে দেখা সময়টুকু জমা রাখে (`useSimulation`-এর `consumed` / `runningSince`)।
-- `Sheet` কেবল compact স্ক্রিনে সত্যিকারের modal: `role="dialog"` + `aria-modal` + Tab ট্র্যাপ + Escape, বন্ধ হলে ফোকাস opener-এ ফেরে। প্রশস্ত স্ক্রিনে ওটা নিছক একটা কলাম, কোনো ARIA role নেই।
+- `Sheet` compact স্ক্রিনে dialog, কিন্তু **modal নয়** — নিচের `ControlsBar` তখনো দেখা যায় ও কাজ করে, তাই Tab ট্র্যাপ বা `aria-modal={true}` দিয়ে ওটাকে কীবোর্ড/স্ক্রিন রিডারের কাছ থেকে কেড়ে নেওয়া চলবে না। যা আছে: `role="dialog"` + Escape + বন্ধ হলে ফোকাস opener-এ ফেরত (কেবল সত্যিকারের বন্ধে, রিসাইজে নয়)। প্রশস্ত স্ক্রিনে ওটা নিছক একটা কলাম, কোনো ARIA role নেই।
 - Packet-টা `<animateMotion>` (SMIL), CSS animation নয় — `prefers-reduced-motion`-এর স্টাইলশিট নিয়ম ওটাকে ছুঁতে পারে না, তাই `AnimatedEdge` ওটাকে DOM থেকেই বাদ দেয়।

@@ -3,10 +3,6 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import { useIsCompact } from "@/app/hooks/useMediaQuery";
 
-/** Everything a keyboard can land on inside the sheet. */
-const FOCUSABLE =
-  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
 /**
  * A region that is an ordinary panel on a wide screen and a bottom sheet on a
  * phone.
@@ -20,6 +16,12 @@ const FOCUSABLE =
  * phone this really is a dialog laid over the content, and on a wide screen it
  * really is just a column. Announcing "dialog" in both places would tell a
  * screen-reader user they are trapped in something they are not.
+ *
+ * On a phone it is a dialog but NOT a modal one: the sheet covers the canvas,
+ * while the playback controls stay visible and usable underneath it. Trapping
+ * Tab inside the sheet — or claiming `aria-modal` — would take those controls
+ * away from a keyboard or screen-reader user while leaving them on screen and
+ * clickable for everyone else.
  *
  * Layout only — every visual value still comes from the theme contract.
  */
@@ -48,10 +50,8 @@ export const Sheet: React.FC<{
 
   const close = useCallback(() => onCloseRef.current(), []);
 
-  // Only while it is genuinely an overlay: Escape dismisses it, focus moves
-  // into it on open, Tab cycles WITHIN it, and focus goes back to whatever
-  // opened it on close. Without the last part, dismissing the sheet drops the
-  // keyboard user back at the top of the document.
+  // Only while it is genuinely an overlay: Escape dismisses it, and focus
+  // moves into it on open.
   useEffect(() => {
     if (!isOverlay) return;
 
@@ -59,46 +59,24 @@ export const Sheet: React.FC<{
     panelRef.current?.focus();
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        close();
-        return;
-      }
-      if (event.key !== "Tab") return;
-
-      // Backdrop and canvas are covered while this is open, so the sheet
-      // claims the tab ring — which is what `aria-modal` promises.
-      const panel = panelRef.current;
-      if (!panel) return;
-
-      const stops = Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE));
-      if (stops.length === 0) {
-        event.preventDefault();
-        panel.focus();
-        return;
-      }
-
-      const first = stops[0];
-      const last = stops[stops.length - 1];
-      const active = document.activeElement;
-
-      if (!panel.contains(active)) {
-        event.preventDefault();
-        (event.shiftKey ? last : first).focus();
-      } else if (event.shiftKey && active === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && active === last) {
-        event.preventDefault();
-        first.focus();
-      }
+      if (event.key === "Escape") close();
     };
     document.addEventListener("keydown", onKeyDown);
 
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      returnFocusTo.current?.focus();
-    };
+    return () => document.removeEventListener("keydown", onKeyDown);
   }, [isOverlay, close]);
+
+  // Focus goes back to whatever opened the sheet — without this, dismissing it
+  // drops the keyboard user at the top of the document. Keyed on OPEN, not on
+  // overlay state: widening the viewport turns the sheet into a plain column
+  // that is still on screen, and that must not yank focus back to the opener.
+  useEffect(() => {
+    if (!open) return;
+    return () => {
+      returnFocusTo.current?.focus();
+      returnFocusTo.current = null;
+    };
+  }, [open]);
 
   if (!open) return null;
 
@@ -118,9 +96,9 @@ export const Sheet: React.FC<{
         ref={panelRef}
         role={isOverlay ? "dialog" : undefined}
         aria-label={isOverlay ? label : undefined}
-        /* The backdrop really does shut the canvas off, and Tab is trapped
-           above — so this is a modal, and says so. */
-        aria-modal={isOverlay ? true : undefined}
+        /* Not modal: the playback controls below the sheet stay reachable,
+           so nothing may hide them from a keyboard or screen-reader user. */
+        aria-modal={isOverlay ? false : undefined}
         tabIndex={isOverlay ? -1 : undefined}
         className={`
           absolute inset-x-0 bottom-0 z-50 h-[62%] max-h-full
