@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import { Handle, Position, NodeProps } from "@xyflow/react";
+import React, { useCallback, useEffect, useId, useRef, useState } from "react";
+import { Handle, Position, NodeProps, useStore } from "@xyflow/react";
 import { SimulationNodeData, ComponentCategory } from "@/app/lib/types";
 import { Info } from "lucide-react";
 import { Badge, Lamp, Ornament } from "@/app/components/ui";
@@ -24,7 +24,10 @@ const HANDLE_SIDES = [
   { position: Position.Bottom, id: "b" },
 ] as const;
 
-/** Roughly how tall the detail card gets — enough to decide which way it opens. */
+/**
+ * Assumed card height for the very first frame, before the card exists and can
+ * be measured. Every frame after that uses its real height.
+ */
 const CARD_CLEARANCE = 260;
 
 export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
@@ -36,34 +39,57 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
   // bounds — a unit near the top of the stage would open into nothing.
   const [openUpwards, setOpenUpwards] = useState(true);
   const rootRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  // The info button has to be able to name the card it opens.
+  const cardId = `unit-card-${useId()}`;
+
+  // Panning or zooming the canvas moves this unit under a card that has
+  // already picked its side, so the choice is re-made whenever the viewport
+  // moves — not once, at open.
+  const transform = useStore((state) => state.transform);
+
+  const placeCard = useCallback(() => {
+    const top = rootRef.current?.getBoundingClientRect().top;
+    if (top === undefined) return;
+    // Measured, not assumed: the card is as tall as its own content.
+    const needed = cardRef.current?.offsetHeight ?? CARD_CLEARANCE;
+    setOpenUpwards(top > needed);
+  }, []);
+
+  useEffect(() => {
+    if (showTooltip) placeCard();
+  }, [showTooltip, transform, placeCard]);
 
   // Dismissable by tapping away or by Escape. This is also what keeps ONE card
   // open at a time: opening another unit's card is a pointer-down out here.
   useEffect(() => {
     if (!showTooltip) return;
 
-    const onPointerDown = (event: MouseEvent) => {
+    // `pointerdown`, not `mousedown`: a touch that React Flow handles as a
+    // canvas gesture may never produce the emulated mouse event.
+    const onPointerDown = (event: PointerEvent) => {
       if (!rootRef.current?.contains(event.target as Node)) setShowTooltip(false);
     };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setShowTooltip(false);
     };
 
-    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
     return () => {
-      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [showTooltip]);
 
   const toggleTooltip = () => {
-    setShowTooltip((prev) => {
-      if (prev) return false;
+    // First guess from the assumed height so the card opens on the right side
+    // immediately; the effect above corrects it against the real one.
+    if (!showTooltip) {
       const top = rootRef.current?.getBoundingClientRect().top ?? CARD_CLEARANCE;
       setOpenUpwards(top > CARD_CLEARANCE);
-      return true;
-    });
+    }
+    setShowTooltip((prev) => !prev);
   };
 
   const color = categoryColor[nodeData.category] ?? categoryColor.compute;
@@ -121,6 +147,7 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
             onClick={(e) => { e.stopPropagation(); toggleTooltip(); }}
             className="control control--quiet p-1 shrink-0"
             aria-expanded={showTooltip}
+            aria-controls={showTooltip ? cardId : undefined}
             aria-label="Component info"
           >
             <Info className="w-7 h-7" />
@@ -141,6 +168,12 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
       {/* Detail card on tap. */}
       {showTooltip && (
         <div
+          ref={cardRef}
+          id={cardId}
+          /* A named region, so a screen reader announces what the info button
+             just opened instead of leaving it as loose text on the canvas. */
+          role="group"
+          aria-label={`${nodeData.label} — details`}
           className={`surface-raised absolute z-50 left-1/2 -translate-x-1/2 w-64 p-3 text-left pointer-events-none ${
             openUpwards ? "bottom-full mb-2" : "top-full mt-2"
           }`}

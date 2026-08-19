@@ -11,19 +11,6 @@ import { Layers } from "lucide-react";
 export const LEVEL_PANEL_ID = "level-panel";
 export const levelTabId = (levelId: LevelId) => `level-tab-${levelId}`;
 
-/**
- * A simulation declares only the levels that teach it something — two is
- * valid, four (once a `global` tier exists) is valid. Tailwind needs the
- * column count as a literal class, so the handful of real cases are spelled
- * out rather than interpolated.
- */
-const columnsClass: Record<number, string> = {
-  1: "grid-cols-1",
-  2: "grid-cols-2",
-  3: "grid-cols-3",
-  4: "grid-cols-4",
-};
-
 export const LevelTabs: React.FC<{
   currentLevelId: LevelId;
   levels: LevelConfig[];
@@ -69,7 +56,11 @@ export const LevelTabs: React.FC<{
       role="tablist"
       aria-label="Architecture level"
       onKeyDown={onKeyDown}
-      className={`grid ${columnsClass[levels.length] ?? "grid-cols-3"} gap-2 w-full`}
+      /* A simulation declares only the levels that teach it something — two
+         is valid, four (once a `global` tier exists) is valid. A row of equal
+         flex children shares the width for ANY count, where a grid would have
+         needed the column count as a literal Tailwind class. */
+      className="flex gap-2 w-full"
     >
       {levels.map((level, index) => {
         const isSelected = level.id === currentLevelId;
@@ -85,7 +76,7 @@ export const LevelTabs: React.FC<{
             role="tab"
             /* Roving tabindex: the group is one stop, the arrows move inside it. */
             tabIndex={isSelected ? 0 : -1}
-            className="tab relative min-h-11 sm:min-h-0 py-1.5 px-1.5 sm:px-2 md:px-4"
+            className="tab relative flex-1 basis-0 min-w-0 min-h-11 sm:min-h-0 py-1.5 px-1.5 sm:px-2 md:px-4"
           >
             {/* On a phone only the level name survives — the ident and the
                 component count are context, not navigation. */}

@@ -80,21 +80,38 @@ export function useSimulation(levelConfig: LevelConfig): UseSimulationReturn {
     setFlowTypeState(levelConfig.flows[0].id);
   }
 
-  // When the step on screen went up. Changing speed re-runs the timer effect
-  // below, and without this the step's clock would restart from zero — a step
-  // you were most of the way through would begin again at 2x.
-  // Seeded by the effect below rather than at declaration — reading the clock
-  // during render is not a pure thing to do, and this effect always runs first.
-  const stepShownAt = useRef<number>(0);
+  // How much of the CURRENT step has already been watched. The timer effect
+  // below re-runs whenever speed or playback changes, and without this its
+  // clock would restart from zero every time — a step you were most of the way
+  // through would begin again on a speed change, or on pause-then-resume.
+  //
+  // `consumed` is the time banked from earlier viewing spells of this step;
+  // `runningSince` is when the spell now in progress began. Both are seeded by
+  // effects rather than at declaration: reading the clock during render is not
+  // a pure thing to do, and these effects always run before the timer's.
+  const consumed = useRef(0);
+  const runningSince = useRef(0);
+
+  // A new step starts its clock from scratch.
   useEffect(() => {
-    stepShownAt.current = Date.now();
-  }, [currentStepIndex, isPlaying]);
+    consumed.current = 0;
+    runningSince.current = Date.now();
+  }, [currentStepIndex]);
+
+  // Pausing banks the spell just watched; resuming opens a new one.
+  useEffect(() => {
+    if (isPlaying) {
+      runningSince.current = Date.now();
+    } else {
+      consumed.current += Date.now() - runningSince.current;
+    }
+  }, [isPlaying]);
 
   // Auto-play timer
   useEffect(() => {
     if (!isPlaying || totalSteps === 0) return;
 
-    const elapsed = Date.now() - stepShownAt.current;
+    const elapsed = consumed.current + (Date.now() - runningSince.current);
     const delay = Math.max(0, BASE_STEP_MS / speed - elapsed);
 
     const timer = setTimeout(() => {

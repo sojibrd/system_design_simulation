@@ -40,4 +40,6 @@ app/
 - `FlowDiagram`-এ `key={simulation.id}-{levelId}` — React Flow-কে জোর করে নতুন করে mount করানোর জন্য।
 - `output: "export"` — কোনো server component data fetch, route handler বা server action নেই।
 - SSR-এ viewport বা reader-preference কিছুই জানা নেই, তাই `useMediaQuery` প্রথম render-এ সবসময় `false` — mount-এর পর একবার শুধরে নেয়।
+- এক ধাপের ঘড়ি ধাপ বদলালেই কেবল শূন্য থেকে শুরু হয় — speed বদলানো বা pause/resume ইতিমধ্যে দেখা সময়টুকু জমা রাখে (`useSimulation`-এর `consumed` / `runningSince`)।
+- `Sheet` কেবল compact স্ক্রিনে সত্যিকারের modal: `role="dialog"` + `aria-modal` + Tab ট্র্যাপ + Escape, বন্ধ হলে ফোকাস opener-এ ফেরে। প্রশস্ত স্ক্রিনে ওটা নিছক একটা কলাম, কোনো ARIA role নেই।
 - Packet-টা `<animateMotion>` (SMIL), CSS animation নয় — `prefers-reduced-motion`-এর স্টাইলশিট নিয়ম ওটাকে ছুঁতে পারে না, তাই `AnimatedEdge` ওটাকে DOM থেকেই বাদ দেয়।

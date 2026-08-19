@@ -1,7 +1,11 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { useIsCompact } from "@/app/hooks/useMediaQuery";
+
+/** Everything a keyboard can land on inside the sheet. */
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 /**
  * A region that is an ordinary panel on a wide screen and a bottom sheet on a
@@ -31,10 +35,23 @@ export const Sheet: React.FC<{
   const panelRef = useRef<HTMLDivElement>(null);
   const returnFocusTo = useRef<HTMLElement | null>(null);
 
+  // Callers pass an inline arrow, so `onClose` is a new function on every
+  // render of the page. Read it through a ref: the effect below then depends
+  // on the OVERLAY STATE alone, and does not tear down — stealing focus back
+  // to the opener — every time the step advances behind the sheet.
+  // Kept current by an effect declared FIRST, so it is already up to date by
+  // the time the overlay effect below runs on the same commit.
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  const close = useCallback(() => onCloseRef.current(), []);
+
   // Only while it is genuinely an overlay: Escape dismisses it, focus moves
-  // into it on open, and goes back to whatever opened it on close. Without the
-  // last part, dismissing the sheet drops the keyboard user back at the top of
-  // the document.
+  // into it on open, Tab cycles WITHIN it, and focus goes back to whatever
+  // opened it on close. Without the last part, dismissing the sheet drops the
+  // keyboard user back at the top of the document.
   useEffect(() => {
     if (!isOverlay) return;
 
@@ -42,7 +59,38 @@ export const Sheet: React.FC<{
     panelRef.current?.focus();
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") {
+        close();
+        return;
+      }
+      if (event.key !== "Tab") return;
+
+      // Backdrop and canvas are covered while this is open, so the sheet
+      // claims the tab ring — which is what `aria-modal` promises.
+      const panel = panelRef.current;
+      if (!panel) return;
+
+      const stops = Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE));
+      if (stops.length === 0) {
+        event.preventDefault();
+        panel.focus();
+        return;
+      }
+
+      const first = stops[0];
+      const last = stops[stops.length - 1];
+      const active = document.activeElement;
+
+      if (!panel.contains(active)) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus();
+      } else if (event.shiftKey && active === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener("keydown", onKeyDown);
 
@@ -50,7 +98,7 @@ export const Sheet: React.FC<{
       document.removeEventListener("keydown", onKeyDown);
       returnFocusTo.current?.focus();
     };
-  }, [isOverlay, onClose]);
+  }, [isOverlay, close]);
 
   if (!open) return null;
 
@@ -70,7 +118,9 @@ export const Sheet: React.FC<{
         ref={panelRef}
         role={isOverlay ? "dialog" : undefined}
         aria-label={isOverlay ? label : undefined}
-        aria-modal={isOverlay ? false : undefined}
+        /* The backdrop really does shut the canvas off, and Tab is trapped
+           above — so this is a modal, and says so. */
+        aria-modal={isOverlay ? true : undefined}
         tabIndex={isOverlay ? -1 : undefined}
         className={`
           absolute inset-x-0 bottom-0 z-50 h-[62%] max-h-full
