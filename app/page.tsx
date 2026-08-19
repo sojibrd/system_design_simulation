@@ -112,6 +112,7 @@ export default function Home() {
               steps={currentSteps}
               onSelectStep={goToStep}
               isFinished={isFinished}
+              isPlaying={isPlaying}
               onClose={() => setIsPanelOpen(false)}
             />
           </Sheet>

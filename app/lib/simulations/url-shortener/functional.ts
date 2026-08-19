@@ -95,7 +95,7 @@ export const functionalLevel: LevelConfig = {
     {
       id: "node-client",
       type: "simulationNode",
-      position: { x: 78, y: 208 },
+      position: { x: 88, y: 235 },
       data: {
         label: "Client",
         subLabel: "Web Browser / Mobile App",
@@ -109,7 +109,7 @@ export const functionalLevel: LevelConfig = {
     {
       id: "node-server",
       type: "simulationNode",
-      position: { x: 676, y: 208 },
+      position: { x: 765, y: 235 },
       data: {
         label: "App Server",
         subLabel: "Node.js / Express API",
@@ -123,7 +123,7 @@ export const functionalLevel: LevelConfig = {
     {
       id: "node-db",
       type: "simulationNode",
-      position: { x: 1274, y: 208 },
+      position: { x: 1442, y: 235 },
       data: {
         label: "Database",
         subLabel: "PostgreSQL (Relational DB)",

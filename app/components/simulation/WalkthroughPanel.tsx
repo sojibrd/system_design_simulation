@@ -30,6 +30,8 @@ interface WalkthroughPanelProps {
   onSelectStep: (index: number) => void;
   /** Flow has run to the end — freeze the live indicators. */
   isFinished?: boolean;
+  /** Playback is running. Starting a run pulls the panel back to the step view. */
+  isPlaying?: boolean;
   /** Dismisses the sheet. Only acted on for phones, where it overlays the canvas. */
   onClose?: () => void;
 }
@@ -43,12 +45,19 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
   steps,
   onSelectStep,
   isFinished = false,
+  isPlaying = false,
   onClose,
 }) => {
   const [showPayload, setShowPayload] = useState<boolean>(true);
   // The panel shows one thing at a time: the current step, or the whole log.
   const [mode, setMode] = useState<"step" | "log">("step");
   const bodyRef = useRef<HTMLDivElement>(null);
+
+  // Log is a reference view, not a standing preference: kicking off a run
+  // means the reader wants the narration again, so pull the panel back.
+  useEffect(() => {
+    if (isPlaying) setMode("step");
+  }, [isPlaying]);
 
   // Auto-scroll body to top on step change
   useEffect(() => {
