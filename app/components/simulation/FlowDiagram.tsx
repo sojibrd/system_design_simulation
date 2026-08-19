@@ -20,7 +20,12 @@ import { useThemeNumber } from "@/app/hooks/useThemeNumber";
 // empty field. minZoom still guards the largest one from shrinking past legible.
 const FIT_VIEW_OPTIONS = { padding: 0.12, minZoom: 0.4, maxZoom: 1.5 };
 
-/** Long enough for the stage grid to settle at its new width before re-fitting. */
+/** Below this the canvas is the short upper row of a split phone stage, where
+    the usual padding eats the little height there is. */
+const SHORT_CANVAS_PX = 360;
+const SHORT_FIT_VIEW_OPTIONS = { ...FIT_VIEW_OPTIONS, padding: 0.06 };
+
+/** Long enough for the stage grid to settle at its new size before re-fitting. */
 const RELAYOUT_SETTLE_MS = 260;
 
 interface FlowDiagramProps {
@@ -40,13 +45,20 @@ export const FlowDiagram: React.FC<FlowDiagramProps> = ({
     CustomEdgeType
   > | null>(null);
 
-  // Toggling the walkthrough panel changes this canvas's width. React Flow
-  // measures its container, and the new width is not readable until the
-  // browser has laid the grid out again — hence a beat before re-fitting,
-  // rather than fitting into the size the canvas is about to stop being.
+  const shellRef = useRef<HTMLDivElement>(null);
+
+  // Toggling the walkthrough panel resizes this canvas — narrower on a wide
+  // screen, shorter on a phone, where the stage splits into rows. React Flow
+  // measures its container, and the new size is not readable until the browser
+  // has laid the grid out again — hence a beat before re-fitting, rather than
+  // fitting into the size the canvas is about to stop being.
   useEffect(() => {
     const timer = setTimeout(() => {
-      instanceRef.current?.fitView(FIT_VIEW_OPTIONS);
+      const isShort =
+        (shellRef.current?.clientHeight ?? Infinity) < SHORT_CANVAS_PX;
+      instanceRef.current?.fitView(
+        isShort ? SHORT_FIT_VIEW_OPTIONS : FIT_VIEW_OPTIONS
+      );
     }, RELAYOUT_SETTLE_MS);
 
     return () => clearTimeout(timer);
@@ -70,7 +82,10 @@ export const FlowDiagram: React.FC<FlowDiagramProps> = ({
   );
 
   return (
-    <div className="surface-well w-full h-full min-h-0 overflow-hidden relative">
+    <div
+      ref={shellRef}
+      className="surface-well w-full h-full min-h-0 overflow-hidden relative"
+    >
       <ReactFlow
         nodes={nodes}
         edges={edges}

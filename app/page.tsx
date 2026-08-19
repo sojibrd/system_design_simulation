@@ -99,12 +99,16 @@ export default function Home() {
           />
         </div>
 
-        {/* Simulation stage — takes every pixel the other rows do not need */}
-        {/* `relative` so the mobile walkthrough sheet can anchor to the stage
-            rather than the viewport — it must not cover the controls row. */}
-        <div className="relative flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4">
-          {/* Architecture Canvas. On a phone it keeps the full stage even when
-              the walkthrough is open — the walkthrough floats over it. */}
+        {/* Simulation stage — takes every pixel the other rows do not need.
+            Opening a panel SPLITS this box rather than layering over it: rows
+            below `lg`, columns above. Nothing ever covers the canvas, because
+            watching the animation while reading the step is the whole app. */}
+        <div
+          className={`flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-4 ${
+            openPanel ? "grid-rows-[45%_minmax(0,1fr)] lg:grid-rows-1" : ""
+          }`}
+        >
+          {/* Architecture Canvas */}
           <div
             /* The canvas IS the panel the level tabs control — saying so is
                what makes the tablist above a real widget rather than three
@@ -112,7 +116,7 @@ export default function Home() {
             id={LEVEL_PANEL_ID}
             role="tabpanel"
             aria-labelledby={levelTabId(currentLevel.id)}
-            className={`min-h-0 h-full ${
+            className={`min-h-0 h-full overflow-hidden ${
               openPanel ? "lg:col-span-7 xl:col-span-8" : "lg:col-span-12"
             }`}
           >
@@ -124,8 +128,8 @@ export default function Home() {
             />
           </div>
 
-          {/* Step-by-step walkthrough: a column on desktop, a bottom sheet on
-              a phone. */}
+          {/* Step-by-step walkthrough: a column on desktop, the stage's lower
+              row on a phone. */}
           <Sheet
             open={openPanel !== null}
             onClose={() => setActivePanel(null)}

@@ -32,5 +32,3 @@ export const useMediaQuery = (query: string): boolean => {
 export const usePrefersReducedMotion = () =>
   useMediaQuery("(prefers-reduced-motion: reduce)");
 
-/** Below Tailwind's `lg` — where the walkthrough is an overlay, not a column. */
-export const useIsCompact = () => useMediaQuery("(max-width: 1023.98px)");
