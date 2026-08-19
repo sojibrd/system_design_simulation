@@ -111,7 +111,7 @@ export const scalableLevel: LevelConfig = {
     {
       id: "node-client",
       type: "simulationNode",
-      position: { x: 40, y: 290 },
+      position: { x: 52, y: 377 },
       data: {
         label: "Client",
         subLabel: "Web & Mobile Users",
@@ -125,7 +125,7 @@ export const scalableLevel: LevelConfig = {
     {
       id: "node-lb",
       type: "simulationNode",
-      position: { x: 480, y: 290 },
+      position: { x: 624, y: 377 },
       data: {
         label: "Load Balancer",
         subLabel: "NGINX / HAProxy",
@@ -139,7 +139,7 @@ export const scalableLevel: LevelConfig = {
     {
       id: "node-limiter",
       type: "simulationNode",
-      position: { x: 960, y: 50 },
+      position: { x: 1248, y: 65 },
       data: {
         label: "Rate Limiter",
         subLabel: "Token Bucket (Redis based)",
@@ -153,7 +153,7 @@ export const scalableLevel: LevelConfig = {
     {
       id: "node-server-1",
       type: "simulationNode",
-      position: { x: 960, y: 200 },
+      position: { x: 1248, y: 260 },
       data: {
         label: "App Server 1",
         subLabel: "Stateless Node.js",
@@ -167,7 +167,7 @@ export const scalableLevel: LevelConfig = {
     {
       id: "node-server-2",
       type: "simulationNode",
-      position: { x: 960, y: 450 },
+      position: { x: 1248, y: 585 },
       data: {
         label: "App Server 2",
         subLabel: "Stateless Node.js",
@@ -181,7 +181,7 @@ export const scalableLevel: LevelConfig = {
     {
       id: "node-cache",
       type: "simulationNode",
-      position: { x: 1440, y: 130 },
+      position: { x: 1872, y: 169 },
       data: {
         label: "Cache (Redis)",
         subLabel: "In-Memory Key-Value",
@@ -195,7 +195,7 @@ export const scalableLevel: LevelConfig = {
     {
       id: "node-db",
       type: "simulationNode",
-      position: { x: 1440, y: 420 },
+      position: { x: 1872, y: 546 },
       data: {
         label: "Database",
         subLabel: "PostgreSQL Primary",

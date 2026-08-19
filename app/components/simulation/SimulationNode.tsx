@@ -40,7 +40,7 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
       data-active={isActive}
       data-animated={isAnimated}
       data-selected={Boolean(selected)}
-      className="unit relative group select-none w-[220px] min-h-[88px] flex flex-col justify-center"
+      className="unit relative group select-none w-[440px] min-h-[176px] flex flex-col justify-center"
     >
       {/* Whatever the theme puts in a unit corners. */}
       <Ornament color={color} />
@@ -55,25 +55,25 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
         </React.Fragment>
       ))}
 
-      <div className="px-3.5 py-3 flex flex-col justify-center min-h-[88px]">
+      <div className="px-7 py-6 flex flex-col justify-center min-h-[176px]">
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex items-center gap-5 min-w-0">
             <span
-              className="surface-well text-base shrink-0 w-8 h-8 flex items-center justify-center"
+              className="surface-well text-3xl shrink-0 w-16 h-16 flex items-center justify-center"
               style={{ color }}
             >
               {nodeData.emoji}
             </span>
             <div className="min-w-0">
-              <span className="flex items-center gap-1.5 min-w-0">
+              <span className="flex items-center gap-3 min-w-0">
                 <Lamp lit={isActive} blink={isAnimated} color={color} />
                 <span className="t-label truncate" style={{ color }}>
                   {nodeData.category}
                 </span>
               </span>
-              <h4 className="t-title text-xs truncate">{nodeData.label}</h4>
+              <h4 className="t-title text-2xl truncate">{nodeData.label}</h4>
               {nodeData.subLabel && (
-                <p className="t-mono t-caption truncate leading-tight">
+                <p className="t-mono t-caption text-sm truncate leading-tight">
                   {nodeData.subLabel}
                 </p>
               )}
@@ -82,18 +82,18 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); setShowTooltip((prev) => !prev); }}
-            className="control control--quiet p-0.5 shrink-0"
+            className="control control--quiet p-1 shrink-0"
             aria-label="Component info"
           >
-            <Info className="w-3.5 h-3.5" />
+            <Info className="w-7 h-7" />
           </button>
         </div>
 
         {/* Live status readout, shown only while this unit is engaged. */}
         {isActive && nodeData.statusMessage && (
-          <div className="surface-well mt-2 px-1.5 py-1 flex items-center gap-1.5">
+          <div className="surface-well mt-4 px-3 py-2 flex items-center gap-3">
             <Lamp lit blink={isAnimated} color="var(--t-accent)" />
-            <span className="t-mono t-accent text-[10px] font-medium truncate">
+            <span className="t-mono t-accent text-base font-medium truncate">
               {nodeData.statusMessage}
             </span>
           </div>

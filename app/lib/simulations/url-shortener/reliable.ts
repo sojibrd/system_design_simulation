@@ -172,7 +172,7 @@ export const reliableLevel: LevelConfig = {
     {
       id: "node-client",
       type: "simulationNode",
-      position: { x: 40, y: 400 },
+      position: { x: 52, y: 520 },
       data: {
         label: "Global Clients",
         subLabel: "Mobile, Web, APIs",
@@ -186,7 +186,7 @@ export const reliableLevel: LevelConfig = {
     {
       id: "node-cdn",
       type: "simulationNode",
-      position: { x: 500, y: 100 },
+      position: { x: 650, y: 130 },
       data: {
         label: "Cloudflare CDN",
         subLabel: "Edge Network (200+ PoPs)",
@@ -200,7 +200,7 @@ export const reliableLevel: LevelConfig = {
     {
       id: "node-lb",
       type: "simulationNode",
-      position: { x: 500, y: 400 },
+      position: { x: 650, y: 520 },
       data: {
         label: "Global Load Balancer",
         subLabel: "AWS ALB / Cloud LB",
@@ -214,7 +214,7 @@ export const reliableLevel: LevelConfig = {
     {
       id: "node-gw",
       type: "simulationNode",
-      position: { x: 960, y: 400 },
+      position: { x: 1248, y: 520 },
       data: {
         label: "API Gateway",
         subLabel: "Kong / Envoy Gateway",
@@ -228,7 +228,7 @@ export const reliableLevel: LevelConfig = {
     {
       id: "node-idgen",
       type: "simulationNode",
-      position: { x: 960, y: 100 },
+      position: { x: 1248, y: 130 },
       data: {
         label: "Snowflake ID Gen",
         subLabel: "64-bit Distributed Unique ID",
@@ -242,7 +242,7 @@ export const reliableLevel: LevelConfig = {
     {
       id: "node-server-1",
       type: "simulationNode",
-      position: { x: 1420, y: 230 },
+      position: { x: 1846, y: 299 },
       data: {
         label: "App Cluster (S1)",
         subLabel: "Kubernetes Pod 1",
@@ -256,7 +256,7 @@ export const reliableLevel: LevelConfig = {
     {
       id: "node-server-2",
       type: "simulationNode",
-      position: { x: 1420, y: 505 },
+      position: { x: 1846, y: 657 },
       data: {
         label: "App Cluster (S2)",
         subLabel: "Kubernetes Pod 2",
@@ -270,7 +270,7 @@ export const reliableLevel: LevelConfig = {
     {
       id: "node-cache",
       type: "simulationNode",
-      position: { x: 1880, y: 60 },
+      position: { x: 2444, y: 78 },
       data: {
         label: "Redis Cluster",
         subLabel: "Multi-Node Sharded Cache",
@@ -284,7 +284,7 @@ export const reliableLevel: LevelConfig = {
     {
       id: "node-primary-db",
       type: "simulationNode",
-      position: { x: 1880, y: 320 },
+      position: { x: 2444, y: 416 },
       data: {
         label: "Primary DB (Write)",
         subLabel: "PostgreSQL Master (ACID)",
@@ -298,7 +298,7 @@ export const reliableLevel: LevelConfig = {
     {
       id: "node-replica-db",
       type: "simulationNode",
-      position: { x: 1880, y: 560 },
+      position: { x: 2444, y: 728 },
       data: {
         label: "Read Replicas",
         subLabel: "PostgreSQL Slaves (Read-Only)",
@@ -312,7 +312,7 @@ export const reliableLevel: LevelConfig = {
     {
       id: "node-queue",
       type: "simulationNode",
-      position: { x: 1420, y: 765 },
+      position: { x: 1846, y: 995 },
       data: {
         label: "Kafka Queue",
         subLabel: "Distributed Event Stream",
@@ -326,7 +326,7 @@ export const reliableLevel: LevelConfig = {
     {
       id: "node-worker",
       type: "simulationNode",
-      position: { x: 1880, y: 765 },
+      position: { x: 2444, y: 995 },
       data: {
         label: "Analytics Engine",
         subLabel: "ClickHouse + Workers",
@@ -340,7 +340,7 @@ export const reliableLevel: LevelConfig = {
     {
       id: "node-dashboard",
       type: "simulationNode",
-      position: { x: 2340, y: 765 },
+      position: { x: 3042, y: 995 },
       data: {
         label: "Owner Dashboard",
         subLabel: "Analytics UI",
