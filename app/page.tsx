@@ -144,6 +144,7 @@ export default function Home() {
                 totalSteps={totalSteps}
                 steps={currentSteps}
                 onSelectStep={goToStep}
+                conceptSummary={currentLevel.conceptSummary}
                 isFinished={isFinished}
                 onClose={() => setActivePanel(null)}
               />

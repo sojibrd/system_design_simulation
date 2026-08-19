@@ -16,7 +16,9 @@ import { CustomNodeType, CustomEdgeType } from "@/app/lib/types";
 import { Lamp } from "@/app/components/ui";
 import { useThemeNumber } from "@/app/hooks/useThemeNumber";
 
-const FIT_VIEW_OPTIONS = { padding: 0.22, minZoom: 0.4, maxZoom: 1.5 };
+// Padding trimmed from 0.22: at the smallest level three units sat in a mostly
+// empty field. minZoom still guards the largest one from shrinking past legible.
+const FIT_VIEW_OPTIONS = { padding: 0.12, minZoom: 0.4, maxZoom: 1.5 };
 
 /** Long enough for the stage grid to settle at its new width before re-fitting. */
 const RELAYOUT_SETTLE_MS = 260;

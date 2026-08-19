@@ -86,7 +86,11 @@ export const LevelTabs: React.FC<{
             <span className="t-title text-xs md:text-sm truncate">
               {level.name}
             </span>
-            <span className="t-label hidden md:flex items-center gap-1">
+            <span
+              className="t-label hidden md:flex items-center gap-1"
+              title={`${level.componentCount} components`}
+              aria-label={`${level.componentCount} components`}
+            >
               <Layers className="w-3 h-3" />
               {level.componentCount}
             </span>

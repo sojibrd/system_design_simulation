@@ -3,7 +3,17 @@
 import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Handle, Position, NodeProps, useStore } from "@xyflow/react";
 import { SimulationNodeData, ComponentCategory } from "@/app/lib/types";
-import { Info } from "lucide-react";
+import {
+  Info,
+  Monitor,
+  Server,
+  Database,
+  Network,
+  ShieldCheck,
+  Layers3,
+  BarChart3,
+  type LucideIcon,
+} from "lucide-react";
 import { Badge, Lamp, Ornament } from "@/app/components/ui";
 
 // The node names its category; the theme supplies the colour behind that name.
@@ -15,6 +25,22 @@ const categoryColor: Record<ComponentCategory, string> = {
   security: "var(--t-cat-security)",
   queue: "var(--t-cat-queue)",
   analytics: "var(--t-cat-analytics)",
+};
+
+/**
+ * The node names its category; the component picks the glyph for that name.
+ * The data files still carry an `emoji`, but a colour emoji is a fixed bitmap —
+ * it would ignore the theme on paper stock or on a monochrome phosphor screen.
+ * A lucide icon inherits `currentColor`, so the theme keeps the last word.
+ */
+const categoryIcon: Record<ComponentCategory, LucideIcon> = {
+  client: Monitor,
+  compute: Server,
+  storage: Database,
+  network: Network,
+  security: ShieldCheck,
+  queue: Layers3,
+  analytics: BarChart3,
 };
 
 const HANDLE_SIDES = [
@@ -99,6 +125,7 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
   };
 
   const color = categoryColor[nodeData.category] ?? categoryColor.compute;
+  const CategoryIcon = categoryIcon[nodeData.category] ?? categoryIcon.compute;
   const isActive = Boolean(nodeData.isActive);
   // Highlight stays on after the flow finishes, but the motion stops.
   const isAnimated = isActive && nodeData.isAnimated !== false;
@@ -128,10 +155,10 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-5 min-w-0">
             <span
-              className="surface-well text-3xl shrink-0 w-16 h-16 flex items-center justify-center"
+              className="surface-well shrink-0 w-16 h-16 flex items-center justify-center"
               style={{ color }}
             >
-              {nodeData.emoji}
+              <CategoryIcon className="w-8 h-8" aria-hidden />
             </span>
             <div className="min-w-0">
               <span className="flex items-center gap-3 min-w-0">
@@ -185,7 +212,7 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
           }`}
         >
           <div className="flex items-center gap-2 mb-1.5 pb-1 seam-b">
-            <span className="text-base">{nodeData.emoji}</span>
+            <CategoryIcon className="w-4 h-4 shrink-0" style={{ color }} aria-hidden />
             <span className="t-title text-xs">{nodeData.label}</span>
             <span className="chip ml-auto" style={{ color, borderColor: color }}>
               {nodeData.category}

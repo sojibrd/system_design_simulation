@@ -29,6 +29,11 @@ interface WalkthroughPanelProps {
   totalSteps: number;
   steps: SimulationStep[];
   onSelectStep: (index: number) => void;
+  /**
+   * The level's own summary. Read before a run, it is what fills the panel
+   * while nothing is playing — the slot used to be an empty play prompt.
+   */
+  conceptSummary: string;
   /** Flow has run to the end — freeze the live indicators. */
   isFinished?: boolean;
   /** Dismisses the sheet. Only acted on for phones, where it overlays the canvas. */
@@ -43,6 +48,7 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
   totalSteps,
   steps,
   onSelectStep,
+  conceptSummary,
   isFinished = false,
   onClose,
 }) => {
@@ -84,25 +90,27 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
     );
   }
 
-  // Placeholder when no step is selected yet (before simulation starts)
+  /* Before the first step: the slot carries the level's summary rather than an
+     empty play prompt, so the reader knows what this configuration teaches
+     before running it. The scenario picker is NOT repeated here — the controls
+     bar below owns it, and two copies left it unclear which one was live. */
   if (!currentStep) {
     return (
-      <Panel className="flex flex-col h-full items-center justify-center p-4 sm:p-6 text-center gap-4">
-        <div className="surface-well t-accent w-14 h-14 flex items-center justify-center">
-          <Play className="w-6 h-6" />
+      <Panel className="flex flex-col h-full p-3 sm:p-4 md:p-5 overflow-hidden">
+        <div className="flex items-center gap-2 pb-2 seam-b-heavy">
+          <BookOpen className="t-muted w-3.5 h-3.5 shrink-0" />
+          <span className="t-mono t-strong text-xs">এই কনফিগে কী আছে</span>
         </div>
-        <div>
-          <h3 className="t-title text-sm mb-1.5">সিমুলেশন শুরু করুন</h3>
-          <p className="t-body text-xs max-w-[220px] mx-auto">
-            নিচের <strong className="t-strong">Simulate</strong> বাটনে ক্লিক করুন এবং দেখুন
-            ডাটা কীভাবে প্রবাহিত হয়।
-          </p>
+
+        <div className="flex-1 overflow-y-auto pt-3">
+          <p className="t-body text-sm">{conceptSummary}</p>
         </div>
-        <div className="t-caption flex items-center gap-2">
-          <Badge>Shorten</Badge>
-          <span>বা</span>
-          <Badge>Redirect</Badge>
-          <span>বেছে নিন</span>
+
+        <div className="t-caption flex items-center gap-2 pt-2 seam-t">
+          <Play className="t-accent w-3 h-3 shrink-0" />
+          <span>
+            নিচের <strong className="t-strong">Simulate</strong> বাটনে ডাটার প্রবাহ দেখুন।
+          </span>
         </div>
       </Panel>
     );
