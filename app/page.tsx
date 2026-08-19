@@ -145,7 +145,6 @@ export default function Home() {
                 steps={currentSteps}
                 onSelectStep={goToStep}
                 conceptSummary={currentLevel.conceptSummary}
-                isFinished={isFinished}
                 onClose={() => setActivePanel(null)}
               />
             )}
@@ -168,6 +167,8 @@ export default function Home() {
             onReset={reset}
             onSpeedChange={setSpeed}
             onFlowChange={setFlowType}
+            onSelectStep={goToStep}
+            isFinished={isFinished}
             activePanel={openPanel}
             onTogglePanel={togglePanel}
             hasNotes={levelHasNotes}

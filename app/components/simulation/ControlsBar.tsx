@@ -49,6 +49,10 @@ interface ControlsBarProps {
   onReset: () => void;
   onSpeedChange: (speed: SpeedOption) => void;
   onFlowChange: (flow: FlowKind) => void;
+  /** Drives the always-visible progress ruler. */
+  onSelectStep: (index: number) => void;
+  /** Flow has run to the end — freeze the ruler's live indicator. */
+  isFinished?: boolean;
   /** Which panel occupies the side slot, if any — one at a time. */
   activePanel: PanelKind;
   onTogglePanel: (panel: Exclude<PanelKind, null>) => void;
@@ -70,6 +74,8 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
   onReset,
   onSpeedChange,
   onFlowChange,
+  onSelectStep,
+  isFinished = false,
   activePanel,
   onTogglePanel,
   hasNotes,
@@ -129,8 +135,41 @@ export const ControlsBar: React.FC<ControlsBarProps> = ({
     </>
   );
 
+  /**
+   * Where the run has got to, on the instrument itself. The steps panel carries
+   * the same ruler, but that panel is dismissable — and a machine that hides
+   * how far through its cycle it is stops being an instrument. This one is
+   * always on, and it is the only readout that survives closing every panel.
+   */
+  const progressRuler = totalSteps > 0 && (
+    <div
+      className="flex items-end justify-center gap-1 flex-nowrap overflow-x-auto"
+      role="group"
+      aria-label={`Step ${currentStepIndex + 1} of ${totalSteps}`}
+    >
+      {Array.from({ length: totalSteps }, (_, idx) => (
+        <button
+          key={idx}
+          type="button"
+          onClick={() => onSelectStep(idx)}
+          data-state={
+            idx === currentStepIndex ? "current" : idx < currentStepIndex ? "done" : "todo"
+          }
+          data-live={!isFinished}
+          className="progress-mark shrink-0"
+          title={`Go to Step ${idx + 1}`}
+          aria-label={`Go to step ${idx + 1}`}
+        />
+      ))}
+    </div>
+  );
+
   return (
     <Panel className="w-full p-2.5 md:p-3 overflow-x-auto">
+      {/* Above the controls, spanning the whole bar: read the run at a glance
+          before reaching for anything. */}
+      {progressRuler && <div className="pb-2.5 mb-2.5 seam-b">{progressRuler}</div>}
+
       <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-2 sm:gap-3">
         {/* 1. Setup: flow selector. Built from what the level declares, so a
                tier can offer a cache-miss or failover scenario without touching

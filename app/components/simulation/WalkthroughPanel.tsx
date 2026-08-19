@@ -34,8 +34,6 @@ interface WalkthroughPanelProps {
    * while nothing is playing — the slot used to be an empty play prompt.
    */
   conceptSummary: string;
-  /** Flow has run to the end — freeze the live indicators. */
-  isFinished?: boolean;
   /** Dismisses the sheet. Only acted on for phones, where it overlays the canvas. */
   onClose?: () => void;
 }
@@ -49,7 +47,6 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
   steps,
   onSelectStep,
   conceptSummary,
-  isFinished = false,
   onClose,
 }) => {
   const [showPayload, setShowPayload] = useState<boolean>(true);
@@ -254,22 +251,9 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
         )}
       </div>
 
-      {/* Progress ruler at the bottom */}
-      <div className="pt-2 seam-t flex flex-wrap items-end justify-center gap-1">
-        {steps.map((_, idx) => (
-          <button
-            key={idx}
-            type="button"
-            onClick={() => onSelectStep(idx)}
-            data-state={
-              idx === currentStepIndex ? "current" : idx < currentStepIndex ? "done" : "todo"
-            }
-            data-live={!isFinished}
-            className="progress-mark"
-            title={`Go to Step ${idx + 1}`}
-          />
-        ))}
-      </div>
+      {/* The progress ruler used to live here. It moved to the controls bar,
+          which is always on screen — this panel is dismissable, and that is
+          exactly the readout that must not be dismissable with it. */}
     </Panel>
   );
 };

@@ -36,7 +36,7 @@
 | Chip | `chip` + `chip--accent` `chip--alert` `chip--ok` |
 | Callout | `callout` + `callout--accent` `callout--alert` |
 | Content | `payload` (literal JSON/SQL/HTTP নমুনা) · `option` (trade-off-এর একটা শাখা) |
-| Canvas | `unit` `ornament-mark` `lamp` `terminal` `edge-tag` `wire` `packet-core` `packet-halo` |
+| Canvas | `backplane` `unit` `ornament-mark` `lamp` `terminal` `edge-tag` `wire` `packet-core` `packet-halo` |
 | Nav | `tab` `row` `progress-mark` `overlay` |
 
 ### State attributes
@@ -53,6 +53,7 @@
 | `data-chosen` | `.option` | trade-off-এ এই শাখাটাই নেওয়া হয়েছে |
 | `data-static` | `.control` | খোলার কিছু নেই — disabled হলেও প্লেট হিসেবে পুরো স্পষ্ট থাকে |
 | `data-corner` (`tl`/`tr`/`bl`/`br`) | `.ornament-mark` | কোন কোণা |
+| `data-category` (`client`…`analytics`) | `.unit` | কোন শ্রেণির কম্পোনেন্ট — spine-এর রঙ এখান থেকে |
 
 ---
 
@@ -67,12 +68,12 @@
 - **Seams:** `seam` `seam-width` `seam-heavy` `seam-heavy-width`
 - **Controls:** `control-bg|border|fg|shadow|radius|border-width` + hover/press ভ্যারিয়েন্ট; `primary-*` `alert-*`
 - **Chips/Callouts:** `chip-*` `callout-*`
-- **Unit:** `unit-bg|border|border-width|radius|shadow`, `unit-selected-border`, `unit-active-bg|border|border-width|shadow|animation`
+- **Unit:** `unit-bg|border|border-width|radius|shadow`, `unit-selected-border`, `unit-active-bg|border|border-width|shadow|animation`, `unit-spine-width|inset|radius|opacity|active-opacity`
 - **Ornament:** `ornament-display|size|inset|radius|fill|color|stroke|shadow`
 - **Lamp:** `lamp-size|radius|off-fill|glow|blink-animation`
 - **Terminal:** `terminal-size|radius|fill|border|fill-hover`
 - **Wire/Packet:** `wire-dormant|dormant-width|dormant-dash`, `wire-live-width|live-dash|live-filter`, `wire-dash-speed`, `wire-corner-radius`, `packet-size|rx`, `packet-halo-size|halo-rx|halo-opacity`, `edge-tag-bg`
-- **Tabs/Progress/Canvas/Scrollbar:** `tab-*` `progress-*` `canvas-dot|gap|dot-size` `scrollbar-*`
+- **Tabs/Progress/Canvas/Scrollbar:** `tab-*` `progress-*` `canvas-dot|gap|dot-size|vignette|inset-shadow` `scrollbar-*`
 - **Categories:** `cat-client|compute|storage|network|security|queue|analytics`
 - **Signals:** `signal-request|write|read|success|cache|event|error|meta`
 
@@ -104,3 +105,5 @@
 ## বিদ্যমান থিমের চরিত্র
 
 **`control-room`** — র‍্যাকে বসানো যন্ত্রের প্যানেল। উষ্ণ চারকোল, মেশিনড বেজেল (inset হাইলাইট + নিচে shadow), খোদাই করা mono লেবেল, অ্যাম্বার সিগন্যাল ল্যাম্প। *একমাত্র ল্যাম্পই আলো ছড়ায়।* Ornament = চারটি বেজেল স্ক্রু।
+
+ক্যানভাসটা chassis-এ কাটা একটা **recess** — `.backplane` (vignette + rim shadow) dot-grid-এর উপরে, ডায়াগ্রামের নিচে বসে (React Flow-এর z-index: grid `-1`, edge `2`, node `4` — তাই `z-0`)। Wire dormant অবস্থায় **solid কিন্তু ম্লান**; dash কেবল live অবস্থার চিহ্ন, অর্থাৎ গতি = প্রবাহ। প্রতিটি `.unit`-এর বাঁ কিনারে category-রঙা একটা **spine**, যাতে বড় লেভেলেও গ্রুপিং এক নজরে পড়া যায়।

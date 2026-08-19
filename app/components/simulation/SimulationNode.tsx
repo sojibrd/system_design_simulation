@@ -136,7 +136,13 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
       data-active={isActive}
       data-animated={isAnimated}
       data-selected={Boolean(selected)}
-      className="unit relative group select-none w-[440px] min-h-[176px] flex flex-col justify-center"
+      /* The unit NAMES its category here; the theme paints the spine for it.
+         The inline `color` below stays for the parts a stylesheet cannot reach
+         (an SVG glyph, a lamp) — the edge of the card is not one of them. */
+      data-category={nodeData.category}
+      /* Denser than it was: at 440x176 a thirteen-unit tier could only be read
+         by zooming out past legible. One size has to serve every tier. */
+      className="unit relative group select-none w-84 min-h-32 flex flex-col justify-center"
     >
       {/* Whatever the theme puts in a unit corners. */}
       <Ornament color={color} />
@@ -151,25 +157,25 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
         </React.Fragment>
       ))}
 
-      <div className="px-7 py-6 flex flex-col justify-center min-h-[176px]">
+      <div className="px-5 py-4 flex flex-col justify-center min-h-32">
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-5 min-w-0">
+          <div className="flex items-center gap-3.5 min-w-0">
             <span
-              className="surface-well shrink-0 w-16 h-16 flex items-center justify-center"
+              className="surface-well shrink-0 w-11 h-11 flex items-center justify-center"
               style={{ color }}
             >
-              <CategoryIcon className="w-8 h-8" aria-hidden />
+              <CategoryIcon className="w-6 h-6" aria-hidden />
             </span>
             <div className="min-w-0">
-              <span className="flex items-center gap-3 min-w-0">
+              <span className="flex items-center gap-2 min-w-0">
                 <Lamp lit={isActive} blink={isAnimated} color={color} />
                 <span className="t-label truncate" style={{ color }}>
                   {nodeData.category}
                 </span>
               </span>
-              <h4 className="t-title text-2xl truncate">{nodeData.label}</h4>
+              <h4 className="t-title text-lg truncate">{nodeData.label}</h4>
               {nodeData.subLabel && (
-                <p className="t-mono t-caption text-sm truncate leading-tight">
+                <p className="t-mono t-caption text-xs truncate leading-tight">
                   {nodeData.subLabel}
                 </p>
               )}
@@ -183,15 +189,15 @@ export const SimulationNode: React.FC<NodeProps> = ({ data, selected }) => {
             aria-controls={showTooltip ? cardId : undefined}
             aria-label="Component info"
           >
-            <Info className="w-7 h-7" />
+            <Info className="w-5 h-5" />
           </button>
         </div>
 
         {/* Live status readout, shown only while this unit is engaged. */}
         {isActive && nodeData.statusMessage && (
-          <div className="surface-well mt-4 px-3 py-2 flex items-center gap-3">
+          <div className="surface-well mt-3 px-2.5 py-1.5 flex items-center gap-2.5">
             <Lamp lit blink={isAnimated} color="var(--t-accent)" />
-            <span className="t-mono t-accent text-base truncate">
+            <span className="t-mono t-accent text-sm truncate">
               {nodeData.statusMessage}
             </span>
           </div>

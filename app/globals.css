@@ -395,6 +395,48 @@ body {
     animation: var(--t-unit-active-animation);
   }
 
+  /* The category, worn down the left edge. The unit only NAMES its category
+     (`data-category`); which colour that name gets — and whether the spine is
+     drawn at all — stays a theme decision. */
+  .unit::before {
+    content: "";
+    position: absolute;
+    left: var(--t-unit-spine-inset);
+    top: var(--t-unit-spine-inset);
+    bottom: var(--t-unit-spine-inset);
+    width: var(--t-unit-spine-width);
+    border-radius: var(--t-unit-spine-radius);
+    background-color: var(--unit-category, var(--t-text-faint));
+    opacity: var(--t-unit-spine-opacity);
+    transition: opacity 240ms var(--t-ease);
+    pointer-events: none;
+  }
+
+  .unit[data-active="true"]::before {
+    opacity: var(--t-unit-spine-active-opacity);
+  }
+
+  .unit[data-category="client"] { --unit-category: var(--t-cat-client); }
+  .unit[data-category="compute"] { --unit-category: var(--t-cat-compute); }
+  .unit[data-category="storage"] { --unit-category: var(--t-cat-storage); }
+  .unit[data-category="network"] { --unit-category: var(--t-cat-network); }
+  .unit[data-category="security"] { --unit-category: var(--t-cat-security); }
+  .unit[data-category="queue"] { --unit-category: var(--t-cat-queue); }
+  .unit[data-category="analytics"] { --unit-category: var(--t-cat-analytics); }
+
+  /* --- Backplane: the stage the units are mounted on ------------------- */
+
+  /* The canvas is the largest surface on screen, and left as a bare dot grid
+     it was the one place the theme said nothing. This is the layer that makes
+     it a recess in the chassis: it lies over the grid and under the diagram,
+     so it never touches legibility, and it takes no pointer events — the
+     canvas below it still pans and zooms. */
+  .backplane {
+    background-image: var(--t-canvas-vignette, none);
+    box-shadow: var(--t-canvas-inset-shadow, none);
+    pointer-events: none;
+  }
+
   /* --- Ornament: the decoration that gives a unit its character -------- */
 
   .ornament-mark {

@@ -98,6 +98,11 @@ export const FlowDiagram: React.FC<FlowDiagramProps> = ({
           size={canvasDotSize}
           color="var(--t-canvas-dot)"
         />
+        {/* The stage itself. React Flow stacks its grid at z-index -1, edges at
+            2 and nodes at 4, so z-0 puts this between the grid and the diagram
+            — it dresses the floor without ever sitting over a unit or a wire. */}
+        <div className="backplane absolute inset-0 z-0" aria-hidden />
+
         <Controls showInteractive={false} position="bottom-left" className="!m-3" />
       </ReactFlow>
 
