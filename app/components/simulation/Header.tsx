@@ -24,7 +24,6 @@ export const Header: React.FC<{
               <h1 className="t-title text-sm md:text-base">
                 System Design Simulator
               </h1>
-              <Badge tone="accent">INTERACTIVE</Badge>
             </div>
           </div>
         </div>

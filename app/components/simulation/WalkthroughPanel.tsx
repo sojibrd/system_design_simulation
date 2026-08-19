@@ -50,13 +50,13 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
 }) => {
   const [showPayload, setShowPayload] = useState<boolean>(true);
   // The panel shows one thing at a time: the current step, or the whole log.
-  const [mode, setMode] = useState<"step" | "log">("step");
+  const [mode, setMode] = useState<"step" | "log">("log");
   const bodyRef = useRef<HTMLDivElement>(null);
 
-  // Log is a reference view, not a standing preference: kicking off a run
-  // means the reader wants the narration again, so pull the panel back.
+  // Starting a run opens the log: the whole scenario at a glance is the
+  // orientation a reader wants first, before drilling into one step.
   useEffect(() => {
-    if (isPlaying) setMode("step");
+    if (isPlaying) setMode("log");
   }, [isPlaying]);
 
   // Auto-scroll body to top on step change
