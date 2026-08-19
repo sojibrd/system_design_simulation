@@ -17,8 +17,13 @@ import { Lamp } from "@/app/components/ui";
 import { useThemeNumber } from "@/app/hooks/useThemeNumber";
 
 // Padding trimmed from 0.22: at the smallest level three units sat in a mostly
-// empty field. minZoom still guards the largest one from shrinking past legible.
-const FIT_VIEW_OPTIONS = { padding: 0.12, minZoom: 0.4, maxZoom: 1.5 };
+// empty field.
+// minZoom is a FLOOR ON FITTING, and it was the reason a phone showed only a
+// slice of the diagram: the widest level spans ~1780px against a ~350px canvas,
+// which needs roughly 0.18 to fit — a 0.4 floor simply clipped it. It is set
+// low enough that fitView can always frame the whole system; the cards go small
+// at that zoom, but seeing the shape is the point of zooming out.
+const FIT_VIEW_OPTIONS = { padding: 0.12, minZoom: 0.1, maxZoom: 1.5 };
 
 /** Below this the canvas is the short upper row of a split phone stage, where
     the usual padding eats the little height there is. */
@@ -96,7 +101,10 @@ export const FlowDiagram: React.FC<FlowDiagramProps> = ({
         }}
         fitView
         fitViewOptions={FIT_VIEW_OPTIONS}
-        minZoom={0.3}
+        /* Matches the fit floor — otherwise React Flow would clamp the very
+           fit it was just asked to perform, and pinch-out would stop short of
+           the whole diagram on a phone. */
+        minZoom={0.1}
         maxZoom={1.8}
         nodesDraggable={false}
         nodesConnectable={false}
