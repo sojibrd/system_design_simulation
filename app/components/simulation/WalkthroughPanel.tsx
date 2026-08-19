@@ -30,8 +30,6 @@ interface WalkthroughPanelProps {
   onSelectStep: (index: number) => void;
   /** Flow has run to the end — freeze the live indicators. */
   isFinished?: boolean;
-  /** Playback is running. Starting a run pulls the panel back to the step view. */
-  isPlaying?: boolean;
   /** Dismisses the sheet. Only acted on for phones, where it overlays the canvas. */
   onClose?: () => void;
 }
@@ -45,19 +43,13 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
   steps,
   onSelectStep,
   isFinished = false,
-  isPlaying = false,
   onClose,
 }) => {
   const [showPayload, setShowPayload] = useState<boolean>(true);
   // The panel shows one thing at a time: the current step, or the whole log.
   const [mode, setMode] = useState<"step" | "log">("log");
   const bodyRef = useRef<HTMLDivElement>(null);
-
-  // Starting a run opens the log: the whole scenario at a glance is the
-  // orientation a reader wants first, before drilling into one step.
-  useEffect(() => {
-    if (isPlaying) setMode("log");
-  }, [isPlaying]);
+  const logRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll body to top on step change
   useEffect(() => {
@@ -65,6 +57,14 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
       bodyRef.current.scrollTo({ top: 0, behavior: "smooth" });
     }
   }, [currentStepIndex]);
+
+  // The log has to follow the run: on a long scenario the current row would
+  // otherwise scroll out of sight while the animation carries on without it.
+  useEffect(() => {
+    if (mode !== "log") return;
+    const row = logRef.current?.querySelector('[aria-current="true"]');
+    row?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [currentStepIndex, mode]);
 
   // Placeholder when no step is selected yet (before simulation starts)
   if (!currentStep) {
@@ -143,7 +143,10 @@ export const WalkthroughPanel: React.FC<WalkthroughPanelProps> = ({
       {/* LOG — the whole scenario at a glance. This is the one thing the
           progress ruler cannot give: the story, not just the position. */}
       {mode === "log" && (
-        <div className="surface-well flex-1 min-h-0 my-2 p-1.5 overflow-y-auto">
+        <div
+          ref={logRef}
+          className="surface-well flex-1 min-h-0 my-2 p-1.5 overflow-y-auto"
+        >
           {steps.map((step, idx) => {
             const isCurrent = idx === currentStepIndex;
             const isCompleted = idx < currentStepIndex;

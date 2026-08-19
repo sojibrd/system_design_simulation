@@ -2,7 +2,6 @@
 
 import React from "react";
 import { Cpu } from "lucide-react";
-import { Badge } from "@/app/components/ui";
 import { SimulationConfig } from "@/app/lib/types";
 import { SimulationPicker } from "./SimulationPicker";
 
@@ -19,13 +18,9 @@ export const Header: React.FC<{
           <div className="surface-well t-accent w-8 h-8 flex items-center justify-center">
             <Cpu className="w-4 h-4" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="t-title text-sm md:text-base">
-                System Design Simulator
-              </h1>
-            </div>
-          </div>
+          <h1 className="t-title text-sm md:text-base">
+            System Design Simulator
+          </h1>
         </div>
 
         <SimulationPicker
